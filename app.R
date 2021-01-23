@@ -2866,47 +2866,173 @@ output$VPMI <- renderPlot({
     endt <- endt[, c(1,3,7,11,12)]
     return(endt)
   }
+  
+  getDiffTab4DAS4HS <- function(tab, lfc, pval){
+    #View(tab)
+    #View(lfc)
+    #View(pval)
+    endt <- tab[abs(as.numeric(tab[,3]))>lfc & as.numeric(tab[,4]) < pval,]
+    endt <- endt[, c(1,3,4)]
+    colnames(endt) = c("geneID","log2FoldChange", "padj")
+    return(endt)
+  }
   getDASdif <- function(sigi,left,right,tpm,fc,pval){
     nt <- switch(tpm, "TPM > 0.1"="TPM-0-1","TPM > 0.3"="TPM-0-3","TPM > 1"= "TPM-1","TPM > 2" = "TPM-2" )
     pa <- ""
     if(left == "Reticulated Platelets in healthy patients" && right == "Mature Platelets in healthy patients"){
       pa <- paste0("www/all_healthy_",nt,".CSV")
+      tab <- read.csv2(pa)
+      endtab <- getDiffTab4DAS(tab,fc,pval)
+      
+      endtab$category[endtab$log2FoldChange < 0] <- "differentially expressed (MP)"
+      endtab$category[endtab$log2FoldChange > 0] <- "differentially expressed (RP)"
+      genesMP <- endtab[endtab$category == "differentially expressed (MP)",1]
+      genesRP <- endtab[endtab$category == "differentially expressed (RP)",1]
+      View(endtab)
+      sigi$category <- "not differentially expressed"
+      sigi$category[sigi[,1] %in% genesMP] <- "differentially expressed (MP)"
+      sigi$category[sigi[,1] %in% genesRP] <- "differentially expressed (RP)"
+      commontab<-inner_join(endtab, sigi, by = c("geneID" = "V1"))
+      View(commontab)
+      commontab <- commontab[,-c(10,11,12,13,14)]
+      colnames(commontab)[c(6,7,8,9)] = c("DE in","E(dPSI) per LSV junction","P(|dPSI|>=0.20) per LSV junction","Type of splicing event")
+      
+      fil <- sigi[,c(1,9)]
+      fil<- fil[!duplicated(fil),]
+      x<-fil%>%
+        group_by(category)%>%
+        count()
+      
+      events <- commontab%>%
+        group_by(commontab[,9])%>%
+        count()
+      
+      allevents <- sigi%>%
+        group_by(V4)%>%
+        count()
+      View(events)
+      
+      colnames(events) = c("tose","n")
+      #return(list(commontab,x,events,allevents))
     }else if(left == "Mature Platelets in patients with stable CCS" && right == "Reticulated Platelets in patients with stable CCS"){
       pa <- paste0("www/all_diseased_",nt,"_phenotype-disease-stable-CAD.CSV")
+      tab <- read.csv2(pa)
+      endtab <- getDiffTab4DAS(tab,fc,pval)
+      endtab$category[endtab$log2FoldChange < 0] <- "differentially expressed (MP)"
+      endtab$category[endtab$log2FoldChange > 0] <- "differentially expressed (RP)"
+      genesMP <- endtab[endtab$category == "differentially expressed (MP)",1]
+      genesRP <- endtab[endtab$category == "differentially expressed (RP)",1]
+      View(endtab)
+      sigi$category <- "not differentially expressed"
+      sigi$category[sigi[,1] %in% genesMP] <- "differentially expressed (MP)"
+      sigi$category[sigi[,1] %in% genesRP] <- "differentially expressed (RP)"
+      commontab<-inner_join(endtab, sigi, by = c("geneID" = "V1"))
+      commontab <- commontab[,-c(10,11,12,13,14)]
+      colnames(commontab)[c(6,7,8,9)] = c("DE in","E(dPSI) per LSV junction","P(|dPSI|>=0.20) per LSV junction","Type of splicing event")
+      View(commontab)
+      fil <- sigi[,c(1,9)]
+      fil<- fil[!duplicated(fil),]
+      x<-fil%>%
+        group_by(category)%>%
+        count()
+      
+      events <- commontab%>%
+        group_by(commontab[,9])%>%
+        count()
+      
+      allevents <- sigi%>%
+        group_by(V4)%>%
+        count()
+      View(events)
+      
+      colnames(events) = c("tose","n")
+      #return(list(commontab,x,events,allevents))
+    }else if(left == "healthy patients (Mature Platelets)" && right == "patients with stable CCS (Mature Platelets)"){ #MP
+      pa <- paste0("www/heat_healthyCAD_",nt,"_MP.CSV")
+      tab <- read.csv2(pa)
+      #print(fc)
+      endtab <- getDiffTab4DAS4HS(tab,fc,pval)
+      endtab$category[endtab$log2FoldChange < 0] <- "differentially expressed (healthy)"
+      endtab$category[endtab$log2FoldChange > 0] <- "differentially expressed (stable CSS)"
+      genesMP <- endtab[endtab$category == "differentially expressed (healthy)",1]
+      genesRP <- endtab[endtab$category == "differentially expressed (stable CSS)",1]
+      View(endtab)
+      sigi$category <- "not differentially expressed"
+      sigi$category[sigi[,1] %in% genesMP] <- "differentially expressed (healthy)"
+      sigi$category[sigi[,1] %in% genesRP] <- "differentially expressed (stable CSS)"
+      commontab<-inner_join(endtab, sigi, by = c("geneID" = "V1"))
+      View(commontab)
+      commontab <- commontab[,-c(8,9,10,11,12)]
+      colnames(commontab)[c(4,5,6,7)] = c("DE in","E(dPSI) per LSV junction","P(|dPSI|>=0.20) per LSV junction","Type of splicing event")
+      
+      fil <- sigi[,c(1,9)]
+      fil<- fil[!duplicated(fil),]
+      x<-fil%>%
+        group_by(category)%>%
+        count()
+      
+      events <- commontab%>%
+        group_by(commontab[,7])%>%
+        count()
+      
+      allevents <- sigi%>%
+        group_by(V4)%>%
+        count()
+      View(events)
+      
+      colnames(events) = c("tose","n")
+      #return(list(commontab,x,events,allevents))
+    }else if(left == "healthy patients (Reticulated Platelets)" && right == "patients with stable CCS (Reticulated Platelets)"){ # RP
+      pa <- paste0("www/heat_healthyCAD_",nt,"_RP.CSV")
+      tab <- read.csv2(pa)
+      endtab <- getDiffTab4DAS4HS(tab,fc,pval)
+      endtab$category[endtab$log2FoldChange < 0] <- "differentially expressed (healthy)"
+      endtab$category[endtab$log2FoldChange > 0] <- "differentially expressed (stable CSS)"
+      genesMP <- endtab[endtab$category == "differentially expressed (healthy)",1]
+      genesRP <- endtab[endtab$category == "differentially expressed (stable CSS)",1]
+      View(endtab)
+      sigi$category <- "not differentially expressed"
+      sigi$category[sigi[,1] %in% genesMP] <- "differentially expressed (healthy)"
+      sigi$category[sigi[,1] %in% genesRP] <- "differentially expressed (stable CSS)"
+      commontab<-inner_join(endtab, sigi, by = c("geneID" = "V1"))
+      commontab <- commontab[,-c(8,9,10,11,12)]
+      colnames(commontab)[c(4,5,6,7)] = c("DE in","E(dPSI) per LSV junction","P(|dPSI|>=0.20) per LSV junction","Type of splicing event")
+      View(commontab)
+      fil <- sigi[,c(1,9)]
+      fil<- fil[!duplicated(fil),]
+      x<-fil%>%
+        group_by(category)%>%
+        count()
+      
+      events <- commontab%>%
+        group_by(commontab[,7])%>%
+        count()
+      
+      allevents <- sigi%>%
+        group_by(V4)%>%
+        count()
+      View(events)
+      
+      colnames(events) = c("tose","n")
+      #return(list(commontab,x,events,allevents))
+      
     }
-    print(pa)
-    tab <- read.csv2(pa)
-    endtab <- getDiffTab4DAS(tab,fc,pval)
+    #print(pa)
     
-    endtab$category[endtab$log2FoldChange < 0] <- "differentially expressed (MP)"
-    endtab$category[endtab$log2FoldChange > 0] <- "differentially expressed (RP)"
-    genesMP <- endtab[endtab$category == "differentially expressed (MP)",1]
-    genesRP <- endtab[endtab$category == "differentially expressed (RP)",1]
-    View(endtab)
-    sigi$category <- "not differentially expressed"
-    sigi$category[sigi[,1] %in% genesMP] <- "differentially expressed (MP)"
-    sigi$category[sigi[,1] %in% genesRP] <- "differentially expressed (RP)"
-    commontab<-inner_join(endtab, sigi, by = c("geneID" = "V1"))
-    commontab <- commontab[,-c(10,11,12,13,14)]
-    colnames(commontab)[c(6,7,8,9)] = c("DE in","E(dPSI) per LSV junction","P(|dPSI|>=0.20) per LSV junction","Type of splicing event")
-    View(commontab)
-    fil <- sigi[,c(1,9)]
-    fil<- fil[!duplicated(fil),]
-    
-    x<-fil%>%
-      group_by(category)%>%
-      count()
-    
-    events <- commontab%>%
-      group_by(commontab[,9])%>%
-      count()
-    
-    allevents <- sigi%>%
-      group_by(V4)%>%
-      count()
-    View(events)
-    
-    colnames(events) = c("tose","n")
+    # x<-fil%>%
+    #   group_by(category)%>%
+    #   count()
+    # 
+    # events <- commontab%>%
+    #   group_by(commontab[,9])%>%
+    #   count()
+    # 
+    # allevents <- sigi%>%
+    #   group_by(V4)%>%
+    #   count()
+    # View(events)
+    # 
+    # colnames(events) = c("tose","n")
     return(list(commontab,x,events,allevents))
     
   }
