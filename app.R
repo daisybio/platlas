@@ -1190,7 +1190,7 @@ server <- function(input,output,session){
         tabPanel(
           title = "percentage of target genes in GO categories", solidHeader = TRUE,# width = 12,
           plotlyOutput("MIpG",height = "800px"),
-          downloadButton("dlPNGGO", "Download plot in PNG format")
+          #downloadButton("dlPNGGO", "Download plot in PNG format")
         ),
         tabPanel(
           title = "enrichment FDR per GO categories", solidHeader = TRUE,# width = 12,
@@ -1210,12 +1210,17 @@ server <- function(input,output,session){
       width = 12, 
       height = "1000px",
       tabPanel(id = "CIVP1", "Differentially Expressed circRNA", "",
+               br(),
+               downloadButton("dlCIVP", "Download plot in PNG format"),
+               br(),
                plotOutput("CIVP", height = "800px")
       ),
       tabPanel(id = "CR1", "List of differentially expressed circRNA", "",
                selectInput(inputId = "circUD" , label = "Choose up or downregulated ciRNAs" , choices = c("upregulated","downregulated"), multiple = FALSE),
                actionButton(inputId = "clickCUD",label = "Get ciRNAs ",icon = icon('arrow'), style = "color: #FFF; background-color: #000000; border-color: #000000"),
-               
+               br(),
+               downloadButton("dlCTO", "Download Table"),
+               br(),
                dataTableOutput("CTO"),
                tags$head(tags$style("#CTO table {background-color: #DCDCDC; color : #000000;  }", media="screen", type="text/css")),
                
@@ -1292,15 +1297,21 @@ server <- function(input,output,session){
           id= "tH", 
           #uiOutput("HMO")
           title = "Counts per samples per genes", background = "red" , solidHeader = TRUE,
+          br(),
+          downloadButton("dlPNG3", "Download plot in PNG format"),
+          br(),
           plotOutput("heatmap",height = "800px"),
           br(),
-         # downloadButton("dlPNG3", "Download plot in PNG format")
+         # 
           
         ),
         tabPanel(
           id= "tP", 
           #uiOutput("HMO")
           title = "PCA Analysis Biplot", background = "red" , solidHeader = TRUE,
+          br(),
+          downloadButton("dlpcabi", "Download plot in PNG format"),
+          br(),
           plotOutput("pcabi",height = "800px"),
           br(),
           # downloadButton("dlPNG3", "Download plot in PNG format")
@@ -1310,6 +1321,9 @@ server <- function(input,output,session){
           id= "tP", 
           #uiOutput("HMO")
           title = "PCA Analysis: CCS vs. MI and MP vs. RP", background = "red" , solidHeader = TRUE,
+          br(),
+          downloadButton("dlpcah", "Download plot in PNG format"),
+          br(),
           plotOutput("pcah",height = "800px"),
           br(),
           # downloadButton("dlPNG3", "Download plot in PNG format")
@@ -1346,7 +1360,7 @@ server <- function(input,output,session){
         title = "percentage of DE genes in GO categories", solidHeader = TRUE,# width = 12,
         br(),
         plotlyOutput("GOpG",height = "800px"),
-        downloadButton("dlPNGGO", "Download plot in PNG format")
+        #downloadButton("dlPNGGO", "Download plot in PNG format")
       ),
       tabPanel(
         title = "enrichment FDR per GO categories", solidHeader = TRUE,# width = 12,
@@ -1360,6 +1374,8 @@ server <- function(input,output,session){
       tabPanel(
         title = "increased/decreased categories and their terms & their genes", solidHeader = TRUE,# width = 12,
         span("Increased/decreased categories and their terms in relation to upregulated and downregulated genes in the corresponding category",style = "color: black; font-size: 19px"),
+        br(),
+        downloadButton("dlGOC", "Download plot in PNG format"),
         br(),
         plotOutput("GOC",height = "800px"),
         #downloadButton("dlPNGGO", "Download plot in PNG format")
@@ -1426,6 +1442,9 @@ server <- function(input,output,session){
         #uiOutput("HMO")
         
         title = "Differential Alternative Splicing Activity", background = "red" , solidHeader = TRUE,
+        br(),
+        downloadButton("dlDASVP", "Download plot in PNG format"),
+        br(),
         plotOutput("DASVP", height = "800px"),
         #forceNetworkOutput("KPMnet", height = "850px")
         
@@ -1442,6 +1461,7 @@ server <- function(input,output,session){
         actionButton(inputId = "clickDASDT",label = "Get Genes ",icon = icon('arrow'), style = "color: #FFF; background-color: #000000; border-color: #000000"),
         br(),
         br(),
+        downloadButton("dlDASDT", "Download Table"),
         br(),
         dataTableOutput(outputId = "DASDT"),
         tags$head(tags$style("#DASDT table {background-color: #DCDCDC; color : #000000;  }", media="screen", type="text/css")),
@@ -1481,6 +1501,8 @@ server <- function(input,output,session){
         
         
         br(),
+       br(),
+       downloadButton("dlDASDIFtab", "Download Table"),
        br(),
         dataTableOutput(outputId = "DASDIFtab"),
         tags$head(tags$style("#DASDIFtab table {background-color: #DCDCDC; color : #000000;  }", media="screen", type="text/css")),
@@ -1686,7 +1708,7 @@ server <- function(input,output,session){
   # output$heatmap <- renderPlot({
   # bg <- colorRampPalette(c('blue','green','yellow'))
   # heatmap.2(heat(), main = paste("Heatmap (", as.character(nameTPM1()) ,as.character(nameHod()), ")"), trace = "none", margins = c(10,12),col = bg )
-
+  saved_heatmap_plot = reactiveVal()
   output$heatmap <- renderPlot({
     heat()
     DBO <- "www/DBO-samples.tsv"
@@ -1699,16 +1721,18 @@ server <- function(input,output,session){
     d_names = c("lightblue","orange","darkgreen")
     names(d_names) = c("healthy","MI", "stable CAD")
     ann_col = list(`Platelet type` = pl_names,Condition = d_names)
-    pheatmap(hm(), 
+    p<- pheatmap(hm(), 
              color = inferno(10),
              annotation_colors = ann_col,
              annotation_col = dbo,#dbo %>% select('Platelet type' = dbo$`Platelet type`, 'Disease' = dbo$Disease),
              show_rownames = FALSE, show_colnames = TRUE, scale="row"
     )
+    saved_heatmap_plot(p)
+    p
    # plot_ly(x= colnames(hm()),y = rownames(hm()),z = hm(), colors = colorRamp(c("blue","green" ,"yellow")), type = "heatmap")
     
   })
-
+  saved_pcabi = reactiveVal()
   output$pcabi<- renderPlot({
     heat()
     CAD_MI <- read.csv2(sav_path())
@@ -1735,8 +1759,10 @@ server <- function(input,output,session){
     )
     #View(cmeta)
     #View(b)
+    saved_pcabi(b)
     b
   })
+  saved_pcah = reactiveVal()
   output$pcah <- renderPlot({
     heat()
     tp <- nameTPM1()
@@ -1752,7 +1778,7 @@ server <- function(input,output,session){
     dis_metatab <- dis_metatab[,-7]
     p <- pca(cmeta, metadata = dis_metatab, removeVar = 0.1)
     b<-eigencorplot(p,metavars = c("stable_CAD","MI","MP","RP"),posColKey = 'top',main = 'PC1-27 correlations')
-   
+    saved_pcah(b)
     #View(b)
      b
   })
@@ -1761,14 +1787,14 @@ server <- function(input,output,session){
 # )
 
 # ___________Volcano Plot___________
-  
+  savedVP_plot = reactiveVal()
   output$VP <- renderPlot({
     d <- Mat()
     d <- d[!(is.na(d$padj)),]
     d <- d %>% mutate(padj = str_replace(padj,"E", "e"))
     d <- d %>% mutate(padj = str_replace_all(padj,",", "."))
     d[,7] = as.numeric(d[,7])
-      EnhancedVolcano(d,
+     p <- EnhancedVolcano(d,
                       lab = d[,1],
                       x = 'log2FoldChange',
                       y = 'padj',
@@ -1791,7 +1817,10 @@ server <- function(input,output,session){
                     legendLabSize = 14,
                     legendIconSize = 4.0,
       )#),
-    })
+     savedVP_plot(p)
+     p
+    
+      })
   
 
 #___________biotypesPlot___________
@@ -1813,8 +1842,9 @@ server <- function(input,output,session){
     biot2 <- c(protein_coding,misc_RNA,Mt_rRNA,processed_pseudogene,Mt_tRNA,transcribed_unprocessed_pseudogene)
    
     })
+     saved_biotype_plot = reactiveVal()
      output$biotype1<- renderPlot({
-      barplot(matt(),
+      p <- barplot(matt(),
               main = paste("Biotypes of the significant Genes",nameTPM1()),
               xlab = "Number of Genes",
               ylab = "Biotypes",
@@ -1824,13 +1854,14 @@ server <- function(input,output,session){
               cex.names=0.8,
               las=1
               )
-
-      
+      saved_biotype_plot(p)
+      p
     })
    
     
      
 #___________tabelle___________
+     saved_ud_tab =reactiveVal()
      UD<-eventReactive(c(input$click1,input$click2,input$click4),ignoreInit = T,{
        # genes <- Mat()[ ,1]
        # fc <- Mat()[ ,3]
@@ -1860,6 +1891,7 @@ server <- function(input,output,session){
          print(NROW(endtab))
        }
      #  gen <- endtab
+       saved_ud_tab(endtab)
        neu <- names2links(endtab)
       
       })
@@ -1869,35 +1901,14 @@ server <- function(input,output,session){
       )
 
     
-#___________download___________
-     dl <- reactive({ #verÃ¤ndern
-       genes <- Mat()[ ,1]
-       fc <- Mat()[ ,3]
-       pval<- Mat()[ ,7]
-       df <- data.frame(genes,fc,pval)
-       significant <- subset(df, pval<pcReactive() & abs(fc)>fcReactive())
-       upreg <- subset(significant,fc > 1)
-       ordUp <- upreg[order(+upreg[,3]), ]
-       endtab <- data.frame()
-       downreg <- subset(significant,fc < -1)
-       ordDown<- downreg[order(+downreg[,3]), ]
-       if(input$UpDown == "upregulated"){
-         endtab <- ordUp
-         print(NROW(endtab))
-       }else if(input$UpDown == "downregulated"){
-         endtab <- ordDown
-         print(NROW(endtab))
-       }
-       restab<-endtab
-       print(restab)
-       })
+#___________download_BUTTONS___________
      
      output$downloadAll <- downloadHandler(
        filename = function() {
          paste("Differentially_Expressed_Genes", ".csv", sep = "")
        },
        content = function(file) {
-         write.csv2(dl(), file, row.names = FALSE)
+         write.csv2(saved_ud_tab(), file, row.names = FALSE)
        },
        contentType = "text/csv"
      )
@@ -1910,6 +1921,17 @@ server <- function(input,output,session){
        },
        contentType = "text/csv"
      )
+     output$dlGOC <- downloadHandler(
+       filename = function() {
+         paste("circular_functional_enrichment_plot", ".png", sep = "")
+       },
+       content = function(file) {
+         png(file)
+         sav_cir()
+         dev.off()
+       },
+       contentType = 'image/png'
+     )
      
      output$dlPNG <- downloadHandler(
        filename = function() {
@@ -1917,24 +1939,7 @@ server <- function(input,output,session){
        },
        content = function(file) {
          png(file)
-         EnhancedVolcano(Mat(),
-                         lab = Mat()[,1],
-                         x = 'log2FoldChange',
-                         y = 'padj',
-                         xlim = c(-5, 8),
-                         title = Titl(),
-                         subtitle = paste(nameHod(),"patients dataset considering", nameTPM1()),
-                         pCutoff = pcReactive(),
-                         FCcutoff = fcReactive(),
-                         # pointSize = 3.0,
-                         # labSize = 3.0,
-                         xlab = bquote(~Log[2]~ 'fold change'),
-                         # title = ' ', 
-                         #subtitle = ' ',##,
-                         # col=c('seashell4', 'palegreen2', 'lightsteelblue1', 'lightcoral'),
-                         shape = c(0, 0, 0, 0),
-                         colAlpha = 1
-         )
+         savedVP_plot()
          dev.off()
        },
        contentType = 'image/png'
@@ -1946,17 +1951,8 @@ server <- function(input,output,session){
        },
        content = function(file) {
          png(file)
-         barplot(matt(),
-                 main = paste("Biotypes of the significant Genes",nameTPM1()),
-                 xlab = "Number of Genes",
-                 ylab = "Biotypes",
-                 names.arg = c("protein coding", "misc_RNA","Mt_rRNA", "proc. pseudogene", "Mt_tRNA", "transcr_unproc_pseudog"),
-                 col = "darkred",
-                 horiz = FALSE,
-                 cex.names=0.8,
-                 las=1
-         )
-         
+         saved_biotype_plot()
+         dev.off()
        },
        contentType = 'image/png'
      )
@@ -1966,8 +1962,30 @@ server <- function(input,output,session){
        },
        content = function(file) {
          png(file)
-         bg <- colorRampPalette(c('blue','green','yellow'))
-         heatmap.2(heat(), main = paste("Heatmap (", as.character(nameTPM1()) ,as.character(nameHod()), ")"), trace = "none", margins = c(10,12),col = bg )
+         saved_heatmap_plot()
+         dev.off()
+         },
+       contentType = 'image/png'
+     )
+     output$dlpcabi <- downloadHandler(
+       filename = function() {
+         paste("Heatmap", ".png", sep = "")
+       },
+       content = function(file) {
+         png(file)
+         saved_pcabi()
+         dev.off()
+       },
+       contentType = 'image/png'
+     )
+     output$dlpcah <- downloadHandler(
+       filename = function() {
+         paste("Heatmap", ".png", sep = "")
+       },
+       content = function(file) {
+         png(file)
+         saved_pcah()
+         dev.off()
        },
        contentType = 'image/png'
      )
@@ -2003,22 +2021,8 @@ server <- function(input,output,session){
        },
        content = function(file) {
          png(file)
-         EnhancedVolcano(getVP(),
-                         lab = getVP()[,1],
-                         x = 'log2FoldChange',
-                         y = 'pvalue',
-                         xlim = c(-5, 8),
-                         #title = 'N061011 versus N61311',
-                         pCutoff = as.numeric(10e-16),
-                         FCcutoff = as.numeric(1),
-                         xlab = bquote(~Log[2]~ 'fold change'),
-                         #title = ' ',
-                         subtitle = ' ',##,
-                         col=c('seashell4', 'palegreen2', 'lightsteelblue1', 'lightcoral'),
-                         # shape = c(0, 0, 0, 0),
-                         colAlpha = 1
-         )
-         
+         saved_VPMI()
+         dev.off()
        },
        contentType = 'image/png'
      )
@@ -2028,12 +2032,8 @@ server <- function(input,output,session){
        },
        content = function(file) {
          png(file)
-         pheatmap(getHM(),
-                  color = inferno(10),
-                  annotation_colors = list(Platelet_type = c(RPs = cbbPalette[1], MPs = cbbPalette[4]), 
-                                           Disease = c(MI = cbbPalette[3], stable_CAD = cbbPalette[8])),
-                  #annotation_col = sample_annotation %>% select(Platelet_type = RPs.MPs, Disease = MI.stable_CAD),
-                  show_rownames = TRUE, show_colnames = TRUE, scale="row")
+         saved_HMMI()
+         dev.off()
        },
        contentType = 'image/png'
      )
@@ -2042,7 +2042,7 @@ server <- function(input,output,session){
          paste("miRNA_Targets", ".csv", sep = "")
        },
        content = function(file) {
-         write.csv2(HUMAN(), file, row.names = FALSE)
+         write.csv2(getMIPaths(), file, row.names = FALSE)
        },
        contentType = "text/csv"
      )
@@ -2051,80 +2051,69 @@ server <- function(input,output,session){
          paste("miRNA_Target_Enrichment", ".csv", sep = "")
        },
        content = function(file) {
-         write.csv2(ego(), file, row.names = FALSE)
+         write.csv2(saved_DTMIT(), file, row.names = FALSE)
        },
        contentType = "text/csv"
      )
-     output$dlGOGR <- downloadHandler(
+     output$dlCIVP <- downloadHandler(
        filename = function() {
-         paste("miRNA_GO_Graph", ".png", sep = "")
+         paste("VolcanoPlot_circRNA", ".png", sep = "")
        },
        content = function(file) {
          png(file)
-         eg2 <- ego2()
-         goplot(eg2)
+         saved_CIVP()
+         dev.off()
        },
        contentType = 'image/png'
      )
-     output$dlMIBP <- downloadHandler(
+     output$dlCTO <- downloadHandler(
        filename = function() {
-         paste("miRNA_Target_Gene_Disease_Association_Barplot", ".png", sep = "")
+         paste("circRNAs", ".csv", sep = "")
+       },
+       content = function(file) {
+         write.csv2(cRNA_ud_dt(), file, row.names = FALSE)
+       },
+       contentType = "text/csv"
+     )
+     output$downloadKPMD <- downloadHandler(
+       filename = function() {
+         paste("Functional_Enrichment_KPM", ".csv", sep = "")
+       },
+       content = function(file) {
+         write.csv2(Kpm(), file, row.names = FALSE)
+       },
+       contentType = "text/csv"
+     )
+     output$dlDASVP <- downloadHandler(
+       filename = function() {
+         paste("VolcanoPlot_DAS", ".png", sep = "")
        },
        content = function(file) {
          png(file)
-         ed <-edo()
-         barplot(ed, showCategory=20)
+         saved_DASVP()
+         dev.off()
        },
        contentType = 'image/png'
+     )
+     output$dlDASDT <- downloadHandler(
+       filename = function() {
+         paste("DiffAlternative_Splicing", ".csv", sep = "")
+       },
+       content = function(file) {
+         write.csv2(DASDataTable(), file, row.names = FALSE)
+       },
+       contentType = "text/csv"
+     )
+     output$dlDASDIFtab <- downloadHandler(
+       filename = function() {
+         paste("DAS_and_DE", ".csv", sep = "")
+       },
+       content = function(file) {
+         write.csv2(DD_tab(), file, row.names = FALSE)
+       },
+       contentType = "text/csv"
      )
      
-     output$dlMIUP <- downloadHandler(
-       filename = function() {
-         paste("miRNA_Target_Gene_Disease_Association_UpsetPlot", ".png", sep = "")
-       },
-       content = function(file) {
-         png(file)
-         ed<-edo()
-         upsetplot(ed)
-       },
-       contentType = 'image/png'
-     )
-     
-     output$dlMICP <- downloadHandler(
-       filename = function() {
-         paste("miRNA_Target_Gene_Disease_Association_CnetPlot", ".png", sep = "")
-       },
-       content = function(file) {
-         png(file)
-         if(input$miF2 == "Mature Platelets vs. Reticulated - all data"){
-           #C:/Users/Leonora/Desktop/Studium/6.Semester/Bachelor-Thema__implementierung_eines_Platelet_Atlas/miRNA/
-           sig_rp_vs_mp <-read.csv2("www/rp_vs_mp_sign_diff_mir_counts.CSV",header = TRUE, na.strings = "_")
-           df <- sig_rp_vs_mp
-         }else if(input$miF2 == "in MI vs. CAD patients"){
-           #C:/Users/Leonora/Desktop/Studium/6.Semester/Bachelor-Thema__implementierung_eines_Platelet_Atlas/miRNA/
-           sig_dis_diff<-read.csv2("www/disease_sign_diff_mir_counts.CSV",header = TRUE, na.strings = "_")
-           df<- sig_dis_diff
-         }else if(input$miF2 == "only CAD patients"){
-           #C:/Users/Leonora/Desktop/Studium/6.Semester/Bachelor-Thema__implementierung_eines_Platelet_Atlas/miRNA/
-           sig_CAD_rp_vs_mp <- read.csv2("www/cad_rp_vs_mp_sign_diff_mir_counts.CSV",header = TRUE, na.strings = "_")
-           df <- sig_CAD_rp_vs_mp
-         }
-         
-         ud<- ""
-         
-         if(as.character(input$UDMI)== "upregulated"){
-           ud <- "u"
-         }else if(as.character(input$UDMI)== "downregulated"){
-           ud <- "d"
-         }
-         gL <- getData(human,df,genDF, ud)
-         geneList <- gL
-         # geneList <- getGL()
-         edoxx <- edox()
-         cnetplot(edoxx, categorySize="pvalue", foldChange=geneList)
-       },
-       contentType = 'image/png'
-     )
 #------------------------------------------GO
 #path3 <- "C:/Users/Leonora/Desktop/Studium/6.Semester/Bachelor-Thema__implementierung_eines_Platelet_Atlas/R-programme-shiny/www/GOE_"
 #C:/Users/Leonora/Desktop/Studium/6.Semester/Bachelor-Thema__implementierung_eines_Platelet_Atlas/R-programme-shiny/www/
@@ -2426,9 +2415,9 @@ getMIPaths <- eventReactive(input$clickMIF2,{
 output$MIDT <- renderDataTable(getMIPaths(),escape = FALSE, options = list(lengthMenu = c(10,15,20), pageLength = 15, width = 700))
 output$DTMI <- renderDataTable(getDTVP(),escape = FALSE, options = list(lengthMenu = c(10, 15, 20), pageLength = 5, width = 700)
 )
-
+saved_VPMI = reactiveVal()
 output$VPMI <- renderPlot({
-  EnhancedVolcano(getVP(),
+ p <- EnhancedVolcano(getVP(),
                   lab = getVP()[,1],
                   x = 'log2FoldChange',
                   y = 'padj',####gucken
@@ -2446,7 +2435,10 @@ output$VPMI <- renderPlot({
                   legendLabSize = 14,
                   legendIconSize = 4.0
   )
+ saved_VPMI(p)
+ p
 })
+saved_HMMI = reactiveVal()
  output$HMMI <- renderPlot({
    DBO <- "www/DBO-samples.tsv"
    dbo <- read.table(DBO, header = FALSE, sep = "\t", quote = "")
@@ -2459,17 +2451,21 @@ output$VPMI <- renderPlot({
    names(d_names) = c("MI", "stable CAD")
    
    ann_col = list(`Platelet type` = pl_names,Disease = d_names)
-   pheatmap(getHM(),
+   p <- pheatmap(getHM(),
             color = inferno(10),
             annotation_colors = ann_col,
             annotation_col = dbo,#dbo %>% select('Platelet type' = dbo$`Platelet type`, 'Disease' = dbo$Disease),
             show_rownames = TRUE, show_colnames = TRUE, scale="row")
+   saved_HMMI(p)
+   p
    
  }
  )
- 
+ saved_DTMIT = reactiveVal()
  output$DTMIT <- renderDataTable({
    g2g <- g2g()[,c(1,2,3,4,5,6)]
+   saved_DTMIT(g2g)
+   g2g
    datatable(
      cbind(' ' = '&oplus;', g2g), escape = -2,
      options = list(
@@ -2632,10 +2628,10 @@ output$VPMI <- renderPlot({
     use_dt
     
   })
-  
+  saved_CIVP = reactiveVal()
   output$CIVP <- renderPlot({
     CRNA_dt()
-    EnhancedVolcano(complete_circRNA_df(),
+    p <- EnhancedVolcano(complete_circRNA_df(),
                                  lab = complete_circRNA_df()[,1],
                                  x = 'log2FoldChange',
                                  y = 'padj',
@@ -2652,6 +2648,8 @@ output$VPMI <- renderPlot({
                                  legendPosition = 'right',
                                  legendLabSize = 14,
                                  legendIconSize = 4.0)
+    saved_CIVP(p)
+    p
   })
   
   output$CTO <- renderDataTable(cRNA_ud_dt(),escape = FALSE, options = list(lengthMenu = c(10, 15, 20), pageLength = 10, width = 700)
@@ -3089,9 +3087,9 @@ output$VPMI <- renderPlot({
     e
     
   })
-  
+  saved_DASVP = reactiveVal()
   output$DASVP <- renderPlot({
-    EnhancedVolcano(DAS_um_tab(),
+    p <- EnhancedVolcano(DAS_um_tab(),
                     lab = DAS_um_tab()[,1],
                     x = 'V2',
                     y = 'V3',
@@ -3112,6 +3110,8 @@ output$VPMI <- renderPlot({
                    
                     legendIconSize = 4.0
     )
+    saved_DASVP(p)
+    p
   })
   
   output$DASBX <- renderPlotly({
