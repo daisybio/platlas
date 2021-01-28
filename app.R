@@ -2604,9 +2604,9 @@ saved_HMMI = reactiveVal()
   upreg_circRNA = reactiveVal()
   downreg_circRNA = reactiveVal()
   CRNA_dt <- eventReactive(input$clickCirc,{
-    print(input$ciDS)
+    #print(input$ciDS)
     enddf <- circRNA_path(input$ciDS)
-    View(enddf)
+    #View(enddf)
     complete_circRNA_df(enddf)
     up <- enddf[enddf$log2FoldChange >= input$fCOcirc & enddf$padj <= 0.05,]
     down <- enddf[enddf$log2FoldChange <= input$fCOcirc & enddf$padj <= 0.05,]
@@ -2886,12 +2886,12 @@ saved_HMMI = reactiveVal()
       endtab$category[endtab$log2FoldChange > 0] <- "differentially expressed (RP)"
       genesMP <- endtab[endtab$category == "differentially expressed (MP)",1]
       genesRP <- endtab[endtab$category == "differentially expressed (RP)",1]
-      View(endtab)
+      #View(endtab)
       sigi$category <- "not differentially expressed"
       sigi$category[sigi[,1] %in% genesMP] <- "differentially expressed (MP)"
       sigi$category[sigi[,1] %in% genesRP] <- "differentially expressed (RP)"
       commontab<-inner_join(endtab, sigi, by = c("geneID" = "V1"))
-      View(commontab)
+      #View(commontab)
       commontab <- commontab[,-c(10,11,12,13,14)]
       colnames(commontab)[c(6,7,8,9)] = c("DE in","E(dPSI) per LSV junction","P(|dPSI|>=0.20) per LSV junction","Type of splicing event")
       
@@ -2908,7 +2908,7 @@ saved_HMMI = reactiveVal()
       allevents <- sigi%>%
         group_by(V4)%>%
         count()
-      View(events)
+      #View(events)
       
       colnames(events) = c("tose","n")
       #return(list(commontab,x,events,allevents))
@@ -2920,14 +2920,14 @@ saved_HMMI = reactiveVal()
       endtab$category[endtab$log2FoldChange > 0] <- "differentially expressed (RP)"
       genesMP <- endtab[endtab$category == "differentially expressed (MP)",1]
       genesRP <- endtab[endtab$category == "differentially expressed (RP)",1]
-      View(endtab)
+      #View(endtab)
       sigi$category <- "not differentially expressed"
       sigi$category[sigi[,1] %in% genesMP] <- "differentially expressed (MP)"
       sigi$category[sigi[,1] %in% genesRP] <- "differentially expressed (RP)"
       commontab<-inner_join(endtab, sigi, by = c("geneID" = "V1"))
       commontab <- commontab[,-c(10,11,12,13,14)]
       colnames(commontab)[c(6,7,8,9)] = c("DE in","E(dPSI) per LSV junction","P(|dPSI|>=0.20) per LSV junction","Type of splicing event")
-      View(commontab)
+      #View(commontab)
       fil <- sigi[,c(1,9)]
       fil<- fil[!duplicated(fil),]
       x<-fil%>%
@@ -2941,7 +2941,7 @@ saved_HMMI = reactiveVal()
       allevents <- sigi%>%
         group_by(V4)%>%
         count()
-      View(events)
+      #View(events)
       
       colnames(events) = c("tose","n")
       #return(list(commontab,x,events,allevents))
@@ -2954,12 +2954,12 @@ saved_HMMI = reactiveVal()
       endtab$category[endtab$log2FoldChange > 0] <- "differentially expressed (stable CSS)"
       genesMP <- endtab[endtab$category == "differentially expressed (healthy)",1]
       genesRP <- endtab[endtab$category == "differentially expressed (stable CSS)",1]
-      View(endtab)
+      #View(endtab)
       sigi$category <- "not differentially expressed"
       sigi$category[sigi[,1] %in% genesMP] <- "differentially expressed (healthy)"
       sigi$category[sigi[,1] %in% genesRP] <- "differentially expressed (stable CSS)"
       commontab<-inner_join(endtab, sigi, by = c("geneID" = "V1"))
-      View(commontab)
+      #View(commontab)
       commontab <- commontab[,-c(8,9,10,11,12)]
       colnames(commontab)[c(4,5,6,7)] = c("DE in","E(dPSI) per LSV junction","P(|dPSI|>=0.20) per LSV junction","Type of splicing event")
       
@@ -2976,7 +2976,7 @@ saved_HMMI = reactiveVal()
       allevents <- sigi%>%
         group_by(V4)%>%
         count()
-      View(events)
+      #View(events)
       
       colnames(events) = c("tose","n")
       #return(list(commontab,x,events,allevents))
@@ -2988,14 +2988,14 @@ saved_HMMI = reactiveVal()
       endtab$category[endtab$log2FoldChange > 0] <- "differentially expressed (stable CSS)"
       genesMP <- endtab[endtab$category == "differentially expressed (healthy)",1]
       genesRP <- endtab[endtab$category == "differentially expressed (stable CSS)",1]
-      View(endtab)
+      #View(endtab)
       sigi$category <- "not differentially expressed"
       sigi$category[sigi[,1] %in% genesMP] <- "differentially expressed (healthy)"
       sigi$category[sigi[,1] %in% genesRP] <- "differentially expressed (stable CSS)"
       commontab<-inner_join(endtab, sigi, by = c("geneID" = "V1"))
       commontab <- commontab[,-c(8,9,10,11,12)]
       colnames(commontab)[c(4,5,6,7)] = c("DE in","E(dPSI) per LSV junction","P(|dPSI|>=0.20) per LSV junction","Type of splicing event")
-      View(commontab)
+      #View(commontab)
       fil <- sigi[,c(1,9)]
       fil<- fil[!duplicated(fil),]
       x<-fil%>%
@@ -3009,7 +3009,7 @@ saved_HMMI = reactiveVal()
       allevents <- sigi%>%
         group_by(V4)%>%
         count()
-      View(events)
+      #View(events)
       
       colnames(events) = c("tose","n")
       #return(list(commontab,x,events,allevents))
