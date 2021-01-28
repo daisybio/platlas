@@ -271,10 +271,17 @@
     },
     "brio": {
       "Package": "brio",
-      "Version": "1.1.0",
+      "Version": "1.1.1",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "570a24963009b9cce0869a0463c83580"
+      "Hash": "36758510e65a457efeefa50e1e7f0576"
+    },
+    "bslib": {
+      "Package": "bslib",
+      "Version": "0.2.4",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "4830a372b241d78ed6f53731ee3023ac"
     },
     "caTools": {
       "Package": "caTools",
@@ -282,6 +289,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "f5b3e8f693522708cd9444c839b432e0"
+    },
+    "cachem": {
+      "Package": "cachem",
+      "Version": "1.0.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "3259868ce0a3fab9456de8635cc34728"
     },
     "callr": {
       "Package": "callr",
@@ -432,10 +446,10 @@
     },
     "fastmap": {
       "Package": "fastmap",
-      "Version": "1.0.1",
+      "Version": "1.1.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "83ab58a0518afe3d17e41da01af13b60"
+      "Hash": "77bd60a6157420d4ffa93b27cf6a58b8"
     },
     "formatR": {
       "Package": "formatR",
@@ -443,6 +457,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "ad36e26eeeb7393886d8a0e19bc6ee42"
+    },
+    "fs": {
+      "Package": "fs",
+      "Version": "1.5.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "44594a07a42e5f91fac9f93fda6d0109"
     },
     "futile.logger": {
       "Package": "futile.logger",
@@ -605,6 +626,13 @@
       "Repository": "CRAN",
       "Hash": "6de84a8c67fb247e721166049c84695f"
     },
+    "jquerylib": {
+      "Package": "jquerylib",
+      "Version": "0.1.3",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "5ff50b36f7f0832f8421745af333e73c"
+    },
     "jsonlite": {
       "Package": "jsonlite",
       "Version": "1.7.2",
@@ -684,10 +712,10 @@
     },
     "memoise": {
       "Package": "memoise",
-      "Version": "1.1.0",
+      "Version": "2.0.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "58baa74e4603fcfb9a94401c58c8f9b1"
+      "Hash": "a0bc51650201a56d00a4798523cc91b3"
     },
     "mgcv": {
       "Package": "mgcv",
@@ -823,10 +851,10 @@
     },
     "proj4": {
       "Package": "proj4",
-      "Version": "1.0-10",
+      "Version": "1.0-10.1",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "df4880a9408d75a23b8a8f7a2b18c429"
+      "Hash": "d25527f72f808fa6a8865b7b0cc4d26c"
     },
     "promises": {
       "Package": "promises",
@@ -855,6 +883,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "70bd921f54c3763f3dbec15106118828"
+    },
+    "rappdirs": {
+      "Package": "rappdirs",
+      "Version": "0.3.2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "86943fd1756f32c7b1cf410559420273"
     },
     "rematch2": {
       "Package": "rematch2",
@@ -917,6 +952,13 @@
       "Repository": "CRAN",
       "Hash": "3a6b30449282b6a4b19ce267142c3299"
     },
+    "sass": {
+      "Package": "sass",
+      "Version": "0.3.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "3ef1adfe46b7b144b970d74ce33ab0d6"
+    },
     "scales": {
       "Package": "scales",
       "Version": "1.1.1",
@@ -926,10 +968,10 @@
     },
     "shiny": {
       "Package": "shiny",
-      "Version": "1.5.0",
+      "Version": "1.6.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "ee4ed72d7a5047d9e73cf922ad66e9c9"
+      "Hash": "6e3b6ae7fe02b5859e4bb277f218b8ae"
     },
     "shinyWidgets": {
       "Package": "shinyWidgets",
@@ -1093,10 +1135,10 @@
     },
     "withr": {
       "Package": "withr",
-      "Version": "2.4.0",
+      "Version": "2.4.1",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "8e07f30a26bc288326edcfe14883fbac"
+      "Hash": "caf4781c674ffa549a4676d2d77b13cc"
     },
     "xml2": {
       "Package": "xml2",
