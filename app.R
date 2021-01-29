@@ -284,6 +284,9 @@ dashboardBody(
         title = "miRNA differential Expression in Mature Platelets vs. Reticulated Platelets" ,background = "black" ,solidHeader = TRUE,
         "",
         selectInput(inputId = "miF" , label = "Choose the dataset in which you want to start the analysis" , choices = c("Mature Platelets vs. Reticulated - all data", "in MI vs. CAD patients", "only CAD patients"), multiple = FALSE),
+        numericInput(inputId = "mpCO",value = 0.05 ,label = "p-value cutoff", min = 0.01 , max = 0.05,step = 0.005),
+        numericInput(inputId = "mfCO",value = 1.5 ,label = "log2(Foldchange) cutoff", min = 0 , max = 4.0, step = 0.5),
+        
         br(),
         br(),
         actionButton(inputId = "clickMIF",label = "Start Analysis", style = "color: #FFF; background-color: #000000; border-color: #FFF")
@@ -2310,19 +2313,12 @@ pathGO <- "www/"
 #sig_data = reactiveVal(0)
 getDTVP <- eventReactive(input$clickMIF,{
   df <- data.frame()
-  if(input$miF == "Mature Platelets vs. Reticulated - all data"){
-    sig_rp_vs_mp <-read.csv2("www/rp_vs_mp_sign_diff_mir_counts.CSV",header = TRUE, na.strings = "_")
-    df <- sig_rp_vs_mp
-   # sig_data(1)
-  }else if(input$miF == "in MI vs. CAD patients"){
-    sig_dis_diff<-read.csv2("www/disease_sign_diff_mir_counts.CSV",header = TRUE, na.strings = "_")
-    df<- sig_dis_diff
-  #  sig_data(2)
-  }else if(input$miF == "only CAD patients"){
-    sig_CAD_rp_vs_mp <- read.csv2("www/cad_rp_vs_mp_sign_diff_mir_counts.CSV",header = TRUE, na.strings = "_")
-    df <- sig_CAD_rp_vs_mp
-   # sig_data(3)
-  }
+  mipa <- switch(input$miF,"Mature Platelets vs. Reticulated - all data" = "www/rp_vs_mp_diff_mir_counts.CSV", "in MI vs. CAD patients" = "www/disease_diff_mir_counts.CSV" , "only CAD patients"= "www/cad_rp_vs_mp_diff_mir_counts.CSV")
+  df <- read.csv2(mipa,header = TRUE, na.strings = "_")
+  pval <- input$mpCO
+  fc <- input$mfCO
+  df <- df[abs(df$log2FoldChange)>= fc & df$padj < pval, ]
+  df <- df[!(is.na(df$baseMean)),]
   names2milinks(df)
 })
 
@@ -2423,8 +2419,8 @@ output$VPMI <- renderPlot({
                   y = 'padj',####gucken
                   xlim = c(-5, 8),
                   #title = 'N061011 versus N61311',
-                  pCutoff = as.numeric(10e-16),
-                  FCcutoff = as.numeric(1),
+                  pCutoff = as.numeric(input$mpCO),
+                  FCcutoff = as.numeric(input$mfCO),
                   xlab = bquote(~Log[2]~ 'fold change'),
                   #title = ' ',
                   subtitle = ' ',##,
@@ -2608,8 +2604,8 @@ saved_HMMI = reactiveVal()
     enddf <- circRNA_path(input$ciDS)
     #View(enddf)
     complete_circRNA_df(enddf)
-    up <- enddf[enddf$log2FoldChange >= input$fCOcirc & enddf$padj <= 0.05,]
-    down <- enddf[enddf$log2FoldChange <= input$fCOcirc & enddf$padj <= 0.05,]
+    up <- enddf[enddf$log2FoldChange >= input$fCOcirc & enddf$padj <= input$pCOcirc,]
+    down <- enddf[enddf$log2FoldChange <= input$fCOcirc & enddf$padj <= input$pCOcirc,]
     upreg_circRNA(up)
     downreg_circRNA(down)
     
