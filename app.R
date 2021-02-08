@@ -431,8 +431,8 @@ dashboardBody(
         width = 12,
         title = span("Integrative Analysis - Guide",style = "color: white; font-size: 18px; font-weight: bold"),background = "black",solidHeader = TRUE,
         span("1.",style = "color: white; font-size: 20px; font-weight: bold"), "Get the intersection of gene sets, where you can choose between the previously shown datasets and your own list of genes (seperated by tab, a simple space or newline character)", br(),
-        span("2.",style = "color: white; font-size: 20px; font-weight: bold"), "Get the intersection of a gene set, where you can choose between the previously shown datasets and your own list of genes (seperated by tab, a simple space or newline character) and miRNA Target Genes",
-       # span("3.",style = "color: white; font-size: 18px; font-weight: bold"), "Get the intersection of a gene set and genes with significant local splicing variations",
+        span("2.",style = "color: white; font-size: 20px; font-weight: bold"), "Get the intersection of a gene set, where you can choose between the previously shown datasets and your own list of genes (seperated by tab, a simple space or newline character) and miRNA Target Genes",br(),
+        span("3.",style = "color: white; font-size: 20px; font-weight: bold"), "Get the intersection of a gene set and genes with significant local splicing variations",
         
       )
     ),
@@ -441,20 +441,22 @@ dashboardBody(
       width = 12,
       height = "20px",
       box(
-        width = 1,
-        title = span("1",style = "color: white; font-size: 18px; font-weight: bold"),background = "black",solidHeader = TRUE,
+        width = 2,
+        column(1,span("1",style = "color: white; font-size: 24px; font-weight: bold")),
+        column(1,actionButton(inputId = "Iclick1",label = "Click here to start analysis", style = "color: #fff; background-color: #000000; border-color: #fff")),
+        background = "black",solidHeader = TRUE,
       )
     ),
     br(),
     fluidRow(
       width = 12,
       tabBox(
-        title = "Filter the results",
+        title = "Intersection of gene sets",
         # The id lets us use input$tabset1 on the server to find the current tab
         id = "INT", #height = "200px", 
         # tabPanel(id= "t1","Guide", "The Differential Expression results, browsable on this page by using different filters, are obtained from the transcriptome analysis of reticulated and mature platelets from 4 healthy patients and 10 diseased patients, of which 6 were diagnosed with Chronic coronary syndrome (CCS) and 4 were diagnosed with Acute coronary syndrome (ACS).",br(), br() ,"By clicking on the first filter (Mature vs Reticulated) and filtering between the datasets of the patients, the different thresholds of read count normalizations (with TPM), p-value cutoffs and foldchange cutoffs, the differentially expressed genes of mature platelets versus reticulated platelets, which were computed by using DESeq2, visualized by downloadable plots and represented by downloadable data tables will be shown on the right side of the page.",br(),br() ,"Analogously by clicking on the second filter (CCS vs ACS), refinement of the search is possible by the same parameters as mentioned before and the differentially expressed genes of patients with Chronic coronary syndrome and the patients with Acute coronary syndrome, computed by using DESeq2, will be shown on the right side of the page, represented by downloadable data tables and plots as well."),
         tabPanel(id="INT1","Insert Genelist 1", 
-                 "Insert Genelist",
+                 "Insert Genelist (EnsemblIDs separated either by space, new line or tab)",
                  textAreaInput(inputId = "IGL", label = "Your Genelist", value = "", width = "400px",height = "100px", placeholder = NULL) 
                  #actionButton(inputId = "Iclick0",label = "Start Analysis",icon = icon('arrow'), style = "color: #fff; background-color: #000000; border-color: #000000")
                  
@@ -483,12 +485,12 @@ dashboardBody(
         )
       ),
       tabBox(
-        title = "Filter the results",
+        title = "",
         # The id lets us use input$tabset1 on the server to find the current tab
         id = "INTZ", #height = "200px", 
         # tabPanel(id= "t1","Guide", "The Differential Expression results, browsable on this page by using different filters, are obtained from the transcriptome analysis of reticulated and mature platelets from 4 healthy patients and 10 diseased patients, of which 6 were diagnosed with Chronic coronary syndrome (CCS) and 4 were diagnosed with Acute coronary syndrome (ACS).",br(), br() ,"By clicking on the first filter (Mature vs Reticulated) and filtering between the datasets of the patients, the different thresholds of read count normalizations (with TPM), p-value cutoffs and foldchange cutoffs, the differentially expressed genes of mature platelets versus reticulated platelets, which were computed by using DESeq2, visualized by downloadable plots and represented by downloadable data tables will be shown on the right side of the page.",br(),br() ,"Analogously by clicking on the second filter (CCS vs ACS), refinement of the search is possible by the same parameters as mentioned before and the differentially expressed genes of patients with Chronic coronary syndrome and the patients with Acute coronary syndrome, computed by using DESeq2, will be shown on the right side of the page, represented by downloadable data tables and plots as well."),
         tabPanel(id="INT4","Insert Genelist 2", 
-                 "Insert Genelist",
+                 "Insert Genelist (EnsemblIDs separated either by space, new line or tab)",
                  textAreaInput(inputId = "IGL2", label = "Your Genelist", value = "", width = "400px",height = "100px", placeholder = NULL) 
                  #actionButton(inputId = "Iclick0",label = "Start Analysis",icon = icon('arrow'), style = "color: #fff; background-color: #000000; border-color: #000000")
                  
@@ -519,51 +521,29 @@ dashboardBody(
     ),
     br(),
     fluidRow(
-      tabBox(
-        width = 12,
-        height = "600px",
-        title = "Get the results",
-        tabPanel(
-          
-          id="","List of Genes", 
-          #"Volcano plot",
-          #uiOutput("VPO")
-          actionButton(inputId = "Iclick1",label = "Start Analysis", style = "color: #fff; background-color: #000000; border-color: #000000"),
-          
-          dataTableOutput(outputId = "IListOfGenes"),
-          tags$head(tags$style("#TopGenesTab table {background-color: #DCDCDC; color : #000000;  }", media="screen", type="text/css")),
-          
-          tags$head(tags$style(".table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
-                               border-top: 1px solid #000000;}",media="screen", type="text/css"))
-          
-        ),
-        tabPanel(
-          id="tV","Pie Plot", 
-          #"Volcano plot",
-          #uiOutput("VPO")
-          plotlyOutput("IGLplot")
-          
-        )
-      )
+      uiOutput("Integ1")
+      
     ),
     br(),
     fluidRow(
       width = 12,
       height = "20px",
       box(
-        width = 1,
-        title = span("2",style = "color: white; font-size: 18px; font-weight: bold"),background = "black",solidHeader = TRUE,
+        width = 2,
+        column(1,span("2",style = "color: white; font-size: 24px; font-weight: bold")),
+        column(1,actionButton(inputId = "Iclick2",label = "Click here to start analysis", style = "color: #fff; background-color: #000000; border-color: #fff")),
+        background = "black",solidHeader = TRUE,
       )
     ),
     br(),
     fluidRow(
       tabBox(
-        title = "Filter the results",
+        title = "Filter miRNA gene targets",
         # The id lets us use input$tabset1 on the server to find the current tab
         id = "INTMI", #height = "200px", 
         # tabPanel(id= "t1","Guide", "The Differential Expression results, browsable on this page by using different filters, are obtained from the transcriptome analysis of reticulated and mature platelets from 4 healthy patients and 10 diseased patients, of which 6 were diagnosed with Chronic coronary syndrome (CCS) and 4 were diagnosed with Acute coronary syndrome (ACS).",br(), br() ,"By clicking on the first filter (Mature vs Reticulated) and filtering between the datasets of the patients, the different thresholds of read count normalizations (with TPM), p-value cutoffs and foldchange cutoffs, the differentially expressed genes of mature platelets versus reticulated platelets, which were computed by using DESeq2, visualized by downloadable plots and represented by downloadable data tables will be shown on the right side of the page.",br(),br() ,"Analogously by clicking on the second filter (CCS vs ACS), refinement of the search is possible by the same parameters as mentioned before and the differentially expressed genes of patients with Chronic coronary syndrome and the patients with Acute coronary syndrome, computed by using DESeq2, will be shown on the right side of the page, represented by downloadable data tables and plots as well."),
         tabPanel(id="INTM1","Insert Genelist", 
-                 "Insert Genelist",
+                 "Insert Genelist (EnsemblIDs separated either by space, new line or tab)",
                  textAreaInput(inputId = "MGIGL", label = "Your Genelist", value = "", width = "400px",height = "100px", placeholder = NULL) 
                  #actionButton(inputId = "Iclick0",label = "Start Analysis",icon = icon('arrow'), style = "color: #fff; background-color: #000000; border-color: #000000")
                  
@@ -592,9 +572,10 @@ dashboardBody(
         )
       ),
       tabBox(
+      #title = "Filter miRNAs",
       tabPanel(
-        id="ty","Target Enrichment",
-        title = "miRNA target enrichment in Mature Platelets vs. Reticulated Platelets" ,background = "black" ,solidHeader = TRUE,
+        id="ty",
+        title = "miRNAs" ,background = "black" ,solidHeader = TRUE,
         "",
         selectInput(inputId = "ImiF2" , label = "Choose the dataset in which you want to start the analysis" , choices = c("Mature Platelets vs. Reticulated - all data", "in diseased patients", "only CAD patients"), multiple = FALSE),
         selectInput(inputId = "ImiOnt" , label = "Choose ontology" , choices = c("Biological Process", "Cellular Component", "Molecular Function"), multiple = FALSE),
@@ -616,35 +597,74 @@ dashboardBody(
     ),
     br(),
     fluidRow(
-      tabBox(
-        width = 12,
-        height = "800px",
-        title = "Get the results",
-        tabPanel(
-          
-          id="tV","List of gene - miRNA Target gene mappings", 
-          #"Volcano plot",
-          #uiOutput("VPO")
-          actionButton(inputId = "Iclick2",label = "Start Analysis", style = "color: #fff; background-color: #000000; border-color: #000000"),
-          
-          dataTableOutput(outputId = "IMIResult"),
-          tags$head(tags$style("#TopGenesTab table {background-color: #DCDCDC; color : #000000;  }", media="screen", type="text/css")),
-          
-          tags$head(tags$style(".table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
-                               border-top: 1px solid #000000;}",media="screen", type="text/css"))
-          
-        ),
-        tabPanel(
-          id="tV","Network Plot", 
-          #"Volcano plot",
-          #uiOutput("VPO")
-          forceNetworkOutput("IGLnet", height = "780px")
-          
-        )
-      )
-    )
-    
-    
+      uiOutput("Integ2")
+    ),
+   br(),
+   fluidRow(
+     width = 12,
+     height = "20px",
+     box(
+       width = 2,
+       column(1,span("3",style = "color: white; font-size: 24px; font-weight: bold")),
+       column(1, actionButton(inputId = "Iclick3",label = "Click here to start analysis", style = "color: #fff; background-color: #000000; border-color: #fff")),
+       background = "black",solidHeader = TRUE
+       
+     )
+   ),
+   br(),
+   fluidRow(
+     tabBox(
+     title = "LSVs in gene sets",
+     # The id lets us use input$tabset1 on the server to find the current tab
+     id = "INTD", #height = "200px", 
+     # tabPanel(id= "t1","Guide", "The Differential Expression results, browsable on this page by using different filters, are obtained from the transcriptome analysis of reticulated and mature platelets from 4 healthy patients and 10 diseased patients, of which 6 were diagnosed with Chronic coronary syndrome (CCS) and 4 were diagnosed with Acute coronary syndrome (ACS).",br(), br() ,"By clicking on the first filter (Mature vs Reticulated) and filtering between the datasets of the patients, the different thresholds of read count normalizations (with TPM), p-value cutoffs and foldchange cutoffs, the differentially expressed genes of mature platelets versus reticulated platelets, which were computed by using DESeq2, visualized by downloadable plots and represented by downloadable data tables will be shown on the right side of the page.",br(),br() ,"Analogously by clicking on the second filter (CCS vs ACS), refinement of the search is possible by the same parameters as mentioned before and the differentially expressed genes of patients with Chronic coronary syndrome and the patients with Acute coronary syndrome, computed by using DESeq2, will be shown on the right side of the page, represented by downloadable data tables and plots as well."),
+     tabPanel(id="INTD1","Insert Genelist", 
+              "Insert Genelist (EnsemblIDs seperated either by space, new line or tab)",
+              textAreaInput(inputId = "DSIGL", label = "Your Genelist", value = "", width = "400px",height = "100px", placeholder = NULL) 
+              #actionButton(inputId = "Iclick0",label = "Start Analysis",icon = icon('arrow'), style = "color: #fff; background-color: #000000; border-color: #000000")
+              
+     ),
+     tabPanel(id="INTD2","Mature vs. Reticulated", 
+              "Mature Platelets vs. Reticulated Platelets",
+              selectInput(inputId = "DSITPM1" , label = "Read count normalization: Choose TPM (Transcripts per million) threshholds" , choices = c("TPM > 0.1","TPM > 0.3", "TPM > 1", "TPM > 2"), multiple = FALSE),
+              selectInput(inputId = "DSIHoD1" , label = "Choose from patient datasets" , choices = c("healthy","diseased", "disease - stable CAD" , "disease - MI"), multiple = FALSE),
+              numericInput(inputId = "DSIpCO1",value = 0.05 ,label = "p-value cutoff", min = 0.01 , max = 0.05,step = 0.005),
+              numericInput(inputId = "DSIfCO1",value = 1.5 ,label = "log2(Foldchange) cutoff", min = 0 , max = 4.0, step = 0.5),
+              #selectInput(inputId = "DSIUDMI1" , label = "Choose upregulated / downregulated" , choices = c("upregulated", "downregulated"), multiple = FALSE)#,
+              
+              #actionButton(inputId = "Iclick1",label = "Start Analysis",icon = icon('arrow'), style = "color: #fff; background-color: #000000; border-color: #000000")
+              
+     ),
+     tabPanel(id="INTD3","CCS vs. ACS", 
+              "Diseased: Chronic coronary syndrome vs. Myocardial infarction",
+              selectInput(inputId = "DSITPM2" , label = "Read count normalization: Choose TPM (Transcripts per million) threshholds" , choices = c("TPM > 0.1","TPM > 0.3", "TPM > 1", "TPM > 2"), multiple = FALSE),
+              selectInput(inputId = "DSIHoD02" , label = "Choose from patient datasets" , choices = c("diseased","disease - mature platelets", "disease - reticulated platelets"), multiple = FALSE),
+              numericInput(inputId = "DSIpCO2",value = 0.05 , label = "p-value cutoff", min = 0.01 , max = 0.05, step = 0.005),
+              numericInput(inputId = "DSIfCO2",value =  1.5 , label = "Foldchange cutoff", min = 0 , max = 4.0, step = 0.5),
+              #selectInput(inputId = "DSIUDMI2" , label = "Choose upregulated / downregulated" , choices = c("upregulated", "downregulated"), multiple = FALSE)#,
+              
+              #actionButton(inputId = "Iclick0",label = "Start Analysis", style = "color: #fff; background-color: #000000; border-color: #000000")
+              
+     )
+   ),
+   tabBox(
+     #title = "LSVs in gene sets",
+     tabPanel(
+       id="t2",#span("Configure your search",style = "color: black; font-size: 16px; font-weight: bold"), 
+       #"Filter LSVs",
+       title = "Filter LSVs",
+     selectInput(inputId = "IDAS1" , label = "Choose differential Alternative Splicing Dataset" , choices = c("Reticulated Platelets vs Mature  Platelets (healthy)","Mature Platelets vs Reticulated Platelets (stable CCS)", "healthy vs stable CCS (Mature Platelets)", "healthy vs stable CCS (Reticulated Platelets)"), multiple = FALSE),
+     numericInput(inputId = "IDASe",value = 0.2 ,label = paste0('Choose E(','\U0394','PSI) per LSV junction cutoff'), min = 0 , max = 1, step = 0.05),
+     numericInput(inputId = "IDASp",value = 0.95 ,label = paste0('Choose P(|','\U0394','PSI|>=0.20) cutoff'), min = 0 , max = 1 , step = 0.05),
+     
+     )
+     
+   )),
+   br(),
+   fluidRow(
+     uiOutput("Integ3")
+     
+   ),
   )
 )
 )
@@ -743,10 +763,6 @@ getIDif <- function(tabin, p, f, ud,num){
 }
 
 getMTAB <- function(pa){
-  #c("Mature Platelets vs. Reticulated - all data", "in diseased patients", "only CAD patients")
-  #rp_vs_mp_sign_diff_mir_counts.CSV
-  #cad_rp_vs_mp_diff_mir_counts.CSV
-  #disease_diff_mir_counts.CSV
   pas <- switch(pa,"Mature Platelets vs. Reticulated - all data" =  "rp_vs_mp_sign_diff_mir_counts.CSV", "in diseased patients" = "disease_diff_mir_counts.CSV", "only CAD patients"= "cad_rp_vs_mp_diff_mir_counts.CSV")
   enpa <- paste("www/", pas, sep = "")
   enpat <- read.csv2(enpa)
@@ -867,28 +883,6 @@ paths2frames <- function(oneortwo,P,IT,IH,CT){
     finalpath <- paste(tailplus,end ,sep= "")
   }
   }else{
-    print("in else!!!!!!")
-    # if(as.character(IH) == "diseased"){
-    #   pathWHod<- paste(P,as.character(IH), sep= "")
-    #   newpath<- paste(pathWHod,tpm,sep = "_")
-    #   tail <- "_disease-phenotype-all"
-    #   tailplus <- paste(newpath, tail, sep = "")
-    #   finalpath <- paste(tailplus,end ,sep= "")
-    #   print("path")
-    #   print(finalpath)
-    # }else if(as.character(IH) == "disease - mature platelets"){
-    #   pathWHod<- paste(P,"diseased", sep= "")
-    #   newpath<- paste(pathWHod,tpm,sep = "_")
-    #   tail <- "_disease-phenotype-MP"
-    #   tailplus <- paste(newpath, tail, sep = "")
-    #   finalpath <- paste(tailplus,end,sep= "")
-    # }else if(as.character(IH) == "disease - reticulated platelets"){
-    #   pathWHod<- paste(P,"diseased", sep= "")
-    #   newpath<- paste(pathWHod,tpm,sep = "_")
-    #   tail <- "_disease-phenotype-RP"
-    #   tailplus <- paste(newpath, tail, sep = "")
-    #   finalpath <- paste(tailplus,end,sep= "")
-    # }
     pathWHod<- paste(P,"diseased", sep= "")
     newpath<- paste(pathWHod,tpm,sep = "_")
     tail <- switch(as.character(IH),"diseased"="_disease-phenotype-all","disease - mature platelets"= "_disease-phenotype-MP", "disease - reticulated platelets" = "_disease-phenotype-RP" )
@@ -986,31 +980,15 @@ metatab$healthy[metatab$medical_condition != "healthy"] <- 0
 #metatab$platelet_condition [metatab$medical_condition == "healthy"] <- 0
 
 getDASdata <- function(ds){
-  p <- ""
-  left <- ""
-  right <- ""
-  if(ds == "Reticulated Platelets vs Mature  Platelets (healthy)"){
-    p <- "healthy-RP_healthy-MP.deltapsi.tsv"
-    left <- "Reticulated Platelets in healthy patients"
-    right <- "Mature Platelets in healthy patients"
-  }else if(ds == "Mature Platelets vs Reticulated Platelets (stable CCS)"){
-    p <- "stable-MP_stable-RP.deltapsi.tsv"
-    left <- "Mature Platelets in patients with stable CCS"
-    right <- "Reticulated Platelets in patients with stable CCS"
-  }else if(ds == "healthy vs stable CCS (Mature Platelets)"){
-    p <- "healthy-MP_stable-MP.deltapsi.tsv"
-    left <- "healthy patients (Mature Platelets)"
-    right <- "patients with stable CCS (Mature Platelets)"
-  }else if(ds == "healthy vs stable CCS (Reticulated Platelets)"){
-    p <- "healthy-RP_stable-RP.deltapsi.tsv"
-    left <- "healthy patients (Reticulated Platelets)"
-    right <- "patients with stable CCS (Reticulated Platelets)"
-  }
+  p <- switch(ds,"Reticulated Platelets vs Mature  Platelets (healthy)"= "healthy-RP_healthy-MP.deltapsi.tsv","Mature Platelets vs Reticulated Platelets (stable CCS)"="stable-MP_stable-RP.deltapsi.tsv" ,"healthy vs stable CCS (Mature Platelets)"= "healthy-MP_stable-MP.deltapsi.tsv","healthy vs stable CCS (Reticulated Platelets)" = "healthy-RP_stable-RP.deltapsi.tsv")
+  left <- switch(ds,"Reticulated Platelets vs Mature  Platelets (healthy)"= "Reticulated Platelets in healthy patients","Mature Platelets vs Reticulated Platelets (stable CCS)"="Mature Platelets in patients with stable CCS" ,"healthy vs stable CCS (Mature Platelets)"= "healthy patients (Mature Platelets)","healthy vs stable CCS (Reticulated Platelets)" = "healthy patients (Reticulated Platelets)" )
+  right <- switch(ds,"Reticulated Platelets vs Mature  Platelets (healthy)"= "Mature Platelets in healthy patients" ,"Mature Platelets vs Reticulated Platelets (stable CCS)"= "Reticulated Platelets in patients with stable CCS","healthy vs stable CCS (Mature Platelets)"="patients with stable CCS (Mature Platelets)" ,"healthy vs stable CCS (Reticulated Platelets)" = "patients with stable CCS (Reticulated Platelets)")
   endpat<- paste(pathDAS,p, sep = "")
   DF <- read.table(endpat, sep = "\t" , na.strings = "NA", header = FALSE)
   res <- list(DF,left,right) # zugriff res[[1]]
   return(res)
 }
+
 getValidEasy <- function(atab,e,p){ ##signifikant alternative splicing
   out <- data.frame(matrix(NA,ncol = 4,nrow = 0))
   out <- subset(atab,(abs(as.numeric(atab[,2]))>=e & as.numeric(atab[,3]) >=p))
@@ -1108,7 +1086,6 @@ getEorS <- function(eors,kptab){
 }
 
 server <- function(input,output,session){
-
 
   UIMI <- eventReactive(input$clickMIF,{
     tagList( 
@@ -1267,8 +1244,13 @@ server <- function(input,output,session){
         tabPanel(
           id="tV","Volcano plot", 
           #"Volcano plot",
+          br(), 
+          selectInput(inputId = "DVP" , label = "Choose gene annotation" , choices = c("ENSEMBL ID", "HGNC symbol"), multiple = FALSE),
+          actionButton(inputId = "clickDVP",label = "Get plot ",icon = icon('arrow'), style = "color: #FFF; background-color: #000000; border-color: #000000"),
+          br(),
+          br(),
           #uiOutput("VPO")
-          plotOutput("VP",height = "800px"),
+          plotOutput("VP",height = "750px"),
           br(),
           
           downloadButton("dlPNG", "Download plot in PNG format")
@@ -1346,9 +1328,10 @@ server <- function(input,output,session){
       tabPanel(
         id="GOtab",title = "Top 500 GO Terms", solidHeader = TRUE,
         "",
-       # selectInput(inputId = "UDA" , label = "Choose Up/Down/All" , choices = c("upregulated","downregulated","all"), multiple = FALSE),
-        #actionButton(inputId = "clickUDA",label = "Get GO",icon = icon('arrow'), style = "color: #FFF; background-color: #000000; border-color: #000000"),
+        selectInput(inputId = "FeA" , label = "Choose gene annotation in GO categories" , choices = c("ENSEMBL ID","ENTREZ ID","HGNC symbol"), multiple = FALSE),
+        actionButton(inputId = "clickFeA",label = "Get GOs",icon = icon('arrow'), style = "color: #FFF; background-color: #000000; border-color: #000000"),
        br(), 
+       br(),
        downloadButton("downloadGO", "Download table"),
         br(),
         br(),
@@ -1613,8 +1596,108 @@ server <- function(input,output,session){
     KPM()
   })
   
+  IN1 <- eventReactive(input$Iclick1,{
+    tabBox(
+      width = 12,
+      height = "600px",
+      title = "Get the results",
+      tabPanel(
+        
+        id="","List of Genes", 
+        #"Volcano plot",
+        #uiOutput("VPO")
+        #actionButton(inputId = "Iclick1",label = "Start Analysis", style = "color: #fff; background-color: #000000; border-color: #000000"),
+        
+        dataTableOutput(outputId = "IListOfGenes"),
+        tags$head(tags$style("#TopGenesTab table {background-color: #DCDCDC; color : #000000;  }", media="screen", type="text/css")),
+        
+        tags$head(tags$style(".table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
+                               border-top: 1px solid #000000;}",media="screen", type="text/css"))
+        
+      ),
+      tabPanel(
+        id="tV","Pie Plot", 
+        #"Volcano plot",
+        #uiOutput("VPO")
+        plotlyOutput("IGLplot")
+        
+      )
+    )
+  })
+  output$Integ1 <- renderUI({
+    IN1()
+  })
   
+  IN2 <- eventReactive(input$Iclick2,{
+    tabBox(
+      width = 12,
+      height = "800px",
+      title = "Get the results",
+      tabPanel(
+        
+        id="tV","List of gene - miRNA Target gene mappings", 
+        #"Volcano plot",
+        #uiOutput("VPO")
+        #actionButton(inputId = "Iclick2",label = "Start Analysis", style = "color: #fff; background-color: #000000; border-color: #000000"),
+        
+        dataTableOutput(outputId = "IMIResult"),
+        tags$head(tags$style("#TopGenesTab table {background-color: #DCDCDC; color : #000000;  }", media="screen", type="text/css")),
+        
+        tags$head(tags$style(".table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
+                               border-top: 1px solid #000000;}",media="screen", type="text/css"))
+        
+      ),
+      tabPanel(
+        id="tV","Network Plot", 
+        #"Volcano plot",
+        #uiOutput("VPO")
+        forceNetworkOutput("IGLnet", height = "780px")
+        
+      )
+    )
+  })
+  output$Integ2 <- renderUI({
+    IN2()
+  })
   
+  IN3 <- eventReactive(input$Iclick3,{
+    tabBox(
+      width = 12,
+      height = "1000px",
+      title = "Get the results",
+      tabPanel(
+        
+        id="tV","List of LSVs on given gene list / DEG", 
+        #"Volcano plot",
+        #uiOutput("VPO")
+        #actionButton(inputId = "Iclick3",label = "Start Analysis", style = "color: #fff; background-color: #000000; border-color: #000000"),
+        
+        dataTableOutput(outputId = "IDASResult"),
+        tags$head(tags$style("#TopGenesTab table {background-color: #DCDCDC; color : #000000;  }", media="screen", type="text/css")),
+        
+        tags$head(tags$style(".table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
+                               border-top: 1px solid #000000;}",media="screen", type="text/css"))
+        
+      ),
+      tabPanel(
+        id="tV","Plots", 
+        br(),
+        column(6,plotlyOutput("IDASpie",height = "400px")),
+        column(6,plotlyOutput("IDAStoe",height = "400px")),
+        br(),br(),br(),br(),br(),br(),br(),br(),br(), br(), br(), br(), br(),br(), br(), br(), br(), br(), br(), br(),br(),br(),
+        
+        #fluidRow(
+        plotlyOutput("IDASALL",height = "400px"),
+        #)
+        
+        
+      )
+    )
+  })
+  
+  output$Integ3 <- renderUI({
+    IN3()
+  })
   
 
 #___________matrix erstellen___________
@@ -1788,6 +1871,10 @@ server <- function(input,output,session){
   
 # }
 # )
+  VPannot <- eventReactive(input$clickDVP,{
+    res <- switch (input$DVP, "ENSEMBL ID"= 1, "HGNC symbol" = 11)
+    res
+  })
 
 # ___________Volcano Plot___________
   savedVP_plot = reactiveVal()
@@ -1797,8 +1884,9 @@ server <- function(input,output,session){
     d <- d %>% mutate(padj = str_replace(padj,"E", "e"))
     d <- d %>% mutate(padj = str_replace_all(padj,",", "."))
     d[,7] = as.numeric(d[,7])
+    annot <- VPannot()
      p <- EnhancedVolcano(d,
-                      lab = d[,1],
+                      lab = d[,annot],
                       x = 'log2FoldChange',
                       y = 'padj',
                       xlim = c(-5, 8),
@@ -2148,7 +2236,7 @@ pathGO <- "www/"
        sav_go_h_p(im_file)
        sav_edges(edge)
        on_fi <- switch(input$GOSS,"biological process"="BP","cellular component"= "CC","molecular function" = "MF")
-       fi_on_entab <- entab[grep(on_fi,entab[,9]),c(1,2,3,4,5,6,9)] ##filter für GenNamen
+       fi_on_entab <- entab[grep(on_fi,entab[,9]),c(1,2,3,4,5,6,7,8,9)] ##filter für GenNamen
        saved_GO(fi_on_entab)
        fi_cir <- cir[cir[,1]==on_fi, ]
        sav_cir(fi_cir)
@@ -2165,7 +2253,8 @@ pathGO <- "www/"
        sav_go_h_p(im_file)
        sav_edges(edge)
        on_fi <- switch(input$GOSS2,"biological process"="BP","cellular component"= "CC","molecular function" = "MF")
-       fi_on_entab <- entab[grep(on_fi,entab[,9]),c(1,2,3,4,5,6,9)] ##filter für GenNamen
+       #
+       fi_on_entab <- entab[grep(on_fi,entab[,9]),c(1,2,3,4,5,6,7,8,9)] ##filter fuer GenNamen
        saved_GO(fi_on_entab)
        fi_cir <- cir[cir[,1]==on_fi, ]
        sav_cir(fi_cir)
@@ -2175,9 +2264,16 @@ pathGO <- "www/"
        #endtab<-names2GOlinks(midtab)
       saved_GO()
      })
+   
+   FEannot <- eventReactive(input$clickFeA,{
+     res <- switch(input$FeA, "ENSEMBL ID" = 6, "ENTREZ ID" = 7, "HGNC symbol" = 8)
+     res
+   })
 
    output$GOTab <- renderDataTable({
      gotab<- GO()
+     annot <- FEannot()
+     gotab <- gotab[,c(1,2,3,4,5,annot,9)]
      datatable(
                                      cbind(' ' = '&oplus;', gotab), escape = -2,
                                      options = list(
@@ -2295,18 +2391,20 @@ pathGO <- "www/"
    })
    
    output$GOH <- renderImage({
-     f <- sav_go_h_p()
-     #f <- "www/BP_MP-RP_TPM-0-1_healthy_UP_p.png"
-     f <-normalizePath(f)
-     print(f)
-     #filename <- "C:\Users\Leonora\Desktop\Platlas_git\www\FE_results\MPRP\plot\BP_MP-RP_TPM-0-1_healthy_UP_p.png"
-     #dev.off()
-     list(src = f,#alt ="NIX"
-          width = "900px",
-          height = "850px",
-          contentType = "image/png"
-     )
-   }, deleteFile = FALSE)
+     GO()
+     
+     #neu <- str_split(sav_go_h_p(), "www/")[[1]]
+     
+     filename <- normalizePath(sav_go_h_p())
+     #print(filename)
+     #tags$img(src = filename)
+     #  print(filename)
+        list(src = filename,
+             width = "900px",
+             height = "600px"
+        )
+      }, deleteFile = FALSE)
+  # })
    # output$GOTab2 <- renderDataTable(GO2(),escape = FALSE, options = list(lengthMenu = c(10, 15, 20), pageLength = 5, width = 700)
    # )
 #------------------------------miRNA
@@ -2870,166 +2968,64 @@ saved_HMMI = reactiveVal()
     colnames(endt) = c("geneID","log2FoldChange", "padj")
     return(endt)
   }
+  
   getDASdif <- function(sigi,left,right,tpm,fc,pval){
     nt <- switch(tpm, "TPM > 0.1"="TPM-0-1","TPM > 0.3"="TPM-0-3","TPM > 1"= "TPM-1","TPM > 2" = "TPM-2" )
     pa <- ""
-    if(left == "Reticulated Platelets in healthy patients" && right == "Mature Platelets in healthy patients"){
-      pa <- paste0("www/all_healthy_",nt,".CSV")
-      tab <- read.csv2(pa)
+    kleiner0fc <- switch(left, "Reticulated Platelets in healthy patients" = "differentially expressed (MP)","Mature Platelets in patients with stable CCS" =  "differentially expressed (MP)", "healthy patients (Mature Platelets)" = "differentially expressed (healthy)","healthy patients (Reticulated Platelets)"= "differentially expressed (healthy)" )
+    groesser0fc <- switch(left, "Reticulated Platelets in healthy patients" = "differentially expressed (RP)","Mature Platelets in patients with stable CCS" =  "differentially expressed (RP)", "healthy patients (Mature Platelets)" = "differentially expressed (stable CSS)","healthy patients (Reticulated Platelets)"= "differentially expressed (stable CSS)")
+    pa <- switch(left, "Reticulated Platelets in healthy patients" = paste0("www/all_healthy_",nt,".CSV"),"Mature Platelets in patients with stable CCS" =  paste0("www/all_diseased_",nt,"_phenotype-disease-stable-CAD.CSV"), "healthy patients (Mature Platelets)" = paste0("www/heat_healthyCAD_",nt,"_MP.CSV"),"healthy patients (Reticulated Platelets)"= paste0("www/heat_healthyCAD_",nt,"_RP.CSV"))
+    tab <- read.csv2(pa)
+    trueifMPRP <- switch(left, "Reticulated Platelets in healthy patients" = TRUE,"Mature Platelets in patients with stable CCS" = TRUE, "healthy patients (Mature Platelets)" = FALSE,"healthy patients (Reticulated Platelets)"= FALSE)
+    endtab <- ""
+    c1 <- c()
+    c2 <- c()
+    colnew <- 0
+    if(trueifMPRP == TRUE){
       endtab <- getDiffTab4DAS(tab,fc,pval)
-      
-      endtab$category[endtab$log2FoldChange < 0] <- "differentially expressed (MP)"
-      endtab$category[endtab$log2FoldChange > 0] <- "differentially expressed (RP)"
-      genesMP <- endtab[endtab$category == "differentially expressed (MP)",1]
-      genesRP <- endtab[endtab$category == "differentially expressed (RP)",1]
-      #View(endtab)
-      sigi$category <- "not differentially expressed"
-      sigi$category[sigi[,1] %in% genesMP] <- "differentially expressed (MP)"
-      sigi$category[sigi[,1] %in% genesRP] <- "differentially expressed (RP)"
-      commontab<-inner_join(endtab, sigi, by = c("geneID" = "V1"))
-      #View(commontab)
-      commontab <- commontab[,-c(10,11,12,13,14)]
-      colnames(commontab)[c(6,7,8,9)] = c("DE in","E(dPSI) per LSV junction","P(|dPSI|>=0.20) per LSV junction","Type of splicing event")
-      
-      fil <- sigi[,c(1,9)]
-      fil<- fil[!duplicated(fil),]
-      x<-fil%>%
-        group_by(category)%>%
-        count()
-      
-      events <- commontab%>%
-        group_by(commontab[,9])%>%
-        count()
-      
-      allevents <- sigi%>%
-        group_by(V4)%>%
-        count()
-      #View(events)
-      
-      colnames(events) = c("tose","n")
-      #return(list(commontab,x,events,allevents))
-    }else if(left == "Mature Platelets in patients with stable CCS" && right == "Reticulated Platelets in patients with stable CCS"){
-      pa <- paste0("www/all_diseased_",nt,"_phenotype-disease-stable-CAD.CSV")
-      tab <- read.csv2(pa)
-      endtab <- getDiffTab4DAS(tab,fc,pval)
-      endtab$category[endtab$log2FoldChange < 0] <- "differentially expressed (MP)"
-      endtab$category[endtab$log2FoldChange > 0] <- "differentially expressed (RP)"
-      genesMP <- endtab[endtab$category == "differentially expressed (MP)",1]
-      genesRP <- endtab[endtab$category == "differentially expressed (RP)",1]
-      #View(endtab)
-      sigi$category <- "not differentially expressed"
-      sigi$category[sigi[,1] %in% genesMP] <- "differentially expressed (MP)"
-      sigi$category[sigi[,1] %in% genesRP] <- "differentially expressed (RP)"
-      commontab<-inner_join(endtab, sigi, by = c("geneID" = "V1"))
-      commontab <- commontab[,-c(10,11,12,13,14)]
-      colnames(commontab)[c(6,7,8,9)] = c("DE in","E(dPSI) per LSV junction","P(|dPSI|>=0.20) per LSV junction","Type of splicing event")
-      #View(commontab)
-      fil <- sigi[,c(1,9)]
-      fil<- fil[!duplicated(fil),]
-      x<-fil%>%
-        group_by(category)%>%
-        count()
-      
-      events <- commontab%>%
-        group_by(commontab[,9])%>%
-        count()
-      
-      allevents <- sigi%>%
-        group_by(V4)%>%
-        count()
-      #View(events)
-      
-      colnames(events) = c("tose","n")
-      #return(list(commontab,x,events,allevents))
-    }else if(left == "healthy patients (Mature Platelets)" && right == "patients with stable CCS (Mature Platelets)"){ #MP
-      pa <- paste0("www/heat_healthyCAD_",nt,"_MP.CSV")
-      tab <- read.csv2(pa)
-      #print(fc)
+      c1 <- c(10,11,12,13,14)
+      c2 <- c(6,7,8,9)
+      colnew <- 9
+    }else{
       endtab <- getDiffTab4DAS4HS(tab,fc,pval)
-      endtab$category[endtab$log2FoldChange < 0] <- "differentially expressed (healthy)"
-      endtab$category[endtab$log2FoldChange > 0] <- "differentially expressed (stable CSS)"
-      genesMP <- endtab[endtab$category == "differentially expressed (healthy)",1]
-      genesRP <- endtab[endtab$category == "differentially expressed (stable CSS)",1]
-      #View(endtab)
-      sigi$category <- "not differentially expressed"
-      sigi$category[sigi[,1] %in% genesMP] <- "differentially expressed (healthy)"
-      sigi$category[sigi[,1] %in% genesRP] <- "differentially expressed (stable CSS)"
-      commontab<-inner_join(endtab, sigi, by = c("geneID" = "V1"))
-      #View(commontab)
-      commontab <- commontab[,-c(8,9,10,11,12)]
-      colnames(commontab)[c(4,5,6,7)] = c("DE in","E(dPSI) per LSV junction","P(|dPSI|>=0.20) per LSV junction","Type of splicing event")
-      
-      fil <- sigi[,c(1,9)]
-      fil<- fil[!duplicated(fil),]
-      x<-fil%>%
-        group_by(category)%>%
-        count()
-      
-      events <- commontab%>%
-        group_by(commontab[,7])%>%
-        count()
-      
-      allevents <- sigi%>%
-        group_by(V4)%>%
-        count()
-      #View(events)
-      
-      colnames(events) = c("tose","n")
-      #return(list(commontab,x,events,allevents))
-    }else if(left == "healthy patients (Reticulated Platelets)" && right == "patients with stable CCS (Reticulated Platelets)"){ # RP
-      pa <- paste0("www/heat_healthyCAD_",nt,"_RP.CSV")
-      tab <- read.csv2(pa)
-      endtab <- getDiffTab4DAS4HS(tab,fc,pval)
-      endtab$category[endtab$log2FoldChange < 0] <- "differentially expressed (healthy)"
-      endtab$category[endtab$log2FoldChange > 0] <- "differentially expressed (stable CSS)"
-      genesMP <- endtab[endtab$category == "differentially expressed (healthy)",1]
-      genesRP <- endtab[endtab$category == "differentially expressed (stable CSS)",1]
-      #View(endtab)
-      sigi$category <- "not differentially expressed"
-      sigi$category[sigi[,1] %in% genesMP] <- "differentially expressed (healthy)"
-      sigi$category[sigi[,1] %in% genesRP] <- "differentially expressed (stable CSS)"
-      commontab<-inner_join(endtab, sigi, by = c("geneID" = "V1"))
-      commontab <- commontab[,-c(8,9,10,11,12)]
-      colnames(commontab)[c(4,5,6,7)] = c("DE in","E(dPSI) per LSV junction","P(|dPSI|>=0.20) per LSV junction","Type of splicing event")
-      #View(commontab)
-      fil <- sigi[,c(1,9)]
-      fil<- fil[!duplicated(fil),]
-      x<-fil%>%
-        group_by(category)%>%
-        count()
-      
-      events <- commontab%>%
-        group_by(commontab[,7])%>%
-        count()
-      
-      allevents <- sigi%>%
-        group_by(V4)%>%
-        count()
-      #View(events)
-      
-      colnames(events) = c("tose","n")
-      #return(list(commontab,x,events,allevents))
-      
+      c1 <- c(8,9,10,11,12)
+      c2 <- c(4,5,6,7)
+      colnew <- 7
     }
-    #print(pa)
+    endtab$category[endtab$log2FoldChange < 0] <- kleiner0fc
+    endtab$category[endtab$log2FoldChange > 0] <- groesser0fc
+    genesMP <- endtab[endtab$category == kleiner0fc,1]
+    genesRP <- endtab[endtab$category == groesser0fc,1]
+    #View(endtab)
+    sigi$category <- "not differentially expressed"
+    sigi$category[sigi[,1] %in% genesMP] <- kleiner0fc
+    sigi$category[sigi[,1] %in% genesRP] <- groesser0fc
+    commontab<-inner_join(endtab, sigi, by = c("geneID" = "V1"))
+    commontab <- commontab[,-c1]
+    colnames(commontab)[c2] = c("DE in","E(dPSI) per LSV junction","P(|dPSI|>=0.20) per LSV junction","Type of splicing event")
     
-    # x<-fil%>%
-    #   group_by(category)%>%
-    #   count()
-    # 
-    # events <- commontab%>%
-    #   group_by(commontab[,9])%>%
-    #   count()
-    # 
-    # allevents <- sigi%>%
-    #   group_by(V4)%>%
-    #   count()
-    # View(events)
-    # 
-    # colnames(events) = c("tose","n")
+    fil <- sigi[,c(1,9)]
+    fil<- fil[!duplicated(fil),]
+    x<-fil%>%
+      group_by(category)%>%
+      count()
+    
+    events <- commontab%>%
+      group_by(commontab[,colnew])%>%
+      count()
+    
+    allevents <- sigi%>%
+      group_by(V4)%>%
+      count()
+    
+    colnames(events) = c("tose","n")
+    
+    
     return(list(commontab,x,events,allevents))
     
   }
+  
+  
 #  kp_p = reactiveVal("")
   DD_tab = reactiveVal()
   DD_pie = reactiveVal()
@@ -3217,23 +3213,62 @@ saved_HMMI = reactiveVal()
     
   })
  
-  ### fuer barplot
-  # neu <- count(new_sig, var = new_sig[,1])
-  # colnames(neu) = c('Gene', "occurrence")
-  # fig <- plot_ly(neu,
-  #                x = ~Gene,
-  #                y = ~occurrence,
-  #                name = "Occurrences of significant local splicing variations in Genes",
-  #                type = "bar",
-  #                color = ~occurrence,
-  #                colors = c("#fff68f","#ba3131")
-  # )
-  # fig <- fig %>% layout(title = "Occurrences of significant local splicing variations in Genes")
-  # fig
+  getDASdifINT <- function(sigi,left,right,genesintb ,manuallististrue){
+    if(manuallististrue == FALSE){
+      kleiner0fc <- switch(left, "Reticulated Platelets in healthy patients" = "differentially expressed (MP)","Mature Platelets in patients with stable CCS" =  "differentially expressed (MP)", "healthy patients (Mature Platelets)" = "differentially expressed (healthy)","healthy patients (Reticulated Platelets)"= "differentially expressed (healthy)" )
+      groesser0fc <- switch(left, "Reticulated Platelets in healthy patients" = "differentially expressed (RP)","Mature Platelets in patients with stable CCS" =  "differentially expressed (RP)", "healthy patients (Mature Platelets)" = "differentially expressed (stable CSS)","healthy patients (Reticulated Platelets)"= "differentially expressed (stable CSS)")
+      genesintb$category[genesintb$log2FoldChange < 0] <- kleiner0fc
+      genesintb$category[genesintb$log2FoldChange > 0] <- groesser0fc
+      genesMP <- genesintb[genesintb$category == kleiner0fc,1]
+      genesRP <- genesintb[genesintb$category == groesser0fc,1]
+      sigi$category <- "not differentially expressed"
+      sigi$category[sigi[,1] %in% genesMP] <- kleiner0fc
+      sigi$category[sigi[,1] %in% genesRP] <- groesser0fc
+      commontab<-inner_join(genesintb, sigi, by = c("geneID" = "V1"))
+      commontab <- commontab[,-c(10,11,12,13,14)]
+      colnames(commontab)[c(6,7,8,9)] = c("DE in","E(dPSI) per LSV junction","P(|dPSI|>=0.20) per LSV junction","Type of splicing event")
+      fil <- sigi[,c(1,9)]
+      fil<- fil[!duplicated(fil),]
+      x<-fil%>%
+        group_by(category)%>%
+        count()
+      events <- commontab%>%
+        group_by(commontab[,9])%>%
+        count()
+    }else{
+      sigi$category <- "not in list"
+      sigi$category[sigi[,1] %in% genesintb] <- "in list"
+      genesintb <- as.data.frame(genesintb)
+      colnames(genesintb) = "geneID"
+      commontab<-inner_join(genesintb, sigi, by = c("geneID" = "V1"))
+      commontab <- commontab[,-c(6,7,8,9,10)]
+      colnames(commontab)[c(2,3,4,5)] = c("DE in","E(dPSI) per LSV junction","P(|dPSI|>=0.20) per LSV junction","Type of splicing event")
+      fil <- sigi[,c(1,5)]
+      fil<- fil[!duplicated(fil),]
+      x<-fil%>%
+        group_by(category)%>%
+        count()
+      
+      events <- commontab%>%
+        group_by(commontab[,5])%>%
+        count()
+    }
+    allevents <- sigi%>%
+      group_by(V4)%>%
+      count()
+    
+    colnames(events) = c("tose","n")
+    
+    return(list(commontab,x,events,allevents))
+    
+  }
+  
+  
+  
   
   sav_intersectGeneList <- reactiveVal()
   sav_IallGenes <- reactiveVal()
-  InterGene <- eventReactive(input$Iclick1,ignoreInit = T,{
+  InterGene <- eventReactive(input$Iclick1,{
     List_of_Genes1 <- NULL#c()
     List_of_Genes2 <- NULL#c()
     print(input$INT)
@@ -3291,7 +3326,7 @@ saved_HMMI = reactiveVal()
   
   #sav_integMIRNA = reactiveVal()
   sav_NetMiRNA = reactiveVal()
-  IntegMiRNA <- eventReactive(input$Iclick2,ignoreInit = T,{
+  IntegMiRNA <- eventReactive(input$Iclick2,{
     List_of_Genes1 <- c()
     if(input$INTMI == "Insert Genelist"){
       inGenes <- getGeneText(input$MGIGL)
@@ -3308,13 +3343,6 @@ saved_HMMI = reactiveVal()
       genesintab <- getIDif(genesintab, input$MGIpCO2, input$MGIfCO2,input$MGIUDMI2,3)
       List_of_Genes1 <- genesintab[,1]
     }
-    # m2Genes <- miRNA_path("", input$ImiEXP,"",input$IUDMI, input$ImiDB,input$ImiF2,FALSE,"0")
-    # m2gtab <-  read.delim(m2Genes, header=FALSE, na.strings = NA,comment.char = "",quote = "\"", sep = "\t",dec = ".")
-    # if(input$ImiDB == "miRDB"){ 
-    #   colnames(m2gtab)=c("Target Gene (Ref-Seq ID)", "Target Gene (Ensembl ID)", "miRNA", "prediction score")
-    # }else if(input$ImiDB == "miRTarBase"){
-    #   colnames(m2gtab)=c("miRNA","miRTarBase ID", "Species (mRNA)", "Target Gene", "Target Gene (Entrez ID)", "Species (Target Gene)","Experiments","Support Type","References (PMID)")
-    # }
     mir_Nodesp <- miRNA_path("", input$ImiEXP,"N",input$IUDMI, input$ImiDB,input$ImiF2,FALSE,"0")
     mir_Nod <- read.table(mir_Nodesp, sep = "\t", header = FALSE)
     # mirnap <- ImiRNA_path(input$ImiF2)
@@ -3322,30 +3350,13 @@ saved_HMMI = reactiveVal()
     MTAB <- getMTAB(input$ImiF2)
     
     sig_mirna_I <- getIDif(MTAB,input$MIpCO2,input$MIfCO2, input$IUDMI,2)
-    #View(sig_mirna_I)
     
-    #mirnaListe <- rownames(sig_mirna_I)#[,1]
-    # endList <- getImirnagene(List_of_Genes1, sig_mirna_I, m2gtab)
-    #View(sig_mirna_I)
-    #View(mir_Nod)
-    #View(List_of_Genes1)
     endNodes <- getImirnagene(List_of_Genes1,sig_mirna_I[,1], mir_Nod)
     #sav_integMIRNA(endList)
     sav_NetMiRNA(endNodes)
     endNodes
   })
   output$IListOfGenes <-renderDataTable(InterGene(),escape = FALSE, options = list(lengthMenu = c(10, 15, 20), pageLength = 10))
-  #{
-  #   mat <- as.data.frame("genes" = InterGene())
-  # #kp<-Kpm()
-  # datatable(
-  #   mat,
-  #   options = list(
-  #     columnDefs = list(
-  #       list(visible = FALSE, targets = c(7)),
-  #       list(orderable = FALSE, className = 'details-control', targets = 1)
-  #     )
-  #   ))})#(mat,escape = FALSE, options = list(lengthMenu = c(10, 15, 20), pageLength = 10))
   output$IMIResult <- renderDataTable(IntegMiRNA(),escape = FALSE, options = list(lengthMenu = c(10, 15, 20), pageLength = 10))
   
   
@@ -3405,6 +3416,110 @@ saved_HMMI = reactiveVal()
                  #Value = "", 
                  NodeID = "name", Group = "type",opacity = 0.9,fontSize = 11, zoom = TRUE,colourScale = JS(ColourScale))
   })
+  
+  ID_tab = reactiveVal()
+  ID_pie = reactiveVal()
+  ID_toe = reactiveVal()
+  ID_alltoe = reactiveVal()
+  IntegDIFDAS <- eventReactive(input$Iclick3,ignoreInit = T,{
+    List_of_Genes1 <- c()
+    genesintab <- ""
+    manuallististrue <- FALSE
+    if(input$INTD == "Insert Genelist"){
+      inGenes <- getGeneText(input$MGIGL)
+      List_of_Genes1 <- inGenes
+      genesintab <- List_of_Genes1
+      manuallististrue <- TRUE
+    }
+    if(input$INTD == "Mature vs. Reticulated" ){
+      kppath <-paths2frames("1",path,input$DSITPM1, input$DSIHoD1,".CSV")
+      genesintab <- read.csv2(kppath)
+      #getDiffTab4DAS(tab,lfc,pval)
+      genesintab <- getDiffTab4DAS(genesintab, input$DSIfCO1, input$DSIpCO1)
+      List_of_Genes1 <- genesintab[,1]
+    }else if(input$INTD == "CCS vs. ACS 2"){
+      kppath <-paths2frames("2",path,input$DSITPM2, input$DSIHoD02,".CSV")
+      genesintab <- read.csv2(kppath)
+      genesintab <- getDiffTab4DAS(genesintab, input$DSIfCO2, input$DSIpCO2)
+      List_of_Genes1 <- genesintab[,1]
+    }
+    
+    DASlist <- getDASdata(as.character(input$IDAS1))
+    left <- DASlist[[2]]
+    right <-DASlist[[3]]
+    tb <- DASlist[[1]]
+    dassig <- getValidEasy(tb,input$IDASe,input$IDASp)
+    IDD <-getDASdifINT(dassig,left,right,genesintab ,manuallististrue)
+    ID_tab(IDD[[1]])
+    ID_pie(IDD[[2]])
+    ID_toe(IDD[[3]])
+    ID_alltoe(IDD[[4]])
+    ID_tab()
+  })
+  
+  
+  output$IDASResult <- renderDataTable(IntegDIFDAS(),escape = FALSE, options = list(lengthMenu = c(10, 15, 20), pageLength = 8))
+  output$IDASALL <- renderPlotly({
+    #IntegDIFDAS()
+    allevents <- ID_alltoe()
+    fig <- plot_ly(allevents, labels = ~V4, values = ~n, type = 'pie',textposition = 'inside',
+                   textinfo = 'percent',
+                   insidetextfont = list(color = '#FFFFFF'),
+                   hoverinfo = 'percent + text',
+                   #text = ~paste(n, 'genes'),
+                   # marker = list(colors = colors2,
+                   #               line = list(color = '#FFFFFF', width = 1)),
+                   # #The 'pull' attribute can also be used to create space between the sectors
+                   showlegend = TRUE)
+    fig <- fig %>% layout(title = 'Percentages of types of significant local splicing events in significant local splicing variations',
+                          xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                          yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+    
+    fig
+  })
+  output$IDASpie <- renderPlotly({
+    #DIFDAS()
+    x<- ID_pie()
+    fig <- plot_ly(x, labels = ~category, values = ~n, type = 'pie',textposition = 'inside',
+                   textinfo = 'percent',
+                   insidetextfont = list(color = '#FFFFFF'),
+                   hoverinfo = 'percent + text',
+                   #text = ~paste(n, 'genes'),
+                   marker = list(colors = DAS_colors,
+                                 line = list(color = '#FFFFFF', width = 1)),
+                   #The 'pull' attribute can also be used to create space between the sectors
+                   showlegend = TRUE)
+    fig <- fig %>% layout(title = 'Percentages of (differentially) expressed genes with significant local splicing events ',
+                          xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                          yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+    
+    fig
+    
+  })
+  
+  output$IDAStoe <- renderPlotly({
+    #DIFDAS()
+    colors2 <- c('rgb(128,133,133)', 'rgb(144,103,167)', 'rgb(171,104,87)')
+    events <- ID_toe()
+    fig <- plot_ly(events, labels = ~tose, values = ~n, type = 'pie',textposition = 'inside',
+                   textinfo = 'percent',
+                   insidetextfont = list(color = '#FFFFFF'),
+                   hoverinfo = 'percent + text',
+                   #text = ~paste(n, 'genes'),
+                   marker = list(colors = colors2,
+                                 line = list(color = '#FFFFFF', width = 1)),
+                   #The 'pull' attribute can also be used to create space between the sectors
+                   showlegend = TRUE)
+    fig <- fig %>% layout(title = 'Percentages of types of significant local splicing events in (differentially) expressed genes',
+                          xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                          yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+    
+    fig
+    
+  })
+  
+  
+  
  # --------------------homepage
   
   output$slickr <- renderSlickR({
