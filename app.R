@@ -441,9 +441,9 @@ dashboardBody(
       width = 12,
       height = "20px",
       box(
-        width = 2,
+        width = 3,
         column(1,span("1",style = "color: white; font-size: 24px; font-weight: bold")),
-        column(1,actionButton(inputId = "Iclick1",label = "Click here to start analysis", style = "color: #fff; background-color: #000000; border-color: #fff")),
+        column(2,actionButton(inputId = "Iclick1",label = "Click here to start analysis", style = "color: #fff; background-color: #000000; border-color: #fff")),
         background = "black",solidHeader = TRUE,
       )
     ),
@@ -529,9 +529,9 @@ dashboardBody(
       width = 12,
       height = "20px",
       box(
-        width = 2,
+        width = 3,
         column(1,span("2",style = "color: white; font-size: 24px; font-weight: bold")),
-        column(1,actionButton(inputId = "Iclick2",label = "Click here to start analysis", style = "color: #fff; background-color: #000000; border-color: #fff")),
+        column(2,actionButton(inputId = "Iclick2",label = "Click here to start analysis", style = "color: #fff; background-color: #000000; border-color: #fff")),
         background = "black",solidHeader = TRUE,
       )
     ),
@@ -604,9 +604,9 @@ dashboardBody(
      width = 12,
      height = "20px",
      box(
-       width = 2,
+       width = 3,
        column(1,span("3",style = "color: white; font-size: 24px; font-weight: bold")),
-       column(1, actionButton(inputId = "Iclick3",label = "Click here to start analysis", style = "color: #fff; background-color: #000000; border-color: #fff")),
+       column(2, actionButton(inputId = "Iclick3",label = "Click here to start analysis", style = "color: #fff; background-color: #000000; border-color: #fff")),
        background = "black",solidHeader = TRUE
        
      )
