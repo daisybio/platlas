@@ -21,6 +21,7 @@ library(slickR)
 library(stringr)
 library(tidyr)  ##neu installiert
 #library(Gviz)   ##neu installiert
+library(shinycssloaders)
 
 ui<- dashboardPage(
   skin = "red",
@@ -182,6 +183,9 @@ ui<- dashboardPage(
                      selectInput(inputId = "HoD" , label = "Choose from patient datasets" , choices = c("healthy","diseased", "disease - stable CAD" , "disease - MI"), multiple = FALSE),
                      numericInput(inputId = "pCO1",value = 0.05 ,label = "p-value cutoff", min = 0.01 , max = 0.05,step = 0.005),
                      numericInput(inputId = "fcO1",value = 1.5 ,label = "log2(Foldchange) cutoff", min = 0 , max = 4.0, step = 0.5),
+                     selectInput(inputId = "DVP1" , label = "Choose gene annotation" , choices = c("ENSEMBL ID", "HGNC symbol"), multiple = FALSE),
+                     #actionButton(inputId = "clickDVP1",label = "Get plot ",icon = icon('arrow'), style = "color: #FFF; background-color: #000000; border-color: #000000"),
+                     
                      actionButton(inputId = "click1",label = "Start Analysis",icon = icon('arrow'), style = "color: #fff; background-color: #000000; border-color: #000000")
                      
             ),
@@ -191,6 +195,9 @@ ui<- dashboardPage(
                      selectInput(inputId = "HoD02" , label = "Choose from patient datasets" , choices = c("diseased","disease - mature platelets", "disease - reticulated platelets"), multiple = FALSE),
                      numericInput(inputId = "pCO2",value = 0.05 , label = "p-value cutoff", min = 0.01 , max = 0.05, step = 0.005),
                      numericInput(inputId = "fcO2",value =  1.5 , label = "Foldchange cutoff", min = 0 , max = 4.0, step = 0.5),
+                     selectInput(inputId = "DVP2" , label = "Choose gene annotation" , choices = c("ENSEMBL ID", "HGNC symbol"), multiple = FALSE),
+                     #actionButton(inputId = "clickDVP2",label = "Get plot ",icon = icon('arrow'), style = "color: #FFF; background-color: #000000; border-color: #000000"),
+                     
                      actionButton(inputId = "click2",label = "Start Analysis", style = "color: #fff; background-color: #000000; border-color: #000000")
                      
                      
@@ -206,7 +213,81 @@ ui<- dashboardPage(
         ),
         br(),
         fluidRow(
-          uiOutput("DIFEXtab")
+         # uiOutput("DIFEXtab")
+          tabBox(
+            width = 12,
+            height = "1000px",
+            title = "Get the results",
+            tabPanel(
+              id="tV","Volcano plot", 
+              #"Volcano plot",
+              br(), 
+              #uiOutput("VPO")
+              plotOutput("VP",height = "750px") %>% withSpinner(color= "#000000") ,
+              br(),
+              
+              downloadButton("dlPNG", "Download plot in PNG format")
+            ),
+            tabPanel(
+              id= "tT", "Differentially Expressed Genes",
+              # uiOutput("DTO")
+              selectInput(inputId = "UpDown" , label = "Choose up or downregulated genes" , choices = c("upregulated","downregulated"), multiple = FALSE),
+              actionButton(inputId = "click4",label = "Get Genes ",icon = icon('arrow'), style = "color: #FFF; background-color: #000000; border-color: #000000"),
+              downloadButton("downloadAll", "Download table"),
+              br(),
+              br(),
+              dataTableOutput(outputId = "TopGenesTab") %>% withSpinner(color= "#000000"),
+              tags$head(tags$style("#TopGenesTab table {background-color: #DCDCDC; color : #000000;  }", media="screen", type="text/css")),
+              
+              tags$head(tags$style(".table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
+                               border-top: 1px solid #000000;}",media="screen", type="text/css"))
+              
+            ),
+            tabPanel(
+              id= "tB", 
+              # uiOutput("BPO")
+              title = "Biotypes of the Detected Genes", solidHeader = TRUE, # background = "white" ,
+              plotlyOutput("biotype1",height = "800px")%>% withSpinner(color= "#000000"),
+              br(),
+              downloadButton("dlPNG2", "Download plot in PNG format")
+            ),
+            tabPanel(
+              id= "tH", 
+              #uiOutput("HMO")
+              title = "Counts per samples per genes", background = "red" , solidHeader = TRUE,
+              br(),
+              downloadButton("dlPNG3", "Download plot in PNG format"),
+              br(),
+              plotOutput("heatmap",height = "800px") %>% withSpinner(color= "#000000"),
+              br(),
+              # 
+              
+            ),
+            tabPanel(
+              id= "tP", 
+              #uiOutput("HMO")
+              title = "PCA Analysis Biplot", background = "red" , solidHeader = TRUE,
+              br(),
+              downloadButton("dlpcabi", "Download plot in PNG format"),
+              br(),
+              plotOutput("pcabi",height = "800px") %>% withSpinner(color= "#000000"),
+              br(),
+              # downloadButton("dlPNG3", "Download plot in PNG format")
+              
+            ),
+            tabPanel(
+              id= "tP", 
+              #uiOutput("HMO")
+              title = "PCA Analysis: CCS vs. MI and MP vs. RP", background = "red" , solidHeader = TRUE,
+              br(),
+              downloadButton("dlpcah", "Download plot in PNG format"),
+              br(),
+              plotOutput("pcah",height = "800px") %>% withSpinner(color= "#000000"),
+              br(),
+              # downloadButton("dlPNG3", "Download plot in PNG format")
+              
+            )
+          )
         )
         
         
