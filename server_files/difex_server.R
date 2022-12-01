@@ -1,5 +1,6 @@
 library(plotly)
-library(crosstalk)
+library(DT)
+#library(crosstalk)
 # DIFEX <- eventReactive(c(input$click1, input$click2),ignoreInit = T,{ 
 #  
 # })
@@ -109,6 +110,7 @@ heat <-  eventReactive(c(input$click1,input$click2),{
 # heatmap.2(heat(), main = paste("Heatmap (", as.character(nameTPM1()) ,as.character(nameHod()), ")"), trace = "none", margins = c(10,12),col = bg )
 saved_heatmap_plot = reactiveVal()
 output$heatmap <- renderPlot({
+  cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
   heat()
   if(!is.null(hm())){
   DBO <- "www/DBO-samples.tsv"
@@ -116,13 +118,13 @@ output$heatmap <- renderPlot({
   rownames(dbo) = dbo[,1]
   dbo <- dbo[,-1]
   colnames(dbo) = c("Condition", "Platelet type")
-  pl_names = c("red","blue")
+  pl_names = c(cbbPalette[1],cbbPalette[4])#c(RPs = cbbPalette[1], MPs = cbbPalette[4])
   names(pl_names) = c("RP", "MP")
   d_names = c("lightblue","orange","darkgreen")
   names(d_names) = c("healthy","MI", "stable CAD")
   ann_col = list(`Platelet type` = pl_names,Condition = d_names)
   p<- pheatmap(hm(), 
-               color = inferno(10),
+               color = colorRampPalette(c("blue", "red"))(50),
                annotation_colors = ann_col,
                annotation_col = dbo,#dbo %>% select('Platelet type' = dbo$`Platelet type`, 'Disease' = dbo$Disease),
                show_rownames = FALSE, show_colnames = TRUE, scale="row"
@@ -133,6 +135,7 @@ output$heatmap <- renderPlot({
   # plot_ly(x= colnames(hm()),y = rownames(hm()),z = hm(), colors = colorRamp(c("blue","green" ,"yellow")), type = "heatmap")
   
 })
+cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 saved_pcabi = reactiveVal()
 output$pcabi<- renderPlot({
   heat()
@@ -183,6 +186,7 @@ output$pcah <- renderPlot({
   dis_metatab <- dis_metatab[,-7]
   p <- pca(cmeta, metadata = dis_metatab, removeVar = 0.1)
   b<-eigencorplot(p,metavars = c("stable_CAD","MI","MP","RP"),posColKey = 'top',main = 'PC1-27 correlations')
+  #b <- ggplotly(b)
   saved_pcah(b)
   #View(b)
   b
@@ -204,31 +208,55 @@ output$VP <- renderPlot({
   d <- d[!(is.na(d$padj)),]
   d <- d %>% mutate(padj = str_replace(padj,"E", "e"))
   d <- d %>% mutate(padj = str_replace_all(padj,",", "."))
+  #View(d)
+  
   d[,7] = as.numeric(d[,7])
   annot <- gene_name_column()
-  p <- EnhancedVolcano(d,
-                       lab = d[,annot],
-                       x = 'log2FoldChange',
-                       y = 'padj',
-                       xlim = c(-5, 8),
-                       title = Titl(),
-                       subtitle = paste(nameHod(),"patients dataset considering", nameTPM1()),
-                       # tryCatch(
-                       pCutoff = pcReactive(),
-                       #  error = function(e) {e$message <- paste("log10(p-value) too small, choose a smaller p-value than: ",pcReactive())}),
-                       FCcutoff = fcReactive(),
-                       # pointSize = 3.0,
-                       # labSize = 3.0,
-                       xlab = bquote(~Log[2]~ 'fold change'),
-                       # title = ' ', 
-                       #subtitle = ' ',##,
-                       col=c('lightgrey', 'lightgrey', 'lightgrey', 'red'),
-                       #shape = c(0, 0, 0, 0),
-                       colAlpha = 4/5,
-                       legendPosition = 'right',
-                       legendLabSize = 14,
-                       legendIconSize = 4.0,
-  )#),
+  #order 
+  upreg_genes <- d[d$log2FoldChange > fcReactive() & d$padj < pcReactive(), ]
+  upreg_genes <- upreg_genes[upreg_genes[,annot]!= "",]
+  top10_upreg_genes <- upreg_genes[order(upreg_genes$padj, decreasing = FALSE),annot] [1:10]
+  
+  downreg_genes <- d[d$log2FoldChange < -fcReactive() & d$padj < pcReactive(), ]
+  downreg_genes <- downreg_genes[downreg_genes[,annot]!= "",]
+  top10_downreg_genes <- downreg_genes[order(downreg_genes$padj, decreasing = FALSE), annot][1:10]
+  
+  #print(top10_upreg_genes)
+  #print(top10_downreg_genes)
+  #upreg gene labels
+  #downreg gene labels
+  #print(paste0("lab_variable: ", annot))
+  p <-myVolcanoPlot(d,
+                    data_type = "gene",
+                    pCutoff = pcReactive(),
+                    FCcutoff = fcReactive(),
+                    xlim = c(-6, 6),
+                    lab_selection = c(top10_upreg_genes,top10_downreg_genes),
+                    symbol_type = colnames(d)[annot] , titel = Titl(), subtitel = paste(nameHod(),"patients dataset considering", nameTPM1())
+                    )
+  # p <- EnhancedVolcano(d,
+  #                      lab = d[,annot],
+  #                      x = 'log2FoldChange',
+  #                      y = 'padj',
+  #                      xlim = c(-5, 8),
+  #                      title = Titl(),
+  #                      subtitle = paste(nameHod(),"patients dataset considering", nameTPM1()),
+  #                      # tryCatch(
+  #                      pCutoff = pcReactive(),
+  #                      #  error = function(e) {e$message <- paste("log10(p-value) too small, choose a smaller p-value than: ",pcReactive())}),
+  #                      FCcutoff = fcReactive(),
+  #                      # pointSize = 3.0,
+  #                      # labSize = 3.0,
+  #                      xlab = bquote(~Log[2]~ 'fold change'),
+  #                      # title = ' ',
+  #                      #subtitle = ' ',##,
+  #                      col=c('lightgrey', 'lightgrey', 'lightgrey', 'red'),
+  #                      #shape = c(0, 0, 0, 0),
+  #                      colAlpha = 4/5,
+  #                      legendPosition = 'right',
+  #                      legendLabSize = 14,
+  #                      legendIconSize = 4.0,
+  # )#),
   savedVP_plot(p)
   # p<- p +
   #   ggplot2::coord_cartesian(xlim=c(-6, 9)) +
@@ -244,7 +272,6 @@ output$VP <- renderPlot({
 
 matt<-eventReactive(c(input$click1,input$click2),{
   print("in matt ")
-  
   if(!is.null(Mat())){
   genes <- Mat()[ ,1]
   fc <- Mat()[ ,3]
@@ -255,15 +282,6 @@ matt<-eventReactive(c(input$click1,input$click2),{
   #View(significant)
   biotypes <- significant %>% count(biotype)
   biotypes
-  #View(biotypes)
-  # protein_coding<- as.numeric(lengths(subset(significant,biotype == "protein_coding"))[1])
-  # misc_RNA <- as.numeric(lengths(subset(significant,biotype == "misc_RNA"))[1])
-  # Mt_rRNA<- as.numeric(lengths(subset(significant,biotype == "Mt_rRNA"))[1])
-  # processed_pseudogene <- as.numeric(lengths(subset(significant,biotype == "processed_pseudogene"))[1])
-  # Mt_tRNA<- as.numeric(lengths(subset(significant,biotype == "Mt_tRNA"))[1])
-  # transcribed_unprocessed_pseudogene <- as.numeric(lengths(subset(significant,biotype == "transcribed_unprocessed_pseudogene"))[1])
-  # biot2 <- c(protein_coding,misc_RNA,Mt_rRNA,processed_pseudogene,Mt_tRNA,transcribed_unprocessed_pseudogene)
-  # 
   }
 })
 saved_biotype_plot = reactiveVal()
@@ -300,12 +318,20 @@ UD<-eventReactive(c(input$click1,input$click2,input$click4),ignoreInit = T,{
   # bt <- Mat()[ ,12]
   # df <- data.frame(genes,fc,pval,bt)
   tab1 <- Mat()[,-10]
-  # tab1 %>% drop_na(padj)
+  
+  ## tab1 %>% drop_na(padj)
   # tab1 <- Mat
   # )
+  tab1 <- tab1[!(is.na(tab1$padj)),]
+  tab1 <- tab1 %>% mutate(padj = str_replace(padj,"E", "e"))
+  tab1 <- tab1 %>% mutate(padj = str_replace_all(padj,",", "."))
+  tab1[,7] = as.numeric(tab1[,7])
+  #View(tab1)
+  
   significant <- subset(tab1, tab1[ ,7]<=pcReactive() & abs(tab1[ ,3])>=fcReactive())
   #significant %>% drop_na()
   upreg <- subset(significant,significant[ ,3] > 0)
+  #View(upreg)
   #upreg %>% drop_na()
   ordUp <- upreg[order(+upreg[,3]), ]
   
@@ -327,10 +353,47 @@ UD<-eventReactive(c(input$click1,input$click2,input$click4),ignoreInit = T,{
   
 })
 
-output$TopGenesTab <- renderDataTable(UD(),
+output$TopGenesTab <- DT::renderDataTable(UD(),
                                       escape = FALSE, options = list(lengthMenu = c(5, 10, 15), pageLength = 15, width = 500)
 )
 
 
+##MA plot
+output$DMA_plot <- renderPlot({
+  d <- Mat()
+  if(!is.null(d)){
+    d <- d[!(is.na(d$padj)),]
+    d <- d %>% mutate(padj = str_replace(padj,"E", "e"))
+    d <- d %>% mutate(padj = str_replace_all(padj,",", "."))
+    View(d)
+    
+    d[,7] = as.numeric(d[,7])
+    annot <- gene_name_column()
+    p <- myMAplot_lim(d, fdr = pcReactive(), fc = fcReactive(), ylim = c(-4, 4)) #fdr ... + make ylim scalable
 
+    p
+  }
+})
+
+output$Dbiotype_plot <- renderPlot({
+  heat()
+  d <- hm()
+  if(!is.null(d)){
+    View(d)
+    p<- myBiotypeBarplot(as.data.frame(d), paste0("CCS only - ", "test"))
+    
+    p
+  }
+})
+
+output$Dexpression_plot <- renderPlot({
+  heat()
+  d <- hm()
+  if(!is.null(d)){
+    View(d)
+    p <- myCountAnalysisPlot(d, "gene", "test title")#fdr ... + make ylim scalable
+    
+    p
+  }
+})
 

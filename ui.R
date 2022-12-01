@@ -5,6 +5,8 @@ library(gplots)
 library(dplyr)    
 library(viridis)
 library(pheatmap)
+library(biomaRt)
+
 
 library(org.Hs.eg.db)
 
@@ -244,7 +246,7 @@ ui<- dashboardPage(
               
             ),
             tabPanel(
-              id= "tB", 
+              id= "tB",
               # uiOutput("BPO")
               title = "Biotypes of the Detected Genes", solidHeader = TRUE, # background = "white" ,
               plotlyOutput("biotype1",height = "800px")%>% withSpinner(color= "#000000"),
@@ -259,6 +261,42 @@ ui<- dashboardPage(
               downloadButton("dlPNG3", "Download plot in PNG format"),
               br(),
               plotOutput("heatmap",height = "800px") %>% withSpinner(color= "#000000"),
+              br(),
+              # 
+              
+            ),
+            tabPanel(
+              id= "tMA", 
+              #uiOutput("HMO")
+              title = "MA plot", background = "red" , solidHeader = TRUE,
+              br(),
+              #downloadButton("dlPNG3", "Download plot in PNG format"),
+              br(),
+              plotOutput("DMA_plot",height = "800px") %>% withSpinner(color= "#000000"),
+              br(),
+              # 
+              
+            ),
+            tabPanel(
+              id= "tBP", 
+              #uiOutput("HMO")
+              title = "Biotype plot", background = "red" , solidHeader = TRUE,
+              br(),
+              #downloadButton("dlPNG3", "Download plot in PNG format"),
+              br(),
+              plotOutput("Dbiotype_plot",height = "800px") %>% withSpinner(color= "#000000"),
+              br(),
+              # 
+              
+            ),
+            tabPanel(
+              id= "tEA", 
+              #uiOutput("HMO")
+              title = "Expression analysis plot", background = "red" , solidHeader = TRUE,
+              br(),
+              #downloadButton("dlPNG3", "Download plot in PNG format"),
+              br(),
+              plotOutput("Dexpression_plot",height = "800px") %>% withSpinner(color= "#000000"),
               br(),
               # 
               
@@ -337,7 +375,88 @@ ui<- dashboardPage(
         ),
         br(),
         fluidRow(
-          uiOutput("DTGO")
+          #uiOutput("DTGO")
+          tabBox(
+            width = 12,
+            height = "1000px",
+            title = "Get the results",
+            tabPanel(
+              id="GOtab",title = "Top 500 GO Terms", solidHeader = TRUE,
+              "",
+              selectInput(inputId = "FeA" , label = "Choose gene annotation in GO categories" , choices = c("ENSEMBL ID","ENTREZ ID","HGNC symbol"), multiple = FALSE),
+              actionButton(inputId = "clickFeA",label = "Get GOs",icon = icon('arrow'), style = "color: #FFF; background-color: #000000; border-color: #000000"),
+              br(), 
+              br(),
+              downloadButton("downloadGO", "Download table"),
+              br(),
+              br(),
+              dataTableOutput(outputId = "GOTab"),#width = 12,
+              
+              # .table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th
+              tags$head(tags$style("#GOTab table {background-color: #DCDCDC; color : #000000}", media="screen", type="text/css")),
+              tags$head(tags$style(".table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th
+                             {border-top: 1px solid #000000}"))
+            ),
+            tabPanel(
+              title = "percentage of DE genes in GO categories", solidHeader = TRUE,# width = 12,
+              br(),
+              plotlyOutput("GOpG",height = "800px"),
+              #downloadButton("dlPNGGO", "Download plot in PNG format")
+            ),
+            tabPanel(
+              title = "enrichment FDR per GO categories", solidHeader = TRUE,# width = 12,
+              #numericInput(inputId = "GOFE",value = 1.0 ,label = "Choose fold enrichment threshhold", min = 0 , max = 10, step = 0.5),
+              #actionButton(inputId = "clickGOFE",label = "get Plot ",icon = icon('arrow'), style = "color: #fff; background-color: #000000; border-color: #000000"),
+              #br(),
+              br(),
+              plotlyOutput("GOpFE",height = "800px"),
+              #downloadButton("dlPNGGO", "Download plot in PNG format")
+            ),
+            tabPanel(
+              title = "increased/decreased categories and their terms & their genes", solidHeader = TRUE,# width = 12,
+              span("Increased/decreased categories and their terms in relation to upregulated and downregulated genes in the corresponding category",style = "color: black; font-size: 19px"),
+              br(),
+              downloadButton("dlGOC", "Download plot in PNG format"),
+              br(),
+              plotOutput("GOC",height = "800px"),
+              #downloadButton("dlPNGGO", "Download plot in PNG format")
+            ),
+            tabPanel(
+              title = "GO categories and their z-score", solidHeader = TRUE,# width = 12,
+              span("The z-score, computed by the circ_dat() Method from the GOplot package, is a score meant to give an orientation to understand if a category is more likely to be increased (z-score = positive) or decreased (z-score = negative)",style = "color: black; font-size: 15px"),
+              br(),
+              withMathJax(),
+              helpText("$$ zscore= \\frac{(up-down)}{\\sqrt{count}}$$"),
+              br(),
+              br(),
+              br(),
+              plotlyOutput("GOZ",height = "800px"),
+              #downloadButton("dlPNGGO", "Download plot in PNG format")
+            ),
+            
+            tabPanel(
+              id= "tN", 
+              #uiOutput("HMO")
+              
+              title = "GO Network", background = "red" , solidHeader = TRUE,
+              #plotOutput(""),
+              forceNetworkOutput("GOnet", height = "850px")
+              #  br(),
+              # downloadButton("dlKPMN", "Download plot in PNG format")
+              
+            ),
+            tabPanel(
+              id= "tH", 
+              #uiOutput("HMO")
+              
+              title = "GO Hierarchy Tree", background = "red" , solidHeader = TRUE,
+              #plotOutput(""),
+              imageOutput("GOH", height = "850px"),
+              br(),
+              downloadButton("dlGOH", "Download plot in PNG format")
+              
+            )
+          )
         )
         
         

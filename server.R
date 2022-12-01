@@ -1,4 +1,6 @@
 source("www/functions.R")
+source("www/create_plots.R")
+
 
 server <- function(input,output,session){
   
