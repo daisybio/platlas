@@ -1,109 +1,109 @@
-UIMI <- eventReactive(input$clickMIF,{
-  tagList( 
-    tabBox(
-      tabPanel(
-        id="t5","DE miRNA", 
-        span("Significant differentially expressed miRNA",style = "color: black; font-size: 16px" ),
-        br(),
-        downloadButton("dlDTMI", "Download table"),
-        br(),
-        dataTableOutput("DTMI"),
-        tags$head(tags$style("#DTMI table {background-color: #DCDCDC; color : #000000;  }", media="screen", type="text/css")),
-        
-        tags$head(tags$style(".table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
-                               border-top: 1px solid #000000;}",media="screen", type="text/css"))
-        
-      ),
-      tabPanel(
-        id="t6","Volcano Plot", 
-        
-        plotOutput("VPMI"),
-        downloadButton("dlVPMI", "Download plot in PNG format")
-        
-      ),
-      tabPanel(
-        id="t7","HeatMap", 
-        
-        plotOutput("HMMI"),
-        downloadButton("dlHMMI", "Download plot in PNG format")
-      )
-    )
-  )
-}
-)
-MITarg <- eventReactive(input$clickMIF2,{
-  tagList( 
-    tabBox(
-      width = 12, 
-      height = "1000px",
-      tabPanel(
-        id= "tE","miRNA Targets",
-        downloadButton("dlMIDT", "Download table"),
-        br(),br(),
-        dataTableOutput("MIDT"),
-        tags$head(tags$style("#DTMIT table {background-color: #DCDCDC; color : #000000;  }", media="screen", type="text/css")),
-        
-        tags$head(tags$style(".table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
-                               border-top: 1px solid #000000;}",media="screen", type="text/css"))
-      ),
-      tabPanel(
-        id="t10","miRNA Target Enrichment", 
-        #selectInput(inputId = "MSIG" , label = "Choose significant or all mRNA" , choices = c("significant","all"), multiple = FALSE),
-        #actionButton(inputId = "clickSIG",label = "Get mRNA ",icon = icon('arrow'), style = "color: #FFF; background-color: #000000; border-color: #000000"),
-        span("The 30 Most significant GO terms" ,style = "color: black; font-size: 18px"),br(),
-        downloadButton("dlDTMIT", "Download table"),
-        br(),br(),
-        dataTableOutput("DTMIT"),
-        tags$head(tags$style("#DTMIT table {background-color: #DCDCDC; color : #000000;  }", media="screen", type="text/css")),
-        
-        tags$head(tags$style(".table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
-                               border-top: 1px solid #000000;}",media="screen", type="text/css"))
-        
-      ),
-      tabPanel(
-        id="t11","miRNA Target Network Graph", 
-        span("Search if miRNA Targets are differentially expressed, by first defining differentially expressed genes with the filters below. The results show miRNAs (darkblue nodes) and their mapping genes (light blue nodes), while green nodes are upregulated genes and red nodes are downregulated genes.",
-             style = "color: black; font-size: 18px"),
-        br(),
-        selectInput(inputId = "mdTPM" , label = "Read count normalization: Choose TPM (Transcripts per million) threshholds" , choices = c("TPM > 0.1","TPM > 0.3", "TPM > 1", "TPM > 2"), multiple = FALSE),
-        numericInput(inputId = "mdpc",value = 0.05 , label = "p-value cutoff", min = 0.01 , max = 0.05, step = 0.005),
-        numericInput(inputId = "mdfc",value =  1.5 , label = "Foldchange cutoff", min = 0 , max = 4.0, step = 0.5),
-        actionButton(inputId = "md_click",label = "Start Analysis", style = "color: #fff; background-color: #000000; border-color: #000000"),
-        forceNetworkOutput("MInet", height = "850px")
-        
-      ),
-      tabPanel(
-        id="t12","miRNA Target Enrichment Graph", 
-        span("miRNA Target Enrichment Graph",style = "color: black; font-size: 24px"),br(),br(),
-        forceNetworkOutput("MIGOnet", height = "850px")
-        
-      ),
-      tabPanel(
-        title = "percentage of target genes in GO categories", solidHeader = TRUE,# width = 12,
-        plotlyOutput("MIpG",height = "800px"),
-        #downloadButton("dlPNGGO", "Download plot in PNG format")
-      ),
-      tabPanel(
-        title = "enrichment FDR per GO categories", solidHeader = TRUE,# width = 12,
-        #numericInput(inputId = "GOFE",value = 1.0 ,label = "Choose fold enrichment threshhold", min = 0 , max = 10, step = 0.5),
-        #actionButton(inputId = "clickGOFE",label = "get Plot ",icon = icon('arrow'), style = "color: #fff; background-color: #000000; border-color: #000000"),
-        #br(),
-        plotlyOutput("MIpFE",height = "800px"),
-        #downloadButton("dlPNGGO", "Download plot in PNG format")
-      )
-    )
-  )
-})
+# UIMI <- eventReactive(input$clickMIF,{
+#   tagList( 
+#     tabBox(
+#       tabPanel(
+#         id="t5","DE miRNA", 
+#         span("Significant differentially expressed miRNA",style = "color: black; font-size: 16px" ),
+#         br(),
+#         downloadButton("dlDTMI", "Download table"),
+#         br(),
+#         dataTableOutput("DTMI"),
+#         tags$head(tags$style("#DTMI table {background-color: #DCDCDC; color : #000000;  }", media="screen", type="text/css")),
+#         
+#         tags$head(tags$style(".table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
+#                                border-top: 1px solid #000000;}",media="screen", type="text/css"))
+#         
+#       ),
+#       tabPanel(
+#         id="t6","Volcano Plot", 
+#         
+#         plotOutput("VPMI"),
+#         downloadButton("dlVPMI", "Download plot in PNG format")
+#         
+#       ),
+#       tabPanel(
+#         id="t7","HeatMap", 
+#         
+#         plotOutput("HMMI"),
+#         downloadButton("dlHMMI", "Download plot in PNG format")
+#       )
+#     )
+#   )
+# }
+# )
+# MITarg <- eventReactive(input$clickMIF2,{
+#   tagList(
+#     tabBox(
+#       width = 12,
+#       height = "1000px",
+#       tabPanel(
+#         id= "tE","miRNA Targets",
+#         downloadButton("dlMIDT", "Download table"),
+#         br(),br(),
+#         dataTableOutput("MIDT"),
+#         tags$head(tags$style("#DTMIT table {background-color: #DCDCDC; color : #000000;  }", media="screen", type="text/css")),
+# 
+#         tags$head(tags$style(".table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
+#                                border-top: 1px solid #000000;}",media="screen", type="text/css"))
+#       ),
+#       tabPanel(
+#         id="t10","miRNA Target Enrichment",
+#         #selectInput(inputId = "MSIG" , label = "Choose significant or all mRNA" , choices = c("significant","all"), multiple = FALSE),
+#         #actionButton(inputId = "clickSIG",label = "Get mRNA ",icon = icon('arrow'), style = "color: #FFF; background-color: #000000; border-color: #000000"),
+#         span("The 30 Most significant GO terms" ,style = "color: black; font-size: 18px"),br(),
+#         downloadButton("dlDTMIT", "Download table"),
+#         br(),br(),
+#         dataTableOutput("DTMIT"),
+#         tags$head(tags$style("#DTMIT table {background-color: #DCDCDC; color : #000000;  }", media="screen", type="text/css")),
+# 
+#         tags$head(tags$style(".table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
+#                                border-top: 1px solid #000000;}",media="screen", type="text/css"))
+# 
+#       ),
+#       tabPanel(
+#         id="t11","miRNA Target Network Graph",
+#         span("Search if miRNA Targets are differentially expressed, by first defining differentially expressed genes with the filters below. The results show miRNAs (darkblue nodes) and their mapping genes (light blue nodes), while green nodes are upregulated genes and red nodes are downregulated genes.",
+#              style = "color: black; font-size: 18px"),
+#         br(),
+#         selectInput(inputId = "mdTPM" , label = "Read count normalization: Choose TPM (Transcripts per million) threshholds" , choices = c("TPM > 0.1","TPM > 0.3", "TPM > 1", "TPM > 2"), multiple = FALSE),
+#         numericInput(inputId = "mdpc",value = 0.05 , label = "p-value cutoff", min = 0.01 , max = 0.05, step = 0.005),
+#         numericInput(inputId = "mdfc",value =  1.5 , label = "Foldchange cutoff", min = 0 , max = 4.0, step = 0.5),
+#         actionButton(inputId = "md_click",label = "Start Analysis", style = "color: #fff; background-color: #000000; border-color: #000000"),
+#         forceNetworkOutput("MInet", height = "850px")
+# 
+#       ),
+#       tabPanel(
+#         id="t12","miRNA Target Enrichment Graph",
+#         span("miRNA Target Enrichment Graph",style = "color: black; font-size: 24px"),br(),br(),
+#         forceNetworkOutput("MIGOnet", height = "850px")
+# 
+#       ),
+#       tabPanel(
+#         title = "percentage of target genes in GO categories", solidHeader = TRUE,# width = 12,
+#         plotlyOutput("MIpG",height = "800px"),
+#         #downloadButton("dlPNGGO", "Download plot in PNG format")
+#       ),
+#       tabPanel(
+#         title = "enrichment FDR per GO categories", solidHeader = TRUE,# width = 12,
+#         #numericInput(inputId = "GOFE",value = 1.0 ,label = "Choose fold enrichment threshhold", min = 0 , max = 10, step = 0.5),
+#         #actionButton(inputId = "clickGOFE",label = "get Plot ",icon = icon('arrow'), style = "color: #fff; background-color: #000000; border-color: #000000"),
+#         #br(),
+#         plotlyOutput("MIpFE",height = "800px"),
+#         #downloadButton("dlPNGGO", "Download plot in PNG format")
+#       )
+#     )
+#   )
+# })
 
 
-output$UIMI <-renderUI({
-  UIMI()
-  
-})   
-output$MITarg <-renderUI({
-  MITarg()
-  
-})   
+# output$UIMI <-renderUI({
+#   UIMI()
+#   
+# })   
+# output$MITarg <-renderUI({
+#   MITarg()
+#   
+# })   
 
 
 # MiRNA Section -----------------------------------------------------------
@@ -158,13 +158,28 @@ getHM <- eventReactive(input$clickMIF,{
   neu<- cdf[grep(paste(df[,1],collapse="|"),cdf[,1]),]
   names <-neu[,1]
   neu <-neu[,-1]
-  # 
-  
-  
   rownames(neu) = make.names(names, unique=TRUE)
-  end<- neu
+  #end<- neu
+  merged_annotation <- fread("www/simulated_sample_names_all.tsv")
+  #View(merged_annotation)
+  merged_annotation <- as.data.frame(merged_annotation)
+  rownames(merged_annotation) <- merged_annotation$original_sample_name
+  to_translate <- colnames(neu)
   
-  
+  print(to_translate)
+  new_names <- merged_annotation[to_translate,]
+  #View(new_names)
+  #print(to_translate)
+  #print(new_names)
+  #View(new_names)
+  colnames(neu) <- new_names$sample_name
+  #View(neuer)
+  if(input$miF == "only CAD patients"){
+    #threshold <- sort(rowVars(counts), decreasing = T)[150]
+    #counts = counts[which(rowVars(counts) >= threshold),]
+    neu <- neu[ , !(colnames(neu) %in% c("6_MPs","6_RPs"))]
+  }
+  neu
   # counts_disease <- data.matrix(counts_disease)
   #sample_annotation <- colnames(neu)
 })
@@ -206,54 +221,167 @@ getMIPaths <- eventReactive(input$clickMIF2,{
   end <- mG
 })
 output$MIDT <- renderDataTable(getMIPaths(),escape = FALSE, options = list(lengthMenu = c(10,15,20), pageLength = 15, width = 700))
-output$DTMI <- renderDataTable(getDTVP(),escape = FALSE, options = list(lengthMenu = c(10, 15, 20), pageLength = 5, width = 700)
+output$DTMI <- renderDataTable(getDTVP(),escape = FALSE, options = list(lengthMenu = c(10, 15, 20), pageLength = 5,scrollX = TRUE,width = 200)
 )
 saved_VPMI = reactiveVal()
 output$VPMI <- renderPlot({
-  p <- EnhancedVolcano(getVP(),
-                       lab = getVP()[,1],
-                       x = 'log2FoldChange',
-                       y = 'padj',####gucken
-                       xlim = c(-5, 8),
-                       #title = 'N061011 versus N61311',
-                       pCutoff = as.numeric(input$mpCO),
-                       FCcutoff = as.numeric(input$mfCO),
-                       xlab = bquote(~Log[2]~ 'fold change'),
-                       #title = ' ',
-                       subtitle = ' ',##,
-                       col=c('lightgrey', 'lightgrey', 'lightgrey', 'red'),
-                       #shape = c(0, 0, 0, 0),
-                       colAlpha = 4/5,
-                       legendPosition = 'right',
-                       legendLabSize = 14,
-                       legendIconSize = 4.0
-  )
+  tab <- getVP()
+ if(!is.null(tab)){ 
+   tab <- tab[!(is.na(tab$padj)),]
+   tab <- tab %>% mutate(padj = str_replace(padj,"E", "e"))
+   tab <- tab %>% mutate(padj = str_replace_all(padj,",", "."))
+   #View(d)
+   
+   tab[,7] = as.numeric(tab[,7])
+   #annot <- gene_name_column()
+   #order 
+   upreg_genes <- tab[tab$log2FoldChange > as.numeric(input$mfCO) & tab$padj < as.numeric(input$mpCO), ]
+   upreg_genes <- upreg_genes[upreg_genes[,1]!= "",]
+   top10_upreg_genes <- upreg_genes[order(upreg_genes$padj, decreasing = FALSE),1] [1:10]
+   
+   downreg_genes <- tab[tab$log2FoldChange < -as.numeric(input$mfCO) & tab$padj < as.numeric(input$mpCO), ]
+   downreg_genes <- downreg_genes[downreg_genes[,1]!= "",]
+   top10_downreg_genes <- downreg_genes[order(downreg_genes$padj, decreasing = FALSE), 1][1:10]
+   
+  #View(getVP())
+  p <- myVolcanoPlot(tab,
+                data_type = "miRNA",
+                pCutoff = as.numeric(input$mpCO),
+                FCcutoff = as.numeric(input$mfCO),
+                xlim = c(-6, 6),
+                lab_selection = c(top10_upreg_genes,top10_downreg_genes),
+                symbol_type = colnames(getVP())[1] , titel = "", subtitel = "")
+
+  # p <- EnhancedVolcano(getVP(),
+  #                      lab = getVP()[,1],
+  #                      x = 'log2FoldChange',
+  #                      y = 'padj',####gucken
+  #                      xlim = c(-5, 8),
+  #                      #title = 'N061011 versus N61311',
+  #                      pCutoff = as.numeric(input$mpCO),
+  #                      FCcutoff = as.numeric(input$mfCO),
+  #                      xlab = bquote(~Log[2]~ 'fold change'),
+  #                      #title = ' ',
+  #                      subtitle = ' ',##,
+  #                      col=c('lightgrey', 'lightgrey', 'lightgrey', 'red'),
+  #                      #shape = c(0, 0, 0, 0),
+  #                      colAlpha = 4/5,
+  #                      legendPosition = 'right',
+  #                      legendLabSize = 14,
+  #                      legendIconSize = 4.0
+  # )
   saved_VPMI(p)
-  p
+  p}
 })
 saved_HMMI = reactiveVal()
 output$HMMI <- renderPlot({
-  DBO <- "www/DBO-samples.tsv"
-  dbo <- read.table(DBO, header = FALSE, sep = "\t", quote = "")
-  rownames(dbo) = dbo[,1]
+  counts <- getHM()
+  cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+  #View(counts)
+  if(!is.null(counts)){
+    if(input$miF == "only CAD patients"){
+      threshold <- sort(rowVars(counts), decreasing = T)[150]
+      counts = counts[which(rowVars(counts) >= threshold),]
+      #counts <- counts[ , !(colnames(counts) %in% c("6_MPs","6_RPs"))]
+      acs <- c("25_MPs","25_RPs","26_MPs","26_RPs","27_MPs","27_RPs","28_MPs","28_RPs")
+      counts <- counts[ , !(colnames(counts) %in% acs)]
+      # counts <- counts[, c("8_MPs","8_RPs","11_RPs","12_MPs","13_MPs","4_MPs","5_MPs","1_MPs","9_MPs","2_MPs","7_MPs","10_MPs","11_MPs","14_MPs","10_RPs",
+      #                      "19_RPs","9_RPs","1_RPs","5_RPs","15_RPs","14_RPs","12_RPs","13_RPs","7_RPs","16_MPs","16_RPs","20_MPs","20_RPs","3_MPs",
+      #                      "3_RPs","19_MPs","18_MPs","18_RPs","17_MPs","17_RPs","15_MPs","2_RPs","4_RPs")]
+      #View(counts)
+      
+    }
+  dbo_file <- fread("www/simulated_sample_names_all.tsv")
+  dbo <- data.frame("names" = dbo_file$sample_name, "Condition" = dbo_file$condition, "Platelet type" = dbo_file$platelet )
+  rownames(dbo) = dbo$names
   dbo <- dbo[,-1]
-  colnames(dbo) = c("Disease", "Platelet type")
-  pl_names = c("red","blue")
+  pl_names = c(cbbPalette[1],cbbPalette[4])#c(RPs = cbbPalette[1], MPs = cbbPalette[4])
   names(pl_names) = c("RP", "MP")
-  d_names = c("orange","darkgreen")
-  names(d_names) = c("MI", "stable CAD")
-  
+  d_names = c("lightblue","orange","darkgreen")
+  names(d_names) = c("healthy","ACS", "CCS")
+  #ann_col = list(`Platelet type` = pl_names,Condition = d_names)
+  # colnames(dbo) = c("Disease", "Platelet type")
+  # pl_names = c("red","blue")
+  # names(pl_names) = c("RP", "MP")
+  # d_names = c("orange","darkgreen")
+  # names(d_names) = c("MI", "stable CAD")
+  # 
+  #View(counts)
   ann_col = list(`Platelet type` = pl_names,Disease = d_names)
-  p <- pheatmap(getHM(),
-                color = inferno(10),
+  p <- pheatmap(counts,
+                color = colorRampPalette(c("blue", "red"))(50),
                 annotation_colors = ann_col,
                 annotation_col = dbo,#dbo %>% select('Platelet type' = dbo$`Platelet type`, 'Disease' = dbo$Disease),
-                show_rownames = TRUE, show_colnames = TRUE, scale="row")
+                show_rownames = FALSE, show_colnames = TRUE, scale="row")
   saved_HMMI(p)
   p
+  }
+  #saved_HMMI()
   
 }
 )
+
+output$MAMI <- renderPlot({
+  tab <- getVP()
+  if(!is.null(tab)){
+    tab <- tab[!(is.na(tab$padj)),]
+    tab <- tab %>% mutate(padj = str_replace(padj,"E", "e"))
+    tab <- tab %>% mutate(padj = str_replace_all(padj,",", "."))
+    #View(d)
+    
+    tab[,7] = as.numeric(tab[,7])
+    annot <- gene_name_column()
+    p <- myMAplot_lim(tab, fdr = as.numeric(input$mpCO), fc = as.numeric(input$mfCO), ylim = c(-4, 4)) #fdr ... + make ylim scalable
+    
+    p
+  }
+  
+})
+
+#myPCAplot(vst(dds_ccs), intgroup = "RPs_MPs") + 
+#geom_label_repel(aes(label=colnames(dds_ccs)), size = 2, show.legend = FALSE)
+#
+
+output$PCAMI <- renderPlot({
+  tab <- getHM()
+  if(!is.null(tab)){
+    dis_metatab <- metatab
+    dis_metatab <-dis_metatab[row.names(dis_metatab) %in% colnames(tab),]
+    p <- pca(tab, metadata = dis_metatab, removeVar = 0.1)
+    b<- biplot(p,colby = 'platelet', colkey = c('MP' = 'blue', 'RP' = 'red', "0" = 'black'),
+               # colLegendTitle = 'types of platelets',
+               # encircle config
+               #encircle = TRUE,
+               #encircleFill = TRUE,
+               # ellipse = TRUE,
+               # ellipseConf = 0.95,
+               # ellipseFill = TRUE,
+               # ellipseAlpha = 1/4,
+               # ellipseLineSize = 1.0,
+               # xlim = c(-125,125), ylim = c(-50, 80),
+               shape = 'condition', shapekey = c('CCS'=15, 'ACS'=17, 'healthy' = 15 ),#'Grade 3'=8
+               hline = 0, vline = c(-25, 0, 25),
+               legendPosition = 'right', legendLabSize = 16, legendIconSize = 8.0,
+               title = "Principal component analysis bi-plot",
+               
+    )
+    b
+  }
+  
+})
+
+
+output$ExpMI <- renderPlot({
+  d <- getHM()
+  if(!is.null(d)){
+    #View(d)
+    p <- myCountAnalysisPlot(as.data.frame(d), "miRNA", "test title")#fdr ... + make ylim scalable
+    
+    p
+  }
+})
+
+
 saved_DTMIT = reactiveVal()
 output$DTMIT <- renderDataTable({
   g2g <- g2g()[,c(1,2,3,4,5,6)]

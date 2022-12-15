@@ -10,6 +10,8 @@ library(gt)
 library(gtExtras)
 library(magrittr) 
 library(data.table)
+library(magick)
+library(bstfun)
 
 get_specified_colors <- function(){
   return(List("col_upregulated" = "#B31B21",
@@ -42,9 +44,10 @@ myCountAnalysisPlot <- function(counts, data_type, plot_title){
     expression_table <- data.frame(total_expression = rowSums(counts))
     expression_table$mp_expression <- rowSums(counts[, grepl('MPs', colnames(counts))])
     expression_table$rp_expression <- rowSums(counts[, grepl('RPs', colnames(counts))])
-    
+    #View(expression_table)
     
     not_expressed_all <- nrow(expression_table[expression_table$total_expression == "0",])
+    #View(not_expressed_all)
     not_expressed_mps <- nrow(expression_table[expression_table$mp_expression == "0" & expression_table$rp_expression != "0",])
     not_expressed_rps <- nrow(expression_table[expression_table$mp_expression != "0" & expression_table$rp_expression == "0",])
     expressed_all <- nrow(expression_table[expression_table$mp_expression != "0" & expression_table$rp_expression != "0",])
@@ -62,6 +65,8 @@ myCountAnalysisPlot <- function(counts, data_type, plot_title){
                round(not_expressed_rps/nrow(expression_table)*100, digits = 1),
                round(expressed_all/nrow(expression_table)*100, digits = 1))
     )
+    #View(not_expressed)
+    
     not_expressed <- not_expressed %>%
       arrange(desc(class)) %>%
       mutate(text_y = cumsum(prop) - prop/2)
@@ -152,11 +157,10 @@ myTopmiRNABarplot <- function(counts, num_tops = 15){
     theme(plot.title = element_text(hjust = 0.5))
 }
 
-myBiotypeBarplot <- function(counts, plot_title, num_tops = 10){
-  
+myBiotypeBarplot <- function(counts, plot_title,id_type,num_tops = 10){
   get_biotype_table <- function(counts){
-    attributes <- c("ensembl_gene_id", "gene_biotype")
-    filters <- "ensembl_gene_id"
+    attributes <- c(id_type, "gene_biotype")
+    filters <- id_type
     mart <- useEnsembl(biomart = "ensembl", dataset = "hsapiens_gene_ensembl")
     #attributes <- listAttributes(mart)
     #filters <- listFilters(mart)
@@ -165,21 +169,27 @@ myBiotypeBarplot <- function(counts, plot_title, num_tops = 10){
                    values = rownames(counts),
                    mart = mart)
     
-    total_counts <- data.frame(ensembl_gene_id = rownames(counts), count = rowSums(counts))
+    total_counts <- data.frame(id_type = rownames(counts), count = rowSums(counts))
+    colnames(total_counts)[1] <- id_type
+    #View(total_counts)
     rownames(total_counts) <- c()
     
     #cat(paste0("Number of gene IDs in Ensembl annotation: ", length(genes$ensembl_gene_id), "\t(unique: ", uniqueN(genes$ensembl_gene_id), ")",
     #           "\nNumber of gene IDs in expression counts: ", length(total_counts$ensembl_gene_id), "\t(unique: ", uniqueN(total_counts$ensembl_gene_id), ")",
     #           "\nNumber of intersecting gene IDs: ", length(intersect(total_counts$ensembl_gene_id, genes$ensembl_gene_id)), "\t(unique: ", uniqueN(intersect(total_counts$ensembl_gene_id, genes$ensembl_gene_id)), ")"))
     
-    not_annotated_genes <- data.frame(ensembl_gene_id = total_counts$ensembl_gene_id[!total_counts$ensembl_gene_id %in% genes$ensembl_gene_id])
+    not_annotated_genes <- data.frame(id_type = total_counts[!total_counts[,1] %in% genes[,1],1])
+    colnames(not_annotated_genes) <- id_type
+    #View(genes)
     not_annotated_genes$gene_biotype <- rep("unknown", nrow(not_annotated_genes))
+    #View(not_annotated_genes)
     genes <- rbind(genes, not_annotated_genes)
+    #sView(genes)
     #cat(paste0("Number of gene IDs in Ensembl annotation: ", length(genes$ensembl_gene_id), "\t(unique: ", uniqueN(genes$ensembl_gene_id), ")",
     #           "\nNumber of gene IDs in expression counts: ", length(total_counts$ensembl_gene_id), "\t(unique: ", uniqueN(total_counts$ensembl_gene_id), ")",
     #           "\nNumber of intersecting gene IDs: ", length(intersect(total_counts$ensembl_gene_id, genes$ensembl_gene_id)), "\t(unique: ", uniqueN(intersect(total_counts$ensembl_gene_id, genes$ensembl_gene_id)), ")"))
     
-    genes <- merge(genes, total_counts, by="ensembl_gene_id")
+    genes <- merge(genes, total_counts, by=id_type)
     
     biotype_table <- data.frame(gene_biotype = c(), gene_biotype_frequency = c(), gene_expression_count = c())
     for(biotype in unique(genes$gene_biotype)){
@@ -204,6 +214,7 @@ myBiotypeBarplot <- function(counts, plot_title, num_tops = 10){
       gt_plt_bar_pct(column = gene_expression_count, scaled = TRUE, fill = "blue", background = "lightblue") %>%
       cols_align("center", contains("scale")) %>%
       gt_highlight_rows(rows = (num_tops+1):nrow(biotype_table_processed), font_weight = "normal", fill = "lavender", alpha = 0.5)
+    #plot <- bstfun::as_ggplot(table)
     return(table)
   }
   
@@ -232,6 +243,8 @@ myBiotypeBarplot <- function(counts, plot_title, num_tops = 10){
       labs(title = plot_title, x = "Number of genes", y = "") + 
       geom_text(aes(label=paste0(round(ceiling(gene_expression_count/total_gene_expression * 10000)/100, digits = 2), "%")), 
                 size = 3)
+    
+    return(plot)
   }
   
   create_biotype_piechart <- function(biotype_table, num_tops){
@@ -265,7 +278,10 @@ myBiotypeBarplot <- function(counts, plot_title, num_tops = 10){
   
   
   biotype_table <- get_biotype_table(counts)
+  #View(biotype_table)
+  #print(num_tops)
   table <- create_biotype_table_list(biotype_table, num_tops)
+  otherplot <- create_biotype_barplot(biotype_table, num_tops)
   plot <- create_biotype_piechart(biotype_table, num_tops)
   
   return(List(biotype_table = table, biotype_plot = plot))
@@ -386,6 +402,8 @@ myVolcanoPlot <- function(deseq_results, data_type, pCutoff = 0.01, FCcutoff = 0
   if(symbol_type == "geneID"){
     deseq_results_highlighted <- deseq_results[deseq_results$geneID %in% lab_selection,]
     #View(deseq_results_highlighted)
+  }else if (symbol_type == "X"){ # bei miRNA
+    deseq_results_highlighted <- deseq_results[deseq_results$X %in% lab_selection,]
   }else{
     deseq_results_highlighted <- deseq_results[deseq_results$hgnc_symbol %in% lab_selection,]
   }
@@ -400,7 +418,7 @@ myVolcanoPlot <- function(deseq_results, data_type, pCutoff = 0.01, FCcutoff = 0
     print("wo ich sein sollte")
     lab <- deseq_results$geneID
   }  else if(data_type == "miRNA"){
-    lab <- rownames(deseq_results)
+    lab <- deseq_results$X
   }
   
   EnhancedVolcano(deseq_results,

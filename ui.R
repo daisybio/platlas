@@ -181,8 +181,8 @@ ui<- dashboardPage(
             # tabPanel(id= "t1","Guide", "The Differential Expression results, browsable on this page by using different filters, are obtained from the transcriptome analysis of reticulated and mature platelets from 4 healthy patients and 10 diseased patients, of which 6 were diagnosed with Chronic coronary syndrome (CCS) and 4 were diagnosed with Acute coronary syndrome (ACS).",br(), br() ,"By clicking on the first filter (Mature vs Reticulated) and filtering between the datasets of the patients, the different thresholds of read count normalizations (with TPM), p-value cutoffs and foldchange cutoffs, the differentially expressed genes of mature platelets versus reticulated platelets, which were computed by using DESeq2, visualized by downloadable plots and represented by downloadable data tables will be shown on the right side of the page.",br(),br() ,"Analogously by clicking on the second filter (CCS vs ACS), refinement of the search is possible by the same parameters as mentioned before and the differentially expressed genes of patients with Chronic coronary syndrome and the patients with Acute coronary syndrome, computed by using DESeq2, will be shown on the right side of the page, represented by downloadable data tables and plots as well."),
             tabPanel(id="t2","Mature vs. Reticulated", 
                      span("Mature Platelets vs. Reticulated Platelets",style = "color: black; font-size: 14px; font-weight: bold"),
-                     selectInput(inputId = "TPM1" , label = "Read count normalization: Choose TPM (Transcripts per million) threshholds" , choices = c("TPM > 0.1","TPM > 0.3", "TPM > 1", "TPM > 2"), multiple = FALSE),
-                     selectInput(inputId = "HoD" , label = "Choose from patient datasets" , choices = c("healthy","diseased", "disease - stable CAD" , "disease - MI"), multiple = FALSE),
+                     selectInput(inputId = "HoD" , label = "Choose from patient datasets" , choices = c("healthy","diseased", "disease - CCS" , "disease - ACS"), multiple = FALSE),
+                     selectInput(inputId = "TPM1" , label = "Read count normalization: Choose TPM (Transcripts per million) threshholds" , choices = c(), multiple = FALSE), #"TPM > 0.1","TPM > 0.3", "TPM > 1", "TPM > 2" 
                      numericInput(inputId = "pCO1",value = 0.05 ,label = "p-value cutoff", min = 0.01 , max = 0.05,step = 0.005),
                      numericInput(inputId = "fcO1",value = 1.5 ,label = "log2(Foldchange) cutoff", min = 0 , max = 4.0, step = 0.5),
                      selectInput(inputId = "DVP1" , label = "Choose gene annotation" , choices = c("ENSEMBL ID", "HGNC symbol"), multiple = FALSE),
@@ -193,9 +193,9 @@ ui<- dashboardPage(
             ),
             tabPanel(id="t3","CCS vs. ACS", 
                      span("Diseased: Chronic coronary syndrome vs. Acute coronary syndrome",style = "color: black; font-size: 14px; font-weight: bold"),
+                      selectInput(inputId = "HoD02" , label = "Choose from patient datasets" , choices = c("diseased","disease - mature platelets", "disease - reticulated platelets"), multiple = FALSE),
                      selectInput(inputId = "TPM2" , label = "Read count normalization: Choose TPM (Transcripts per million) threshholds" , choices = c("TPM > 0.1","TPM > 0.3", "TPM > 1", "TPM > 2"), multiple = FALSE),
-                     selectInput(inputId = "HoD02" , label = "Choose from patient datasets" , choices = c("diseased","disease - mature platelets", "disease - reticulated platelets"), multiple = FALSE),
-                     numericInput(inputId = "pCO2",value = 0.05 , label = "p-value cutoff", min = 0.01 , max = 0.05, step = 0.005),
+                    numericInput(inputId = "pCO2",value = 0.05 , label = "p-value cutoff", min = 0.01 , max = 0.05, step = 0.005),
                      numericInput(inputId = "fcO2",value =  1.5 , label = "Foldchange cutoff", min = 0 , max = 4.0, step = 0.5),
                      selectInput(inputId = "DVP2" , label = "Choose gene annotation" , choices = c("ENSEMBL ID", "HGNC symbol"), multiple = FALSE),
                      #actionButton(inputId = "clickDVP2",label = "Get plot ",icon = icon('arrow'), style = "color: #FFF; background-color: #000000; border-color: #000000"),
@@ -511,13 +511,122 @@ ui<- dashboardPage(
               
             )
           ),
-          uiOutput("UIMI")
+          #uiOutput("UIMI")
+          tagList( 
+            tabBox(
+              tabPanel(
+                id="t5","DE miRNA", 
+                span("Significant differentially expressed miRNA",style = "color: black; font-size: 16px" ),
+                br(),
+                downloadButton("dlDTMI", "Download table"),
+                br(),
+                dataTableOutput("DTMI")%>% withSpinner(color= "#000000"),
+                tags$head(tags$style("#DTMI table {background-color: #DCDCDC; color : #000000;  }", media="screen", type="text/css")),
+                
+                tags$head(tags$style(".table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
+                               border-top: 1px solid #000000;}",media="screen", type="text/css"))
+                
+              ),
+              tabPanel(
+                id="t6","Volcano Plot", 
+                
+                plotOutput("VPMI")%>% withSpinner(color= "#000000"),
+                downloadButton("dlVPMI", "Download plot in PNG format")
+                
+              ),
+              tabPanel(
+                id="t7","HeatMap", 
+                
+                plotOutput("HMMI")%>% withSpinner(color= "#000000"),
+                downloadButton("dlHMMI", "Download plot in PNG format")
+              ),
+              tabPanel(
+                id="t8","MA plot", 
+                
+                plotOutput("MAMI")%>% withSpinner(color= "#000000"),
+                #downloadButton("dlHMMI", "Download plot in PNG format")
+              ),
+              tabPanel(
+                id="t9","PCA plot", 
+                
+                plotOutput("PCAMI")%>% withSpinner(color= "#000000"),
+                #downloadButton("dlHMMI", "Download plot in PNG format")
+              ),
+              tabPanel(
+                id="t10","Expression plot", 
+                
+                plotOutput("ExpMI")%>% withSpinner(color= "#000000"),
+                #downloadButton("dlHMMI", "Download plot in PNG format")
+              )
+            )
+            
+          )
           
           
         ),
         fluidRow(
-          uiOutput("MITarg")
-          
+          #uiOutput("MITarg")
+          tagList( 
+            tabBox(
+              width = 12, 
+              height = "1000px",
+              tabPanel(
+                id= "tE","miRNA Targets",
+                downloadButton("dlMIDT", "Download table"),
+                br(),br(),
+                dataTableOutput("MIDT"),
+                tags$head(tags$style("#DTMIT table {background-color: #DCDCDC; color : #000000;  }", media="screen", type="text/css")),
+                
+                tags$head(tags$style(".table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
+                               border-top: 1px solid #000000;}",media="screen", type="text/css"))
+              ),
+              tabPanel(
+                id="t10","miRNA Target Enrichment", 
+                #selectInput(inputId = "MSIG" , label = "Choose significant or all mRNA" , choices = c("significant","all"), multiple = FALSE),
+                #actionButton(inputId = "clickSIG",label = "Get mRNA ",icon = icon('arrow'), style = "color: #FFF; background-color: #000000; border-color: #000000"),
+                span("The 30 Most significant GO terms" ,style = "color: black; font-size: 18px"),br(),
+                downloadButton("dlDTMIT", "Download table"),
+                br(),br(),
+                dataTableOutput("DTMIT"),
+                tags$head(tags$style("#DTMIT table {background-color: #DCDCDC; color : #000000;  }", media="screen", type="text/css")),
+                
+                tags$head(tags$style(".table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
+                               border-top: 1px solid #000000;}",media="screen", type="text/css"))
+                
+              ),
+              tabPanel(
+                id="t11","miRNA Target Network Graph", 
+                span("Search if miRNA Targets are differentially expressed, by first defining differentially expressed genes with the filters below. The results show miRNAs (darkblue nodes) and their mapping genes (light blue nodes), while green nodes are upregulated genes and red nodes are downregulated genes.",
+                     style = "color: black; font-size: 18px"),
+                br(),
+                selectInput(inputId = "mdTPM" , label = "Read count normalization: Choose TPM (Transcripts per million) threshholds" , choices = c("TPM > 0.1","TPM > 0.3", "TPM > 1", "TPM > 2"), multiple = FALSE),
+                numericInput(inputId = "mdpc",value = 0.05 , label = "p-value cutoff", min = 0.01 , max = 0.05, step = 0.005),
+                numericInput(inputId = "mdfc",value =  1.5 , label = "Foldchange cutoff", min = 0 , max = 4.0, step = 0.5),
+                actionButton(inputId = "md_click",label = "Start Analysis", style = "color: #fff; background-color: #000000; border-color: #000000"),
+                forceNetworkOutput("MInet", height = "850px")
+                
+              ),
+              tabPanel(
+                id="t12","miRNA Target Enrichment Graph", 
+                span("miRNA Target Enrichment Graph",style = "color: black; font-size: 24px"),br(),br(),
+                forceNetworkOutput("MIGOnet", height = "850px")
+                
+              ),
+              tabPanel(
+                title = "percentage of target genes in GO categories", solidHeader = TRUE,# width = 12,
+                plotlyOutput("MIpG",height = "800px"),
+                #downloadButton("dlPNGGO", "Download plot in PNG format")
+              ),
+              tabPanel(
+                title = "enrichment FDR per GO categories", solidHeader = TRUE,# width = 12,
+                #numericInput(inputId = "GOFE",value = 1.0 ,label = "Choose fold enrichment threshhold", min = 0 , max = 10, step = 0.5),
+                #actionButton(inputId = "clickGOFE",label = "get Plot ",icon = icon('arrow'), style = "color: #fff; background-color: #000000; border-color: #000000"),
+                #br(),
+                plotlyOutput("MIpFE",height = "800px"),
+                #downloadButton("dlPNGGO", "Download plot in PNG format")
+              )
+            )
+          )
         )
         
         

@@ -8,6 +8,7 @@
 #C:/Users/Leonora/Desktop/Studium/6.Semester/Bachelor-Thema__implementierung_eines_Platelet_Atlas/R-programme-shiny/www/
 #genDF <- read.csv2("www/all_diseased_TPM-0-1_disease-phenotype-all.CSV",header = TRUE, na.strings = "_")
 #C:/Users/Leonora/Desktop/Studium/6.Semester/Bachelor-Thema__implementierung_eines_Platelet_Atlas/R-programme-shiny/www/
+library(data.table)
 goterms <- read.table("www/goterms.txt", header = FALSE, sep = "\t", quote = "")
 colnames(goterms) = c("id","term1")
 path<-"www/all_"
@@ -162,18 +163,10 @@ miRNA_path <- function(ont, expe, netorenrich,ud,db,data,signif,datei){
   if(signif == TRUE){
     s <- "_sig"
   }
-  v <- paste(anfang,o, sep = "")
-  w <- paste(v,e, sep = "")
-  x <- paste(w, n , sep = "")
-  y <- paste(x,u, sep = "")
-  z <- paste(y, d, sep = "_")
-  a <- paste(z, da, sep = "_")
-  b <- paste(a, s, sep = "")
-  c <- ""
   letzt <- switch(datei, "1" ="_Liste_mit_Ontologies.txt", "2" = "_Nodes.txt", "3" = "_Edges.txt", "0" = ".tsv" )
-  c <- paste(b,letzt, sep = "")
+  #c <- paste(b,letzt, sep = "")
   
-  finalpath <- c
+  finalpath <- paste0(anfang,o,e,n,u,"_",d,"_",da,s,letzt)
   
 }
 
@@ -197,7 +190,7 @@ getImirnagene <- function(genlist, sigmirna, m2g){
 
 paths2frames <- function(oneortwo,P,IT,IH,CT){
   end <- switch(CT,".CSV" = ".CSV",".tsv"= ".tsv" )
-  tpm <- switch(as.character(IT),"TPM > 0.1"="TPM-0-1","TPM > 0.3"="TPM-0-3","TPM > 1"= "TPM-1", "TPM > 2"= "TPM-2")
+  tpm <- switch(as.character(IT),"TPM > 0.1"="TPM-0-1","TPM > 0.3"="TPM-0-3","TPM > 1"= "TPM-1", "TPM > 2"= "TPM-2", "TPM > 0.2"="TPM-0-2")
   hod <- ""
   finalpath <- ""
   if(oneortwo == "1"){
@@ -208,7 +201,7 @@ paths2frames <- function(oneortwo,P,IT,IH,CT){
     }else{
       pathWHod<- paste(P,"diseased", sep= "")
       newpath<- paste(pathWHod,tpm,sep = "_")
-      tail <- switch(as.character(IH),"diseased"="_phenotype-disease-all","disease - stable CAD"= "_phenotype-disease-stable-CAD","disease - MI"= "_phenotype-disease-MI"  )
+      tail <- switch(as.character(IH),"diseased"="_phenotype-disease-all","disease - CCS"= "_phenotype-disease-stable-CAD","disease - ACS"= "_phenotype-disease-MI"  )
       tailplus <- paste(newpath, tail, sep = "")
       finalpath <- paste(tailplus,end ,sep= "")
     }
@@ -287,26 +280,26 @@ pickGeneAnnot <- function(geneID,tab){ #right gene id annotation
   endt = endt[,-1]
   return(endt)
 }
-metapath <- "www/DBO-samples.tsv"
-metatab <- read.table(metapath, header = FALSE, sep = "\t", na.strings = "NA", quote = "" )
-row.names(metatab) = metatab[,1]
+metapath <- "www/simulated_sample_names_all.tsv"
+metatab <- as.data.frame(fread(metapath, header = TRUE, sep = "\t", na.strings = "NA", quote = "" ))
+row.names(metatab) = metatab$sample_name
 metatab = metatab[,-1]
-colnames(metatab) = c("medical_condition","platelet_condition")
-metatab$stable_CAD<- NULL
-metatab$stable_CAD[metatab$medical_condition == "stable CAD"] <- 1
-metatab$stable_CAD[metatab$medical_condition != "stable CAD"] <- 0
-metatab$MI<- NULL
-metatab$MI[metatab$medical_condition == "MI"] <- 1
-metatab$MI[metatab$medical_condition != "MI"] <- 0
+#colnames(metatab) = c("medical_condition","platelet_condition")
+metatab$CCS<- NULL
+metatab$CCS[metatab$condition == "CCS"] <- 1
+metatab$CCS[metatab$condition != "CCS"] <- 0
+metatab$ACS<- NULL
+metatab$ACS[metatab$condition == "ACS"] <- 1
+metatab$ACS[metatab$condition != "ACS"] <- 0
 metatab$MP<- NULL
-metatab$MP[metatab$platelet_condition == "MP"] <- 1
-metatab$MP[metatab$platelet_condition != "MP"] <- 0
+metatab$MP[metatab$platelet == "MP"] <- 1
+metatab$MP[metatab$platelet != "MP"] <- 0
 metatab$RP<- NULL
-metatab$RP[metatab$platelet_condition == "RP"] <- 1
-metatab$RP[metatab$platelet_condition != "RP"] <- 0
+metatab$RP[metatab$platelet == "RP"] <- 1
+metatab$RP[metatab$platelet != "RP"] <- 0
 
-metatab$healthy[metatab$medical_condition == "healthy"] <- 1
-metatab$healthy[metatab$medical_condition != "healthy"] <- 0
+metatab$healthy[metatab$condition == "healthy"] <- 1
+metatab$healthy[metatab$condition != "healthy"] <- 0
 #metatab$platelet_condition [metatab$medical_condition == "healthy"] <- 0
 
 getDASdata <- function(ds){
