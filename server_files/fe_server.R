@@ -85,10 +85,40 @@
 # output$DTGO <- renderUI({
 #   FER()
 # })
+library(clusterProfiler)
 
 # GO ----------------------------------------------------------------------
 #path3 <- "C:/Users/Leonora/Desktop/Studium/6.Semester/Bachelor-Thema__implementierung_eines_Platelet_Atlas/R-programme-shiny/www/GOE_"
 #C:/Users/Leonora/Desktop/Studium/6.Semester/Bachelor-Thema__implementierung_eines_Platelet_Atlas/R-programme-shiny/www/
+functional_enrichment <- function(significant_genes, universal_genes, ontology, annotation_type){
+  res <- enrichGO(gene=significant_genes,universe = universal_genes,OrgDb="org.Hs.eg.db", ont=ontology,pAdjustMethod = "BH",keyType = annotation_type)#'ENSEMBL'
+  erg <- res@result#[, c("ID", "Description", "Count", "GeneRatio", "pvalue", "GeneId", "List", "Pop.GeneRatio", "Pop.GeneId", "OddsRatio", "FDR")]#"List", "Pop.GeneRatio", "Pop.GeneId", "OddsRatio", "FDR"
+  erg <- mutate(erg, richFactor = Count / as.numeric (sub("/\\d+", "", BgRatio)))
+  #library(dplyr)
+  erg <- tidyr::separate(erg,col=GeneRatio, into=c("Count2", "List Total"), sep="/")
+  erg <- tidyr::separate(erg,col=BgRatio, into=c("Pop Hits", "Pop Total"), sep="/")
+  erg$percent <- as.numeric(erg$Count2)/as.numeric(erg$`List Total`)
+  erg <- erg[,c("ID","Description","Count","percent","pvalue","geneID","List Total","Pop Hits","Pop Total","richFactor","qvalue")]
+  
+  # rename the columns
+  names(erg) <- c("Category", "Term", "Count", "%", "PValue", "Genes", "List Total", "Pop Hits", "Pop Total", "Fold Enrichment", "q-value (BH)") #eig letztes sollte FDR sein
+  return(erg)
+}
+
+functional_enrichment_input <- function(dataset, pval, foldchange, annot){
+  upregulated <- dataset[dataset$log2FoldChange > foldchange & dataset$padj < pval,]
+  downregulated <- dataset[dataset$log2FoldChange < -foldchange & dataset$padj < pval,]
+  upregulated_genes <- upregulated[!is.na(upregulated),annot]
+  downregulated_genes <- downregulated[!is.na(downregulated),annot]
+  upregulated_genes <- as.vector(upregulated_genes)
+  downregulated_genes <- as.vector(downregulated_genes)
+  all_significant <- dataset[abs(dataset$log2FoldChange) > foldchange & dataset$padj < pval,]
+  all_significant_genes <- all_significant[!is.na(all_significant),annot]
+  all_significant_genes <- as.vector(all_significant_genes)
+  universe <- as.vector(dataset[,annot])
+  return(list("upregulated" = upregulated_genes, "downregulated" = downregulated_genes,"all" = all_significant_genes,"universe" = universe))
+}
+
 pathGO <- "www/"
 #pGO2 <- "./www/"
 
@@ -101,49 +131,41 @@ sav_cir =reactiveVal()
 sav_go_h_p = reactiveVal()
 sav_edges = reactiveVal()
 GO <-  eventReactive(c(input$clickGO,input$clickGO2),{
-  # midtab <- data.frame()
-  #udi <- UDA()
-  #p <- udi[[1]]
-  #c <- udi[[2]]
+  finalpath <- ""
+  ontology <- ""
+  UDA <- ""
+  pval <- 0
+  fc <- 0
+  annot <- 0
+  annotation_type <- ""
   if(clickedUDA1() < input$clickGO){
-    fe_result<- fe_shiny_paths("M",input$TPMGO,input$HoDGO,input$GOSS,input$UDA)
-    entab_file <- paste(pathGO,fe_result[[1]], sep= "")
-    circ_file <- paste(pathGO,fe_result[[2]], sep= "")
-    edg_file <- paste(pathGO,fe_result[[3]], sep= "")
-    im_file <- paste(pathGO,fe_result[[4]], sep= "")
-    entab <- read.table(entab_file, header = TRUE, sep = ",", quote = "")
-    cir <- read.table(circ_file, sep = "\t", header= TRUE, quote = "")
-    edge <- read.table(edg_file, header = TRUE, sep = ",", quote = "")
-    sav_go_h_p(im_file)
-    sav_edges(edge)
-    on_fi <- switch(input$GOSS,"biological process"="BP","cellular component"= "CC","molecular function" = "MF")
-    fi_on_entab <- entab[grep(on_fi,entab[,9]),c(1,2,3,4,5,6,7,8,9)] ##filter für GenNamen
-    saved_GO(fi_on_entab)
-    fi_cir <- cir[cir[,1]==on_fi, ]
-    sav_cir(fi_cir)
+    finalpath <-paths2frames("1",path,input$TPMGO,input$HoDGO,".CSV")
+    ontology <- switch(input$GOSS,"biological process"="BP","cellular component"= "CC","molecular function" = "MF")
+    UDA <- switch(input$UDA, "upregulated" = "upregulated","downregulated" = "downregulated","all" = "all")
+    annot <- switch(input$DVP1GO, "ENSEMBL ID"= 1, "HGNC symbol" = 11)
+    annotation_type <- switch(input$DVP1GO, "ENSEMBL ID"= "ENSEMBL", "HGNC symbol" = "SYMBOL")
+    pval <- input$pCO1GO
+    fc <- input$fcO1GO
     clickedUDA1(input$clickGO)
   }else if(clickedUDA2() < input$clickGO2){
-    fe_result<- fe_shiny_paths("C",input$TPM2GO,input$HoD2GO,input$GOSS2,input$UDA2)
-    entab_file <- paste(pathGO,fe_result[[1]], sep= "")
-    circ_file <- paste(pathGO,fe_result[[2]], sep= "")
-    edg_file <- paste(pathGO,fe_result[[3]], sep= "")
-    im_file <- paste(pathGO,fe_result[[4]], sep= "")
-    entab <- read.table(entab_file, header = TRUE, sep = ",", quote = "")
-    cir <- read.table(circ_file, sep = "\t", header= TRUE, quote = "")
-    edge <- read.table(edg_file, header = TRUE, sep = ",", quote = "")
-    sav_go_h_p(im_file)
-    sav_edges(edge)
-    on_fi <- switch(input$GOSS2,"biological process"="BP","cellular component"= "CC","molecular function" = "MF")
-    #
-    fi_on_entab <- entab[grep(on_fi,entab[,9]),c(1,2,3,4,5,6,7,8,9)] ##filter fuer GenNamen
-    saved_GO(fi_on_entab)
-    fi_cir <- cir[cir[,1]==on_fi, ]
-    sav_cir(fi_cir)
+    finalpath <-paths2frames("1",path,input$TPM2GO,input$HoD2GO,".CSV")
+    ontology <- switch(input$GOSS2,"biological process"="BP","cellular component"= "CC","molecular function" = "MF")
+    UDA <- switch(input$UDA2, "upregulated" = "upregulated","downregulated" = "downregulated","all" = "all")
+    annot <- switch(input$DVP2GO, "ENSEMBL ID"= 1, "HGNC symbol" = 11)
+    annotation_type <- switch(input$DVP2GO, "ENSEMBL ID"= "ENSEMBL", "HGNC symbol" = "SYMBOL")
+    pval <- input$pCO2GO
+    fc <- input$fcO2GO
     clickedUDA2(input$clickGO2)
   }
-  #saved_GO(midtab)
-  #endtab<-names2GOlinks(midtab)
-  saved_GO()
+  print(finalpath)
+  if(finalpath != ""){
+  matGO <- read.csv2(finalpath)
+  input_list <- functional_enrichment_input(matGO, pval, fc, annot)
+  sig_genes <- input_list[[UDA]]
+  universe_genes <- input_list[["universe"]]
+  functional_enrichment_result <- functional_enrichment(sig_genes, universe_genes, ontology, annotation_type)
+  saved_GO(functional_enrichment_result)
+  }
 })
 
 FEannot <- eventReactive(input$clickFeA,{
@@ -152,9 +174,15 @@ FEannot <- eventReactive(input$clickFeA,{
 })
 
 output$GOTab <- renderDataTable({
-  gotab<- GO()
-  annot <- FEannot()
-  gotab <- gotab[,c(1,2,3,4,5,annot,9)]
+  GO()
+  gotab<- saved_GO()
+  
+  if(!is.null(gotab)){
+  gotab<- as.data.table(gotab)
+  View(gotab)
+  gotab$Genes <- str_replace_all(gotab$Genes,"/", "; ")
+  #annot <- FEannot()
+  #gotab <- gotab[,c(1,2,3,4,5,annot,9)]
   datatable(
     cbind(' ' = '&oplus;', gotab), escape = -2,
     options = list(
@@ -179,7 +207,9 @@ output$GOTab <- renderDataTable({
       td.html('&CircleMinus;');
     }
   });"
-    ))}#escape = FALSE, options = list(lengthMenu = c(10, 15, 20), pageLength = 15, width = 700)
+    ))
+  }
+  }#escape = FALSE, options = list(lengthMenu = c(10, 15, 20), pageLength = 15, width = 700)
 )
 # output$GOplot <- renderPlot({
 #   GOdf <- GO()
@@ -193,13 +223,13 @@ output$GOTab <- renderDataTable({
 # })
 output$GOpG <- renderPlotly({
   tabi <- saved_GO()
-  tabi$percentage <- (tabi$Genes_in_list / tabi$Total_genes)*100
+  tabi$percentage <- tabi$'%' *100
   #print(tabi$percentage)
   tabi <- tabi[order(tabi$percentage),]
   form <- list(categoryorder = "array",
                categoryarray = tabi$id,
                title = "category")
-  fig <- plot_ly(tabi, x = ~id, y = ~percentage, type = 'bar', name = 'percentage of differentially expressed genes in category',text = ~Functional_Category ,marker = list(color = '#ba3131'))
+  fig <- plot_ly(tabi, x = ~Category, y = ~percentage, type = 'bar', name = 'percentage of differentially expressed genes in category',text = ~Term ,marker = list(color = '#ba3131'))
   #fig <- fig %>% add_trace(y = ~numInCat, name = 'number of genes in category', marker = list(color = '#ffe5ea'))
   fig <- fig %>% layout(title = "percentage of differentially expressed genes in GO categories", xaxis = form,
                         yaxis = list(title = "percentage of DE genes in category"),

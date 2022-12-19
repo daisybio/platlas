@@ -6,10 +6,7 @@ library(dplyr)
 library(viridis)
 library(pheatmap)
 library(biomaRt)
-
-
 library(org.Hs.eg.db)
-
 library("ggplot2")
 library("networkD3")
 library("plotly")
@@ -195,7 +192,7 @@ ui<- dashboardPage(
                      span("Diseased: Chronic coronary syndrome vs. Acute coronary syndrome",style = "color: black; font-size: 14px; font-weight: bold"),
                       selectInput(inputId = "HoD02" , label = "Choose from patient datasets" , choices = c("diseased","disease - mature platelets", "disease - reticulated platelets"), multiple = FALSE),
                      selectInput(inputId = "TPM2" , label = "Read count normalization: Choose TPM (Transcripts per million) threshholds" , choices = c("TPM > 0.1","TPM > 0.3", "TPM > 1", "TPM > 2"), multiple = FALSE),
-                    numericInput(inputId = "pCO2",value = 0.05 , label = "p-value cutoff", min = 0.01 , max = 0.05, step = 0.005),
+                     numericInput(inputId = "pCO2",value = 0.05 , label = "p-value cutoff", min = 0.01 , max = 0.05, step = 0.005),
                      numericInput(inputId = "fcO2",value =  1.5 , label = "Foldchange cutoff", min = 0 , max = 4.0, step = 0.5),
                      selectInput(inputId = "DVP2" , label = "Choose gene annotation" , choices = c("ENSEMBL ID", "HGNC symbol"), multiple = FALSE),
                      #actionButton(inputId = "clickDVP2",label = "Get plot ",icon = icon('arrow'), style = "color: #FFF; background-color: #000000; border-color: #000000"),
@@ -346,8 +343,12 @@ ui<- dashboardPage(
             id = "VPfilter", #height = "200px", 
             tabPanel(id="t4","Mature vs. Reticulated", 
                      span("Mature Platelets vs. Reticulated Platelets",style = "color: black; font-size: 14px; font-weight: bold"),
+                     selectInput(inputId = "HoDGO" , label = "Choose from patient datasets" , choices = c("healthy","diseased", "disease - CCS" , "disease - ACS"), multiple = FALSE),
                      selectInput(inputId = "TPMGO" , label = "Read count normalization: Choose TPM (Transcripts per million) threshholds" , choices = c("TPM > 0.1","TPM > 0.3", "TPM > 1", "TPM > 2"), multiple = FALSE),
-                     selectInput(inputId = "HoDGO" , label = "Choose from patient datasets" , choices = c("healthy","diseased", "disease - stable CAD" , "disease - MI"), multiple = FALSE),
+                     numericInput(inputId = "pCO1GO",value = 0.05 , label = "p-value cutoff", min = 0.01 , max = 0.05, step = 0.005),
+                     numericInput(inputId = "fcO1GO",value =  1.5 , label = "Foldchange cutoff", min = 0 , max = 4.0, step = 0.5),
+                     selectInput(inputId = "DVP1GO" , label = "Choose gene annotation" , choices = c("ENSEMBL ID", "HGNC symbol"), multiple = FALSE),
+                     
                      selectInput(inputId = "GOSS" , label = "Choose ontology" , choices = c("biological process","cellular component", "molecular function"), multiple = FALSE),
                      selectInput(inputId = "UDA" , label = "Choose Up/Down/All" , choices = c("upregulated","downregulated","all"), multiple = FALSE),
                      
@@ -356,8 +357,12 @@ ui<- dashboardPage(
             ),
             tabPanel(id="t5","CCS vs. MI", 
                      span("Diseased: Chronic coronary syndrome vs. Myocardial infarction",style = "color: black; font-size: 14px; font-weight: bold"),
-                     selectInput(inputId = "TPM2GO" , label = "Read count normalization: Choose TPM (Transcripts per million) threshholds" , choices = c("TPM > 0.1","TPM > 0.3", "TPM > 1", "TPM > 2"), multiple = FALSE),
                      selectInput(inputId = "HoD2GO" , label = "Choose from patient datasets" , choices = c("diseased","disease - mature platelets", "disease - reticulated platelets"), multiple = FALSE),
+                     selectInput(inputId = "TPM2GO" , label = "Read count normalization: Choose TPM (Transcripts per million) threshholds" , choices = c("TPM > 0.1","TPM > 0.3", "TPM > 1", "TPM > 2"), multiple = FALSE),
+                     numericInput(inputId = "pCO2GO",value = 0.05 , label = "p-value cutoff", min = 0.01 , max = 0.05, step = 0.005),
+                     numericInput(inputId = "fcO2GO",value =  1.5 , label = "Foldchange cutoff", min = 0 , max = 4.0, step = 0.5),
+                     selectInput(inputId = "DVP2GO" , label = "Choose gene annotation" , choices = c("ENSEMBL ID", "HGNC symbol"), multiple = FALSE),
+                     
                      selectInput(inputId = "GOSS2" , label = "Choose ontology" ,choices = c("biological process","cellular component", "molecular_function"), multiple = FALSE),
                      selectInput(inputId = "UDA2" , label = "Choose Up/Down/All" , choices = c("upregulated","downregulated","all"), multiple = FALSE),
                      
@@ -383,14 +388,14 @@ ui<- dashboardPage(
             tabPanel(
               id="GOtab",title = "Top 500 GO Terms", solidHeader = TRUE,
               "",
-              selectInput(inputId = "FeA" , label = "Choose gene annotation in GO categories" , choices = c("ENSEMBL ID","ENTREZ ID","HGNC symbol"), multiple = FALSE),
-              actionButton(inputId = "clickFeA",label = "Get GOs",icon = icon('arrow'), style = "color: #FFF; background-color: #000000; border-color: #000000"),
-              br(), 
-              br(),
+              #selectInput(inputId = "FeA" , label = "Choose gene annotation in GO categories" , choices = c("ENSEMBL ID","ENTREZ ID","HGNC symbol"), multiple = FALSE),
+              #actionButton(inputId = "clickFeA",label = "Get GOs",icon = icon('arrow'), style = "color: #FFF; background-color: #000000; border-color: #000000"),
+              #br(), 
+              #br(),
               downloadButton("downloadGO", "Download table"),
               br(),
               br(),
-              dataTableOutput(outputId = "GOTab"),#width = 12,
+              dataTableOutput(outputId = "GOTab")%>% withSpinner(color= "#000000"),#width = 12,
               
               # .table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th
               tags$head(tags$style("#GOTab table {background-color: #DCDCDC; color : #000000}", media="screen", type="text/css")),
@@ -400,7 +405,7 @@ ui<- dashboardPage(
             tabPanel(
               title = "percentage of DE genes in GO categories", solidHeader = TRUE,# width = 12,
               br(),
-              plotlyOutput("GOpG",height = "800px"),
+              plotlyOutput("GOpG",height = "800px")%>% withSpinner(color= "#000000"),
               #downloadButton("dlPNGGO", "Download plot in PNG format")
             ),
             tabPanel(
@@ -409,7 +414,7 @@ ui<- dashboardPage(
               #actionButton(inputId = "clickGOFE",label = "get Plot ",icon = icon('arrow'), style = "color: #fff; background-color: #000000; border-color: #000000"),
               #br(),
               br(),
-              plotlyOutput("GOpFE",height = "800px"),
+              plotlyOutput("GOpFE",height = "800px")%>% withSpinner(color= "#000000"),
               #downloadButton("dlPNGGO", "Download plot in PNG format")
             ),
             tabPanel(
@@ -418,7 +423,7 @@ ui<- dashboardPage(
               br(),
               downloadButton("dlGOC", "Download plot in PNG format"),
               br(),
-              plotOutput("GOC",height = "800px"),
+              plotOutput("GOC",height = "800px")%>% withSpinner(color= "#000000"),
               #downloadButton("dlPNGGO", "Download plot in PNG format")
             ),
             tabPanel(
@@ -430,7 +435,7 @@ ui<- dashboardPage(
               br(),
               br(),
               br(),
-              plotlyOutput("GOZ",height = "800px"),
+              plotlyOutput("GOZ",height = "800px")%>% withSpinner(color= "#000000"),
               #downloadButton("dlPNGGO", "Download plot in PNG format")
             ),
             
@@ -440,7 +445,7 @@ ui<- dashboardPage(
               
               title = "GO Network", background = "red" , solidHeader = TRUE,
               #plotOutput(""),
-              forceNetworkOutput("GOnet", height = "850px")
+              forceNetworkOutput("GOnet", height = "850px")%>% withSpinner(color= "#000000")
               #  br(),
               # downloadButton("dlKPMN", "Download plot in PNG format")
               
@@ -451,7 +456,7 @@ ui<- dashboardPage(
               
               title = "GO Hierarchy Tree", background = "red" , solidHeader = TRUE,
               #plotOutput(""),
-              imageOutput("GOH", height = "850px"),
+              imageOutput("GOH", height = "850px")%>% withSpinner(color= "#000000"),
               br(),
               downloadButton("dlGOH", "Download plot in PNG format")
               
