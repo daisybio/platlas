@@ -21,14 +21,13 @@ libpng-dev \
 libtiff5-dev \
 libjpeg-dev \
 libc++1 \
-libgfortran-5-dev \
+libgfortran3 \
 libquadmath0 \
 zlib1g \
 libicu-dev \
 libbz2-dev \
-libresolv \
 libc6-dev \
-libobjc
+libobjc4
 
 
 
