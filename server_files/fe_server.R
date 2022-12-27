@@ -351,6 +351,26 @@ output$GO_perc_term <- renderPlotly({
   
 })
 
+output$GO_padj_logFC <- renderPlotly({
+  gotab <- saved_GO()
+  gotab <- gotab[gotab$significantly_expressed == input$UDA, ]
+  circ_data <- make_circ_data(gotab,saved_circ_mat(),saved_ontology())
+  
+  #gotab$percentage <- gotab$'%' *100
+  #print(tabi$percentage)
+  gotab <- as.data.table(circ_data)
+  #gotab$percentage <- as.numeric(gotab$percentage)
+  View(gotab)
+  form <- list(categoryorder = "array",
+               categoryarray = gotab$logFC,
+               title = "logFC")
+  fig2 <- plot_ly(gotab, x =~logFC, y = ~adj_pval, name = ~term,mode = "markers",color = ~term,size = ~logFC, text = ~genes, hovertemplate = paste('<br>gene: %{text}<br>', '<br>term: %{name}<br>'))
+  fig2 <- fig2 %>% layout(title = "adjusted p-values in categories", yaxis = list(title = "adjusted p-value"),
+                          xaxis = form,
+                          margin = list(b = 100))
+  # fig2
+  
+})
 
 
 #TODO: noch einen Plot mit sortierung nach p.adjusted terms (dh die make_circ_data methode noch mal umschreiben)

@@ -452,6 +452,24 @@ ui<- dashboardPage(
               #helpText("$$ zscore= \\frac{(up-down)}{\\sqrt{count}}$$"),
               plotlyOutput("GOp",height = "800px")%>% withSpinner(color= "#000000"),
               #downloadButton("dlPNGGO", "Download plot in PNG format")
+            ),#GO_perc_term
+            tabPanel(
+              title = "Scatterplot- p.adjusted vs. identity percentage", solidHeader = TRUE,# width = 12,
+              #span("The z-score, computed by the circ_dat() Method from the GOplot package, is a score meant to give an orientation to understand if a category is more likely to be increased (z-score = positive) or decreased (z-score = negative)",style = "color: black; font-size: 15px"),
+              #br(),
+              #withMathJax(),
+              #helpText("$$ zscore= \\frac{(up-down)}{\\sqrt{count}}$$"),
+              plotlyOutput("GO_perc_term",height = "800px")%>% withSpinner(color= "#000000"),
+              #downloadButton("dlPNGGO", "Download plot in PNG format")
+            ),#GO_padj_logFC
+            tabPanel(
+              title = "Scatterplot- p.adjusted vs. gene logFC", solidHeader = TRUE,# width = 12,
+              #span("The z-score, computed by the circ_dat() Method from the GOplot package, is a score meant to give an orientation to understand if a category is more likely to be increased (z-score = positive) or decreased (z-score = negative)",style = "color: black; font-size: 15px"),
+              #br(),
+              #withMathJax(),
+              #helpText("$$ zscore= \\frac{(up-down)}{\\sqrt{count}}$$"),
+              plotlyOutput("GO_padj_logFC",height = "800px")%>% withSpinner(color= "#000000"),
+              #downloadButton("dlPNGGO", "Download plot in PNG format")
             )
             # tabPanel(
             #   id= "tN", 

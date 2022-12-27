@@ -28,7 +28,8 @@ libicu-dev \
 libbz2-dev \
 libc6-dev \
 libobjc4 \
-cmake
+cmake \
+libmagick++-dev 
 
 
 
