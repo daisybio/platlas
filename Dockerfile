@@ -21,7 +21,7 @@ libpng-dev \
 libtiff5-dev \
 libjpeg-dev \
 libc++1 \
-libgfortran3 \
+libgfortran5 \
 libquadmath0 \
 zlib1g \
 libicu-dev \
