@@ -1,5 +1,5 @@
 # Base image https://hub.docker.com/u/rocker/
-FROM rocker/shiny:4.0.2
+FROM rocker/shiny:4.2.0
 MAINTAINER Leonora Raka <leonoraraka1801@gmail.com>
 
 # system libraries of general use
