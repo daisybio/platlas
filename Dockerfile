@@ -27,7 +27,8 @@ zlib1g \
 libicu-dev \
 libbz2-dev \
 libc6-dev \
-libobjc4
+libobjc4 \
+cmake
 
 
 

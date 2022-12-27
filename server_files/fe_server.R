@@ -332,6 +332,27 @@ output$GOp <- renderPlotly({
   # fig2
   
 })
+
+output$GO_perc_term <- renderPlotly({
+  gotab <- saved_GO()
+  gotab <- gotab[gotab$significantly_expressed == input$UDA, ]
+  gotab$percentage <- gotab$'%' *100
+  #print(tabi$percentage)
+  gotab <- as.data.table(gotab)
+  gotab$percentage <- as.numeric(gotab$percentage)
+  form <- list(categoryorder = "array",
+               categoryarray = gotab$percentage,
+               title = "Percentage")
+  fig2 <- plot_ly(gotab, x =~percentage, y = ~p.adjust, name = 'Top 10 categories with lowest adjusted p-values',mode = "markers", size = ~percentage, text = ~Term)
+  fig2 <- fig2 %>% layout(title = "adjusted p-values in categories", yaxis = list(title = "adjusted p-value"),
+                          xaxis = form,
+                          margin = list(b = 100))
+  # fig2
+  
+})
+
+
+
 #TODO: noch einen Plot mit sortierung nach p.adjusted terms (dh die make_circ_data methode noch mal umschreiben)
 make_circ_data <- function(erg_table, difex_tab,categ){
   erg_table$Genes <- str_replace_all(erg_table$Genes,"/", ",")
