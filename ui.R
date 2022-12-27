@@ -163,6 +163,9 @@ ui<- dashboardPage(
         
         
       ),
+
+# Differential Expression Analysis ----------------------------------------
+
       tabItem( 
         tabName = "DifExRes",
         #tags$style('.nav-tabs-custom .nav-tabs li.active {
@@ -324,9 +327,9 @@ ui<- dashboardPage(
             )
           )
         )
-        
-        
+   
       ),
+# Functional Enrichment ---------------------------------------------------
       tabItem(
         tabName = "GO",
         # "Functional Enrichment Results Page under construction",
@@ -350,7 +353,9 @@ ui<- dashboardPage(
                      selectInput(inputId = "DVP1GO" , label = "Choose gene annotation" , choices = c("ENSEMBL ID", "HGNC symbol"), multiple = FALSE),
                      
                      selectInput(inputId = "GOSS" , label = "Choose ontology" , choices = c("biological process","cellular component", "molecular function"), multiple = FALSE),
-                     selectInput(inputId = "UDA" , label = "Choose Up/Down/All" , choices = c("upregulated","downregulated","all"), multiple = FALSE),
+                     #selectInput(inputId = "UDA" , label = "Choose Up/Down/All" , choices = c("upregulated","downregulated","all"), multiple = FALSE),
+                     #selectInput(inputId = "AdjMethod" , label = "Choose the p-value adjustment method/correction method" , choices = c("Benjamini-Hochberg","FDR"), multiple = FALSE),
+                     
                      
                      actionButton(inputId = "clickGO",label = "get Table ",icon = icon('arrow'), style = "color: #FFF; background-color:#000000; border-color: #000000")
                      
@@ -364,7 +369,9 @@ ui<- dashboardPage(
                      selectInput(inputId = "DVP2GO" , label = "Choose gene annotation" , choices = c("ENSEMBL ID", "HGNC symbol"), multiple = FALSE),
                      
                      selectInput(inputId = "GOSS2" , label = "Choose ontology" ,choices = c("biological process","cellular component", "molecular_function"), multiple = FALSE),
-                     selectInput(inputId = "UDA2" , label = "Choose Up/Down/All" , choices = c("upregulated","downregulated","all"), multiple = FALSE),
+                     #selectInput(inputId = "UDA2" , label = "Choose Up/Down/All" , choices = c("upregulated","downregulated","all"), multiple = FALSE),
+                     #selectInput(inputId = "AdjMethod2" , label = "Choose the p-value adjustment method/correction method" , choices = c("Benjamini-Hochberg","FDR"), multiple = FALSE),
+                     
                      
                      actionButton(inputId = "clickGO2",label = "get Table", style = "color: #FFF; background-color: #000000; border-color: #000000")
             )
@@ -385,6 +392,7 @@ ui<- dashboardPage(
             width = 12,
             height = "1000px",
             title = "Get the results",
+            selectInput(inputId = "UDA" , label = "Choose Up/Downregulated" , choices = c("upregulated","downregulated"), multiple = FALSE, selected = "upregulated"),
             tabPanel(
               id="GOtab",title = "Top 500 GO Terms", solidHeader = TRUE,
               "",
@@ -392,6 +400,7 @@ ui<- dashboardPage(
               #actionButton(inputId = "clickFeA",label = "Get GOs",icon = icon('arrow'), style = "color: #FFF; background-color: #000000; border-color: #000000"),
               #br(), 
               #br(),
+              #selectInput(inputId = "UDA" , label = "Choose Up/Down/All" , choices = c("upregulated","downregulated"), multiple = FALSE),
               downloadButton("downloadGO", "Download table"),
               br(),
               br(),
@@ -423,44 +432,49 @@ ui<- dashboardPage(
               br(),
               downloadButton("dlGOC", "Download plot in PNG format"),
               br(),
-              plotOutput("GOC",height = "800px")%>% withSpinner(color= "#000000"),
+              plotlyOutput("GOC",height = "800px")%>% withSpinner(color= "#000000"),
               #downloadButton("dlPNGGO", "Download plot in PNG format")
             ),
             tabPanel(
               title = "GO categories and their z-score", solidHeader = TRUE,# width = 12,
-              span("The z-score, computed by the circ_dat() Method from the GOplot package, is a score meant to give an orientation to understand if a category is more likely to be increased (z-score = positive) or decreased (z-score = negative)",style = "color: black; font-size: 15px"),
-              br(),
-              withMathJax(),
-              helpText("$$ zscore= \\frac{(up-down)}{\\sqrt{count}}$$"),
-              br(),
-              br(),
-              br(),
-              plotlyOutput("GOZ",height = "800px")%>% withSpinner(color= "#000000"),
+              #span("The z-score, computed by the circ_dat() Method from the GOplot package, is a score meant to give an orientation to understand if a category is more likely to be increased (z-score = positive) or decreased (z-score = negative)",style = "color: black; font-size: 15px"),
+              #br(),
+              #withMathJax(),
+              #helpText("$$ zscore= \\frac{(up-down)}{\\sqrt{count}}$$"),
+              plotOutput("GOZ",height = "800px")%>% withSpinner(color= "#000000"),
               #downloadButton("dlPNGGO", "Download plot in PNG format")
-            ),
-            
+            ),#GOp
             tabPanel(
-              id= "tN", 
-              #uiOutput("HMO")
-              
-              title = "GO Network", background = "red" , solidHeader = TRUE,
-              #plotOutput(""),
-              forceNetworkOutput("GOnet", height = "850px")%>% withSpinner(color= "#000000")
-              #  br(),
-              # downloadButton("dlKPMN", "Download plot in PNG format")
-              
-            ),
-            tabPanel(
-              id= "tH", 
-              #uiOutput("HMO")
-              
-              title = "GO Hierarchy Tree", background = "red" , solidHeader = TRUE,
-              #plotOutput(""),
-              imageOutput("GOH", height = "850px")%>% withSpinner(color= "#000000"),
-              br(),
-              downloadButton("dlGOH", "Download plot in PNG format")
-              
+              title = "Top 10 most significant GO categories", solidHeader = TRUE,# width = 12,
+              #span("The z-score, computed by the circ_dat() Method from the GOplot package, is a score meant to give an orientation to understand if a category is more likely to be increased (z-score = positive) or decreased (z-score = negative)",style = "color: black; font-size: 15px"),
+              #br(),
+              #withMathJax(),
+              #helpText("$$ zscore= \\frac{(up-down)}{\\sqrt{count}}$$"),
+              plotlyOutput("GOp",height = "800px")%>% withSpinner(color= "#000000"),
+              #downloadButton("dlPNGGO", "Download plot in PNG format")
             )
+            # tabPanel(
+            #   id= "tN", 
+            #   #uiOutput("HMO")
+            #   
+            #   title = "GO Network", background = "red" , solidHeader = TRUE,
+            #   #plotOutput(""),
+            #   forceNetworkOutput("GOnet", height = "850px")%>% withSpinner(color= "#000000")
+            #   #  br(),
+            #   # downloadButton("dlKPMN", "Download plot in PNG format")
+            #   
+            # ),
+            # tabPanel(
+            #   id= "tH", 
+            #   #uiOutput("HMO")
+            #   
+            #   title = "GO Hierarchy Tree", background = "red" , solidHeader = TRUE,
+            #   #plotOutput(""),
+            #   imageOutput("GOH", height = "850px")%>% withSpinner(color= "#000000"),
+            #   br(),
+            #   downloadButton("dlGOH", "Download plot in PNG format")
+            #   
+            # )
           )
         )
         

@@ -19,7 +19,16 @@ libfribidi-dev \
 libfreetype6-dev \
 libpng-dev \
 libtiff5-dev \
-libjpeg-dev
+libjpeg-dev \
+libc++1 \
+libgfortran-5-dev \
+libquadmath0 \
+zlib1g \
+libicu-dev \
+libbz2-dev \
+libresolv \
+libc6-dev \
+libobjc
 
 
 

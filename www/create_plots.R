@@ -595,7 +595,7 @@ myGObarplot <- function(panther_result_up, panther_result_down, count_threshold,
     footnote <- paste0("Significant genes padj < ", padj_threshold,
                        "\nBackgroung for GO analysis: ", background,
                        "\nGene count per GO Term >= ", count_threshold, 
-                       "\nFRD for GO Term <= ", fdr_threshold)
+                       "\nFDR for GO Term <= ", fdr_threshold)
     shared_legend <- get_shared_legend(panther_result)
     plot <- ggarrange(plots$BP, plots$CC, plots$MF, nrow = 1, ncol = 3, legend.grob = shared_legend, legend = "bottom")
     plot <- annotate_figure(plot, 

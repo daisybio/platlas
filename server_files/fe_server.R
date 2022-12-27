@@ -86,23 +86,43 @@
 #   FER()
 # })
 library(clusterProfiler)
-
+#library(qvalue)
+library(stats)
 # GO ----------------------------------------------------------------------
 #path3 <- "C:/Users/Leonora/Desktop/Studium/6.Semester/Bachelor-Thema__implementierung_eines_Platelet_Atlas/R-programme-shiny/www/GOE_"
 #C:/Users/Leonora/Desktop/Studium/6.Semester/Bachelor-Thema__implementierung_eines_Platelet_Atlas/R-programme-shiny/www/
-functional_enrichment <- function(significant_genes, universal_genes, ontology, annotation_type){
-  res <- enrichGO(gene=significant_genes,universe = universal_genes,OrgDb="org.Hs.eg.db", ont=ontology,pAdjustMethod = "BH",keyType = annotation_type)#'ENSEMBL'
-  erg <- res@result#[, c("ID", "Description", "Count", "GeneRatio", "pvalue", "GeneId", "List", "Pop.GeneRatio", "Pop.GeneId", "OddsRatio", "FDR")]#"List", "Pop.GeneRatio", "Pop.GeneId", "OddsRatio", "FDR"
+functional_enrichment <- function(significant_genes_up,significant_genes_down,universal_genes, ontology, annotation_type){
+  res_up <- enrichGO(gene=significant_genes_up,universe = universal_genes,OrgDb="org.Hs.eg.db", ont=ontology,pAdjustMethod = "BH",keyType = annotation_type)#'ENSEMBL', pvalueCutoff = 0.05
+  res_down <- enrichGO(gene=significant_genes_down,universe = universal_genes,OrgDb="org.Hs.eg.db", ont=ontology,pAdjustMethod = "BH",keyType = annotation_type)#'ENSEMBL', pvalueCutoff = 0.05
+  
+  erg_up <- res_up@result#[, c("ID", "Description", "Count", "GeneRatio", "pvalue", "GeneId", "List", "Pop.GeneRatio", "Pop.GeneId", "OddsRatio", "FDR")]#"List", "Pop.GeneRatio", "Pop.GeneId", "OddsRatio", "FDR"
+  erg_down <- res_down@result
+  erg_up$significantly_expressed <- "upregulated"
+  erg_down$significantly_expressed <- "downregulated"
+  #View(erg_down)
+  erg <- rbind(erg_up,erg_down)
+  
   erg <- mutate(erg, richFactor = Count / as.numeric (sub("/\\d+", "", BgRatio)))
   #library(dplyr)
   erg <- tidyr::separate(erg,col=GeneRatio, into=c("Count2", "List Total"), sep="/")
   erg <- tidyr::separate(erg,col=BgRatio, into=c("Pop Hits", "Pop Total"), sep="/")
   erg$percent <- as.numeric(erg$Count2)/as.numeric(erg$`List Total`)
-  erg <- erg[,c("ID","Description","Count","percent","pvalue","geneID","List Total","Pop Hits","Pop Total","richFactor","qvalue")]
+  #View(erg)
+  # print(erg$pvalue)
+  # print("is infinite")
+  # print(is.infinite(erg$pvalue))
+  # print("is na")
+  # print(is.na(erg$pvalue))
+  # print("is null")
+  # print(is.null(erg$pvalue))
+  
+  erg$fdr <- p.adjust(erg$pvalue, method="BH")#[!is.na(erg$pvalue) & !is.infinite(erg$pvalue) & !is.null(erg$pvalue)]
+  erg <- erg[,c("ID","Description","Count","percent","pvalue","geneID","p.adjust","List Total","Pop Hits","Pop Total","richFactor","qvalue","fdr", "significantly_expressed")]
+  
   
   # rename the columns
-  names(erg) <- c("Category", "Term", "Count", "%", "PValue", "Genes", "List Total", "Pop Hits", "Pop Total", "Fold Enrichment", "q-value (BH)") #eig letztes sollte FDR sein
-  return(erg)
+  names(erg) <- c("Category", "Term", "Count", "%", "PValue", "Genes", "p.adjust","List Total", "Pop Hits", "Pop Total", "Fold Enrichment", "q-value","FDR","significantly_expressed" ) #eig letztes sollte FDR sein
+  return(list("tab" = erg, "obj_up" = res_up, "obj_down" = res_down))
 }
 
 functional_enrichment_input <- function(dataset, pval, foldchange, annot){
@@ -127,9 +147,15 @@ clickedUDA2 = reactiveVal(isolate(input$clickGO2))
 
 
 saved_GO = reactiveVal()
-sav_cir =reactiveVal()
-sav_go_h_p = reactiveVal()
-sav_edges = reactiveVal()
+saved_circ_mat = reactiveVal()
+saved_ontology = reactiveVal()
+saved_GO_obj_up = reactiveVal()
+saved_GO_obj_down = reactiveVal()
+current_UDA = reactiveVal()
+other_UDA = reactiveVal()
+#sav_cir =reactiveVal()
+#sav_go_h_p = reactiveVal()
+#sav_edges = reactiveVal()
 GO <-  eventReactive(c(input$clickGO,input$clickGO2),{
   finalpath <- ""
   ontology <- ""
@@ -138,21 +164,24 @@ GO <-  eventReactive(c(input$clickGO,input$clickGO2),{
   fc <- 0
   annot <- 0
   annotation_type <- ""
+  #adjustment_method <- ""
   if(clickedUDA1() < input$clickGO){
     finalpath <-paths2frames("1",path,input$TPMGO,input$HoDGO,".CSV")
     ontology <- switch(input$GOSS,"biological process"="BP","cellular component"= "CC","molecular function" = "MF")
-    UDA <- switch(input$UDA, "upregulated" = "upregulated","downregulated" = "downregulated","all" = "all")
+    #UDA <- switch(input$UDA, "upregulated" = "upregulated","downregulated" = "downregulated","all" = "all")
     annot <- switch(input$DVP1GO, "ENSEMBL ID"= 1, "HGNC symbol" = 11)
     annotation_type <- switch(input$DVP1GO, "ENSEMBL ID"= "ENSEMBL", "HGNC symbol" = "SYMBOL")
+    #adjustment_method <- switch(input$AdjMethod, "Benjamini-Hochberg"= "BH", "FDR" = "fdr")
     pval <- input$pCO1GO
     fc <- input$fcO1GO
     clickedUDA1(input$clickGO)
   }else if(clickedUDA2() < input$clickGO2){
     finalpath <-paths2frames("1",path,input$TPM2GO,input$HoD2GO,".CSV")
     ontology <- switch(input$GOSS2,"biological process"="BP","cellular component"= "CC","molecular function" = "MF")
-    UDA <- switch(input$UDA2, "upregulated" = "upregulated","downregulated" = "downregulated","all" = "all")
+    #UDA <- switch(input$UDA2, "upregulated" = "upregulated","downregulated" = "downregulated","all" = "all")
     annot <- switch(input$DVP2GO, "ENSEMBL ID"= 1, "HGNC symbol" = 11)
     annotation_type <- switch(input$DVP2GO, "ENSEMBL ID"= "ENSEMBL", "HGNC symbol" = "SYMBOL")
+    #adjustment_method <- switch(input$AdjMethod2, "Benjamini-Hochberg"= "BH", "FDR" = "fdr")
     pval <- input$pCO2GO
     fc <- input$fcO2GO
     clickedUDA2(input$clickGO2)
@@ -160,11 +189,24 @@ GO <-  eventReactive(c(input$clickGO,input$clickGO2),{
   print(finalpath)
   if(finalpath != ""){
   matGO <- read.csv2(finalpath)
+  annot_colname <- colnames(matGO)[annot]
+  saved_circ_mat(matGO[,c(annot_colname,"log2FoldChange")])
+  saved_ontology(ontology)
   input_list <- functional_enrichment_input(matGO, pval, fc, annot)
-  sig_genes <- input_list[[UDA]]
+  
+  sig_genes_up <- input_list[["upregulated"]]
+  sig_genes_down <- input_list[["downregulated"]]
+  
   universe_genes <- input_list[["universe"]]
-  functional_enrichment_result <- functional_enrichment(sig_genes, universe_genes, ontology, annotation_type)
-  saved_GO(functional_enrichment_result)
+  functional_enrichment_result <- functional_enrichment(sig_genes_up,sig_genes_down, universe_genes, ontology, annotation_type)
+  #TODO
+  #go_bar_result_upreg <- functional_enrichment(input_list[[]], universe_genes, ontology, annotation_type)
+  significant_tab<- functional_enrichment_result$tab[functional_enrichment_result$tab$p.adjust <= 0.05,]
+  saved_GO(significant_tab)
+  saved_GO_obj_up(functional_enrichment_result$obj_up)
+  saved_GO_obj_down(functional_enrichment_result$obj_down)
+  #print(saved_GO_obj_down())
+  
   }
 })
 
@@ -179,7 +221,11 @@ output$GOTab <- renderDataTable({
   
   if(!is.null(gotab)){
   gotab<- as.data.table(gotab)
-  View(gotab)
+  #View(gotab)
+  gotab <- gotab[gotab$significantly_expressed == input$UDA, ]
+  gotab <- gotab[, -"significantly_expressed"]
+  #View(gotab)
+  
   gotab$Genes <- str_replace_all(gotab$Genes,"/", "; ")
   #annot <- FEannot()
   #gotab <- gotab[,c(1,2,3,4,5,annot,9)]
@@ -189,7 +235,10 @@ output$GOTab <- renderDataTable({
       columnDefs = list(
         list(visible = FALSE, targets = c(7)),
         list(orderable = FALSE, className = 'details-control', targets = 1)
-      )
+      ),
+      lengthMenu = c(5, 10, 15),
+      width = 500,
+      scrollX = TRUE
     ),
     callback = JS("
   table.column(1).nodes().to$().css({cursor: 'pointer'});
@@ -223,19 +272,23 @@ output$GOTab <- renderDataTable({
 # })
 output$GOpG <- renderPlotly({
   tabi <- saved_GO()
+  tabi <- tabi[tabi$significantly_expressed == input$UDA, ]
   tabi$percentage <- tabi$'%' *100
   #print(tabi$percentage)
-  tabi <- tabi[order(tabi$percentage),]
-  form <- list(categoryorder = "array",
-               categoryarray = tabi$id,
-               title = "category")
-  fig <- plot_ly(tabi, x = ~Category, y = ~percentage, type = 'bar', name = 'percentage of differentially expressed genes in category',text = ~Term ,marker = list(color = '#ba3131'))
+  tabi <- as.data.table(tabi)
+  tabi$percentage <- as.numeric(tabi$percentage)
+  tabi <- tabi[order(tabi$percentage,decreasing = FALSE),]
+  #View(tabi)
+  # form <- list(categoryorder = "array",
+  #             categoryarray = tabi$id,
+  #             title = "category")
+  fig <- plot_ly(tabi, x = ~Category, y = ~percentage, type = 'bar', name = 'percentage of differentially expressed genes in category',text = ~Term,marker = list(color = '#ba3131'))
   #fig <- fig %>% add_trace(y = ~numInCat, name = 'number of genes in category', marker = list(color = '#ffe5ea'))
-  fig <- fig %>% layout(title = "percentage of differentially expressed genes in GO categories", xaxis = form,
-                        yaxis = list(title = "percentage of DE genes in category"),
-                        margin = list(b = 100)
-                        # barmode = 'group'
-  )
+  # fig <- fig %>% layout(title = "percentage of differentially expressed genes in GO categories", xaxis = form,
+  #                       yaxis = list(title = "percentage of DE genes in category"),
+  #                       margin = list(b = 100))
+  #barmode = 'group'
+ # )
   # fig
   
 })
@@ -247,12 +300,13 @@ fthreshold <- eventReactive(input$clickGOFE,{
 output$GOpFE <- renderPlotly({
   # n <- fthreshold()
   testtab <- saved_GO()#f_foldenrich(saved_GO(),n)
-  testtab <- testtab[order(testtab$Enrichment_FDR, decreasing = FALSE),]
-  testtab <- testtab %>% mutate(Enrichment_FDR = -log10(Enrichment_FDR))
+  testtab <- testtab[testtab$significantly_expressed == input$UDA, ]
+  testtab <- testtab[order(testtab$FDR, decreasing = FALSE),]
+  testtab <- testtab %>% mutate(FDR = -log10(FDR))
   form <- list(categoryorder = "array",
-               categoryarray = testtab$id,
+               categoryarray = testtab$Category,
                title = "category")
-  fig2 <- plot_ly(testtab, x =~Enrichment_FDR, y = ~id, type = 'bar', name = 'enrichment FDR in categories',text = ~Functional_Category, orientation = 'h' ,marker = list(color = '#ba3131'))
+  fig2 <- plot_ly(testtab, x =~FDR, y = ~Category, type = 'bar', name = 'enrichment FDR in categories',text = ~Term, orientation = 'h' ,marker = list(color = '#ba3131'))
   #fig <- fig %>% add_trace(y = ~numInCat, name = 'number of genes in category', marker = list(color = '#ffe5ea'))
   fig2 <- fig2 %>% layout(title = "enrichment FDR in categories", xaxis = list(title = "enrichment FDR"),
                           yaxis = form,
@@ -260,26 +314,97 @@ output$GOpFE <- renderPlotly({
   # fig2
   
 })
-
-output$GOC <- renderPlot({
-  GOCircle(sav_cir())
-})
-
-
-output$GOZ <- renderPlotly({
-  zdat <- sav_cir()[,c(2,3,8)]
-  zdat <- zdat[!(duplicated(zdat)),]
-  zdat <- zdat[order(abs(zdat$zscore),decreasing = TRUE),]
+output$GOp <- renderPlotly({
+  gotab <- saved_GO()
+  gotab <- gotab[gotab$significantly_expressed == input$UDA & gotab$p.adjust <= 0.05, ]
+  #circ_data <- make_circ_data(gotab,saved_circ_mat(),saved_ontology())
+  #circ_data_sorted <- circ_data[,-4] %>% arrange(adj_pval)
+  #View(gotab)
+  gotab <- gotab%>% arrange(p.adjust)
+  circ_end <- gotab[1:10,]
   form <- list(categoryorder = "array",
-               categoryarray = zdat$ID,
-               title = "category")
-  fig2 <- plot_ly(zdat, x =~zscore, y = ~ID, type = 'bar', name = 'z-score in categories',text = ~term, orientation = 'h' ,color = ~zscore,
-                  colors = c("#0066b2","#ba3131"))#,marker = list(color = '#ba3131')
-  #fig <- fig %>% add_trace(y = ~numInCat, name = 'number of genes in category', marker = list(color = '#ffe5ea'))
-  fig2 <- fig2 %>% layout(title = "z-scores in categories", xaxis = list(title = "z-score"),
-                          yaxis = form,
+               categoryarray = circ_end$Category,
+               title = "Category")
+  fig2 <- plot_ly(circ_end, x =~Category, y = ~p.adjust, type = 'bar', name = 'Top 10 categories with lowest adjusted p-values',text = ~Term, marker = list(color = '#ba3131'))
+  fig2 <- fig2 %>% layout(title = "adjusted p-values in categories", yaxis = list(title = "adjusted p-value"),
+                          xaxis = form,
                           margin = list(b = 100))
+  # fig2
+  
 })
+#TODO: noch einen Plot mit sortierung nach p.adjusted terms (dh die make_circ_data methode noch mal umschreiben)
+make_circ_data <- function(erg_table, difex_tab,categ){
+  erg_table$Genes <- str_replace_all(erg_table$Genes,"/", ",")
+  erg_table <- separate_rows(erg_table,Genes, sep = ",", convert = FALSE)
+  go_tab <- erg_table[,c("Category","Term","Genes","p.adjust")]
+  #View(go_tab)
+  colnames(go_tab) <- c("ID","term","genes","adj_pval")
+  go_tab$category <- categ
+ # go_tab <- go_tab[,c("category","ID","term","genes","adj_pval")]
+  colnames(difex_tab) = c("ID","logFC")
+  
+  #difex_tab <- difex_tab[difex_tab$ID %in% go_tab$genes,]
+  #View(difex_tab)
+  circ <- circle_dat(go_tab, difex_tab)
+  circ$regulation <- ""
+  circ$regulation[circ$logFC < 0] <- "downregulated"
+  circ$regulation[circ$logFC > 0] <- "upregulated"
+  circ <- circ %>% arrange(desc(abs(logFC)))
+  #View(circ)
+  return(circ)
+}
+
+
+
+output$GOC <- renderPlotly({
+  gotab <- saved_GO()
+  gotab <- gotab[gotab$significantly_expressed == input$UDA, ]
+  circ_data <- make_circ_data(gotab,saved_circ_mat(),saved_ontology())
+  chosen_terms <- circ_data[1:10,3] #top 10 highest logFC
+  filtered_tab <- circ_data[circ_data$term %in% chosen_terms,]
+  p<- plot_ly(filtered_tab,x = ~term, y = ~logFC, type = "violin",text = ~genes,color= ~regulation,hovertemplate = paste('%{x}', '<br>gene: %{text}<br>')) %>%
+    add_markers(size = 5)
+  p
+})
+
+
+output$GOZ <- renderPlot({
+  obj <- NULL
+  if(input$UDA == "upregulated"){
+    obj <- saved_GO_obj_up()
+  }else if(input$UDA == "downregulated"){
+    obj <- saved_GO_obj_down()
+    #View(obj)
+  }
+  
+  if(!is.null(obj)){
+    term_enriched <- any(obj@result[["p.adjust"]]<= 0.05)
+    if(term_enriched){
+      goplot(obj)
+    }else{
+      validate(
+        need(term_enriched == TRUE, "0 enriched terms found (p-value < 0.05)")
+      )
+    }
+    
+  }
+})
+
+
+output$GObar <- renderPlot({ #
+  tab <- saved_GO()
+  #todo anpassed
+  p <- myGObarplot(panther_result_up = panther_result_up_ref, 
+                    panther_result_down = panther_result_down_ref, 
+                    count_threshold = count, 
+                    fdr_threshold = fdr,
+                    padj_threshold = padj,
+                    gos_of_interest = gos_of_interest,
+                    background = "Reference genes")
+
+})
+
+
 output$GOnet <- renderForceNetwork({
   GOEtab<-sav_edges()#read.table(sav_edges(),quote = "",sep = " ", header = FALSE)
   GOE <- GOEtab[,c(1,2)]

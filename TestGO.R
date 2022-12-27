@@ -3,7 +3,7 @@ library(topGO)
 library(GO.db) #gibt es auch Panther?
 library(biomaRt)
 library(Rgraphviz)
-library(PANTHER.db)
+
 
 de_file <- read.csv2("/Users/leonoraka/Desktop/Projekte/platlas/www/all_diseased_TPM-0-2_phenotype-disease-stable-CAD.CSV")
 genes_universe <- de_file$geneID
