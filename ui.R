@@ -348,9 +348,9 @@ ui<- dashboardPage(
                      span("Mature Platelets vs. Reticulated Platelets",style = "color: black; font-size: 14px; font-weight: bold"),
                      selectInput(inputId = "HoDGO" , label = "Choose from patient datasets" , choices = c("healthy","diseased", "disease - CCS" , "disease - ACS"), multiple = FALSE),
                      selectInput(inputId = "TPMGO" , label = "Read count normalization: Choose TPM (Transcripts per million) threshholds" , choices = c("TPM > 0.1","TPM > 0.3", "TPM > 1", "TPM > 2"), multiple = FALSE),
+                     selectInput(inputId = "DVP1GO" , label = "Choose gene annotation" , choices = c("ENSEMBL ID", "HGNC symbol"), multiple = FALSE),
                      numericInput(inputId = "pCO1GO",value = 0.05 , label = "p-value cutoff", min = 0.01 , max = 0.05, step = 0.005),
                      numericInput(inputId = "fcO1GO",value =  1.5 , label = "Foldchange cutoff", min = 0 , max = 4.0, step = 0.5),
-                     selectInput(inputId = "DVP1GO" , label = "Choose gene annotation" , choices = c("ENSEMBL ID", "HGNC symbol"), multiple = FALSE),
                      
                      selectInput(inputId = "GOSS" , label = "Choose ontology" , choices = c("biological process","cellular component", "molecular function"), multiple = FALSE),
                      #selectInput(inputId = "UDA" , label = "Choose Up/Down/All" , choices = c("upregulated","downregulated","all"), multiple = FALSE),
@@ -393,6 +393,18 @@ ui<- dashboardPage(
             height = "1000px",
             title = "Get the results",
             selectInput(inputId = "UDA" , label = "Choose Up/Downregulated" , choices = c("upregulated","downregulated"), multiple = FALSE, selected = "upregulated"),
+            #slider only gos of interest
+            prettySwitch(
+              "gos_of_interest",
+              label = "Plot only the GO Terms of interest (containing the words platelet, hemostasis andcoagulation):",
+              value = FALSE,
+              status = "default",
+              slim = FALSE,
+              fill = TRUE,
+              bigger = FALSE,
+              inline = FALSE,
+              width = NULL
+            ),
             tabPanel(
               id="GOtab",title = "Top 500 GO Terms", solidHeader = TRUE,
               "",
@@ -469,6 +481,15 @@ ui<- dashboardPage(
               #withMathJax(),
               #helpText("$$ zscore= \\frac{(up-down)}{\\sqrt{count}}$$"),
               plotlyOutput("GO_padj_logFC",height = "800px")%>% withSpinner(color= "#000000"),
+              #downloadButton("dlPNGGO", "Download plot in PNG format")
+            ),
+            tabPanel(
+              title = "GO barplot", solidHeader = TRUE,# width = 12,
+              numericInput(inputId = "padjGO",value = 0.05 , label = "adjusted p-value cutoff", min = 1e-15 , max = 0.05, step = 0.01),
+              numericInput(inputId = "fdrGO",value =  0.01 , label = "FDR cutoff", min = 0.00 , max = 1, step = 0.05),
+              numericInput(inputId = "countGO",value =  2 , label = "gene count cutoff", min = 0 , max = 20.0, step = 5),
+              
+              plotlyOutput("GObarplot",height = "800px")%>% withSpinner(color= "#000000"),
               #downloadButton("dlPNGGO", "Download plot in PNG format")
             )
             # tabPanel(

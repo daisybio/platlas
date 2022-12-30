@@ -86,6 +86,7 @@
 #   FER()
 # })
 library(clusterProfiler)
+library(DescTools)
 #library(qvalue)
 library(stats)
 # GO ----------------------------------------------------------------------
@@ -116,7 +117,7 @@ functional_enrichment <- function(significant_genes_up,significant_genes_down,un
   # print("is null")
   # print(is.null(erg$pvalue))
   
-  erg$fdr <- p.adjust(erg$pvalue, method="BH")#[!is.na(erg$pvalue) & !is.infinite(erg$pvalue) & !is.null(erg$pvalue)]
+  erg$fdr <- p.adjust(erg$pvalue, method="BH")#[!is.na(erg$pvalue) & !is.infinite(erg$pvalue) & !is.null(erg$pvalue)]#
   erg <- erg[,c("ID","Description","Count","percent","pvalue","geneID","p.adjust","List Total","Pop Hits","Pop Total","richFactor","qvalue","fdr", "significantly_expressed")]
   
   
@@ -223,6 +224,8 @@ output$GOTab <- renderDataTable({
   gotab<- as.data.table(gotab)
   #View(gotab)
   gotab <- gotab[gotab$significantly_expressed == input$UDA, ]
+  gotab <- filterGO(gotab,input$gos_of_interest)
+  
   gotab <- gotab[, -"significantly_expressed"]
   #View(gotab)
   
@@ -273,6 +276,7 @@ output$GOTab <- renderDataTable({
 output$GOpG <- renderPlotly({
   tabi <- saved_GO()
   tabi <- tabi[tabi$significantly_expressed == input$UDA, ]
+  tabi <- filterGO(tabi,input$gos_of_interest)
   tabi$percentage <- tabi$'%' *100
   #print(tabi$percentage)
   tabi <- as.data.table(tabi)
@@ -301,6 +305,8 @@ output$GOpFE <- renderPlotly({
   # n <- fthreshold()
   testtab <- saved_GO()#f_foldenrich(saved_GO(),n)
   testtab <- testtab[testtab$significantly_expressed == input$UDA, ]
+  testtab <- filterGO(testtab,input$gos_of_interest)
+  
   testtab <- testtab[order(testtab$FDR, decreasing = FALSE),]
   testtab <- testtab %>% mutate(FDR = -log10(FDR))
   form <- list(categoryorder = "array",
@@ -317,6 +323,7 @@ output$GOpFE <- renderPlotly({
 output$GOp <- renderPlotly({
   gotab <- saved_GO()
   gotab <- gotab[gotab$significantly_expressed == input$UDA & gotab$p.adjust <= 0.05, ]
+  gotab <- filterGO(gotab,input$gos_of_interest)
   #circ_data <- make_circ_data(gotab,saved_circ_mat(),saved_ontology())
   #circ_data_sorted <- circ_data[,-4] %>% arrange(adj_pval)
   #View(gotab)
@@ -336,6 +343,7 @@ output$GOp <- renderPlotly({
 output$GO_perc_term <- renderPlotly({
   gotab <- saved_GO()
   gotab <- gotab[gotab$significantly_expressed == input$UDA, ]
+  gotab <- filterGO(gotab,input$gos_of_interest)
   gotab$percentage <- gotab$'%' *100
   #print(tabi$percentage)
   gotab <- as.data.table(gotab)
@@ -354,6 +362,8 @@ output$GO_perc_term <- renderPlotly({
 output$GO_padj_logFC <- renderPlotly({
   gotab <- saved_GO()
   gotab <- gotab[gotab$significantly_expressed == input$UDA, ]
+  gotab <- filterGO(gotab,input$gos_of_interest)
+  
   circ_data <- make_circ_data(gotab,saved_circ_mat(),saved_ontology())
   
   #gotab$percentage <- gotab$'%' *100
@@ -364,7 +374,7 @@ output$GO_padj_logFC <- renderPlotly({
   form <- list(categoryorder = "array",
                categoryarray = gotab$logFC,
                title = "logFC")
-  fig2 <- plot_ly(gotab, x =~logFC, y = ~adj_pval, name = ~term,mode = "markers",color = ~term,size = ~logFC, text = ~genes, hovertemplate = paste('<br>gene: %{text}<br>', '<br>term: %{name}<br>'))
+  fig2 <- plot_ly(gotab, x =~logFC, y = ~adj_pval, name = ~term,mode = "markers",color = ~term,customdata = ~term,size = ~logFC, text = ~genes, hovertemplate = paste('<br>gene: %{text}<br>', '<br>term: %{customdata}<br>'))
   fig2 <- fig2 %>% layout(title = "adjusted p-values in categories", yaxis = list(title = "adjusted p-value"),
                           xaxis = form,
                           margin = list(b = 100))
@@ -400,6 +410,7 @@ make_circ_data <- function(erg_table, difex_tab,categ){
 output$GOC <- renderPlotly({
   gotab <- saved_GO()
   gotab <- gotab[gotab$significantly_expressed == input$UDA, ]
+  gotab <- filterGO(gotab,input$gos_of_interest)
   circ_data <- make_circ_data(gotab,saved_circ_mat(),saved_ontology())
   chosen_terms <- circ_data[1:10,3] #top 10 highest logFC
   filtered_tab <- circ_data[circ_data$term %in% chosen_terms,]
@@ -431,18 +442,35 @@ output$GOZ <- renderPlot({
   }
 })
 
+filterGO <- function(tabs, gos_of_interest){
+  gos <- c("%platelet%", "%hemostasis%", "%coagulation%")
+  res_tab <- NULL
+  if(gos_of_interest){
+    res_tab <- tabs[tabs$Term %like any% gos,]
+  }else{
+    res_tab <- tabs
+  }
+  return(res_tab)
+}
+
+
+
+
 
 output$GObar <- renderPlot({ #
   tab <- saved_GO()
   #todo anpassed
+  panther_result_up_ref <- tab[tab$significantly_expressed == "upregulated",]
+  panther_result_down_ref <- tab[tab$significantly_expressed == "downregulated",]
+  
   p <- myGObarplot(panther_result_up = panther_result_up_ref, 
                     panther_result_down = panther_result_down_ref, 
-                    count_threshold = count, 
-                    fdr_threshold = fdr,
-                    padj_threshold = padj,
-                    gos_of_interest = gos_of_interest,
+                    count_threshold = input$countGO, 
+                    fdr_threshold = input$fdrGO,
+                    padj_threshold = padj$padjGO,
+                    gos_of_interest = c("platelet", "hemostasis", "coagulation"),
                     background = "Reference genes")
-
+  p
 })
 
 
