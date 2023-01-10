@@ -150,7 +150,7 @@ getHM <- eventReactive(input$clickMIF,{
     counts_disease <- read.csv2("www/counts_normalized_disease.CSV",header = TRUE, na.strings = "_")
     cdf<- counts_disease
   }else if(input$miF == "only CAD patients"){
-    sig_CAD_rp_vs_mp <- read.csv2("www/cad_rp_vs_mp_sign_diff_mir_counts.CSV",header = TRUE, na.strings = "_")
+    sig_CAD_rp_vs_mp <- read.csv2("www/cad_rp_vs_mp_sign_diff_mir_counts.CSV",header = TRUE, na.strings = "_") # ccs_rp_vs_mp_diff_mir_counts_noSample6_filtered_pCutoff0.05.CSV bzw das signifikante
     df <- sig_CAD_rp_vs_mp
     counts_disease <- read.csv2("www/counts_normalized_disease.CSV",header = TRUE, na.strings = "_")
     cdf <- counts_disease
@@ -184,43 +184,79 @@ getHM <- eventReactive(input$clickMIF,{
   #sample_annotation <- colnames(neu)
 })
 
-m2g = reactiveVal("")
-g2g = reactiveVal("")
-nod = reactiveVal("")
-edg = reactiveVal("")
-minod = reactiveVal("")
-mi_name = reactiveVal("")
-
+ m2g = reactiveVal("")
+ g2g = reactiveVal("")
+# nod = reactiveVal("")
+# edg = reactiveVal("")
+ minod = reactiveVal("")
+ mi_name = reactiveVal("")
+ miRNA_up = reactiveVal()
+ miRNA_down = reactiveVal()
+ miRNA_GO_obj = reactiveVal()
+ miRNA_saved_circ = reactiveVal()
+ miRNA_saved_ontology = reactiveVal()
+ 
 getMIPaths <- eventReactive(input$clickMIF2,{
-  m2Genes <- miRNA_path("", input$miEXP,"",input$UDMI, input$miDB,input$miF2,input$miSign,"0")
-  #print(m2Genes)
+  m2Genes <- get_miRNA_datasets(input$miF2, input$miDB, input$mTpCO, input$mTfCO, input$miEXP, input$miSign)
+  m2Genes_tab <- m2Genes[[input$UDMI]]
   mi_name(input$miF2)
-  ge2GO <- miRNA_path(input$miOnt, input$miEXP,"G",input$UDMI, input$miDB,input$miF2,input$miSign,"1")
-  #print(ge2GO)
-  GO_Nodes <- miRNA_path(input$miOnt, input$miEXP,"G",input$UDMI, input$miDB,input$miF2,input$miSign,"2")
-  #print(GO_Nodes)
-  GO_Edges <- miRNA_path(input$miOnt, input$miEXP,"G",input$UDMI, input$miDB,input$miF2,input$miSign,"3")
-  #print(GO_Edges)
-  mir_Nodes <- miRNA_path("", input$miEXP,"N",input$UDMI, input$miDB,input$miF2,input$miSign,"0")
+  #View(m2Genes_tab)
+  sav_circ <- getGeneMat(input$miF2,input$miAnnot)
+  # if(input$UDMI == "upregulated"){
+  #   sav_circ <- m2Genes$up_expr
+  # }else if(input$UDMI == "downregulated"){
+  #   sav_circ <- m2Genes$down_expr
+  # }
+  # annot <- switch(input$miAnnot, "ENSEMBL ID"= 1, "HGNC symbol" = 11)
+  # annot_colname <- colnames(sav_circ)[annot]
+  if(input$UDMI == "upregulated"){
+    sav_circ <- sav_circ[sav_circ$log2FoldChange > 0,]
+  }else if(input$UDMI == "downregulated"){
+    sav_circ <- sav_circ[sav_circ$log2FoldChange < 0,]
+  }
+  miRNA_saved_circ(sav_circ)
+  #View(m2Genes)
+  ontology <- switch(input$miOnt,"Biological Process"="BP","Cellular Component"= "CC","Molecular Function" = "MF")
+  miRNA_saved_ontology(ontology)
+  #View(m2Genes[["upregulated"]])
+  #View(m2Genes[["downregulated"]])
+  up <- extract_genes_from_m2g(m2Genes[["upregulated"]],input$miDB,input$miAnnot)
+  down <- extract_genes_from_m2g(m2Genes[["downregulated"]],input$miDB,input$miAnnot)
+  universe <- getUniverse(input$miF2,input$miAnnot)
+  
+  annotation <- switch(input$miAnnot, "ENSEMBL ID"= "ENSEMBL", "HGNC symbol" = "SYMBOL")
+  ge2GO <- functional_enrichment(up,down,universe, ontology, annotation)#miRNA_path(input$miOnt, input$miEXP,"G",input$UDMI, input$miDB,input$miF2,input$miSign,"1")
+  mir_Nodes <- makeNodes(m2Genes_tab,input$miDB)
+  miRNA_up(up)
+  miRNA_down(down)
   #print(mir_Nodes)
   #mG <- read.table(m2Genes,header = FALSE)
-  m2g(m2Genes)
-  gG <- read.table(ge2GO,quote = "",sep = ",", header = TRUE)
-  mi_tab <- read.table(mir_Nodes, sep = "\t", header = FALSE)
-  g2g(gG)
-  nod(GO_Nodes)
-  edg(GO_Edges)
-  minod(mi_tab)
-  finalpath <- m2Genes
-  mG <- read.delim(m2Genes, header=FALSE, na.strings = NA,comment.char = "",quote = "\"", sep = "\t",dec = ".")
-  if(input$miDB == "miRDB"){ 
-    colnames(mG)=c("Target Gene (Ref-Seq ID)", "Target Gene (Ensembl ID)", "miRNA", "prediction score")
-  }else if(input$miDB == "miRTarBase"){
-    colnames(mG)=c("miRNA","miRTarBase ID", "Species (mRNA)", "Target Gene", "Target Gene (Entrez ID)", "Species (Target Gene)","Experiments","Support Type","References (PMID)")
+  m2g(m2Genes_tab)
+ # gG <- read.table(ge2GO,quote = "",sep = ",", header = TRUE)
+  #mi_tab <- read.table(mir_Nodes, sep = "\t", header = FALSE)
+  #View(ge2GO$tab)
+  g2g(ge2GO$tab)
+  go_obj <- NULL
+  if(input$UDMI== "upregulated"){
+    go_obj <- ge2GO$obj_up
+  }else if(input$UDMI== "downregulated"){
+    go_obj <- ge2GO$obj_down
   }
-  end <- mG
+  miRNA_GO_obj(go_obj)
+  #nod(GO_Nodes)
+  #edg(GO_Edges)
+  minod(mir_Nodes)
+  #finalpath <- m2Genes
+  #mG <- read.delim(m2Genes, header=FALSE, na.strings = NA,comment.char = "",quote = "\"", sep = "\t",dec = ".")
+  #if(input$miDB == "miRDB"){ 
+  #  colnames(mG)=c("Target Gene (Ref-Seq ID)", "Target Gene (Ensembl ID)", "miRNA", "prediction score")
+  #}else if(input$miDB == "miRTarBase"){
+  #  colnames(mG)=c("miRNA","miRTarBase ID", "Species (mRNA)", "Target Gene", "Target Gene (Entrez ID)", "Species (Target Gene)","Experiments","Support Type","References (PMID)")
+  #}
+  #end <- 
+  m2Genes_tab
 })
-output$MIDT <- renderDataTable(getMIPaths(),escape = FALSE, options = list(lengthMenu = c(10,15,20), pageLength = 15, width = 700))
+output$MIDT <- renderDataTable(getMIPaths(),escape = FALSE, options = list(lengthMenu = c(10,15,20), pageLength = 10, scrollX = TRUE,width = 500))
 output$DTMI <- renderDataTable(getDTVP(),escape = FALSE, options = list(lengthMenu = c(10, 15, 20), pageLength = 5,scrollX = TRUE,width = 200)
 )
 saved_VPMI = reactiveVal()
@@ -252,24 +288,6 @@ output$VPMI <- renderPlot({
                 lab_selection = c(top10_upreg_genes,top10_downreg_genes),
                 symbol_type = colnames(getVP())[1] , titel = "", subtitel = "")
 
-  # p <- EnhancedVolcano(getVP(),
-  #                      lab = getVP()[,1],
-  #                      x = 'log2FoldChange',
-  #                      y = 'padj',####gucken
-  #                      xlim = c(-5, 8),
-  #                      #title = 'N061011 versus N61311',
-  #                      pCutoff = as.numeric(input$mpCO),
-  #                      FCcutoff = as.numeric(input$mfCO),
-  #                      xlab = bquote(~Log[2]~ 'fold change'),
-  #                      #title = ' ',
-  #                      subtitle = ' ',##,
-  #                      col=c('lightgrey', 'lightgrey', 'lightgrey', 'red'),
-  #                      #shape = c(0, 0, 0, 0),
-  #                      colAlpha = 4/5,
-  #                      legendPosition = 'right',
-  #                      legendLabSize = 14,
-  #                      legendIconSize = 4.0
-  # )
   saved_VPMI(p)
   p}
 })
@@ -381,25 +399,34 @@ output$ExpMI <- renderPlot({
   }
 })
 
+# miRNA Targets & GO ------------------------------------------------------
 
 saved_DTMIT = reactiveVal()
 output$DTMIT <- renderDataTable({
-  g2g <- g2g()[,c(1,2,3,4,5,6)]
-  saved_DTMIT(g2g)
-  g2g
+  g2g <- as.data.table(g2g())#[,c(1,2,3,4,5,6)]
+  g2g <- g2g[g2g$significantly_expressed == input$UDMI, ]
+ # g2g <- filterGO(gotab,input$gos_of_interest)
+  
+  g2g <- g2g[, -"significantly_expressed"]
+  #View(gotab)
+  
+  g2g$Genes <- str_replace_all(g2g$Genes,"/", "; ")
   datatable(
     cbind(' ' = '&oplus;', g2g), escape = -2,
     options = list(
       columnDefs = list(
-        list(visible = FALSE, targets = c(7)),
+        list(visible = FALSE, targets = c(8)),
         list(orderable = FALSE, className = 'details-control', targets = 1)
-      )
+      ),
+      lengthMenu = c(5, 10, 15),
+      width = 500,
+      scrollX = TRUE
     ),
     callback = JS("
   table.column(1).nodes().to$().css({cursor: 'pointer'});
   var format = function(d) {
     return '<div style=\"background-color:#eee; padding: .5em;\">  ' +
-            'Genes: ' + d[7] + '</div>';
+            'Genes: ' + d[8] + '</div>';
   };
   table.on('click', 'td.details-control', function() {
     var td = $(this), row = table.row(td.closest('tr'));
@@ -418,21 +445,38 @@ output$DTMIT <- renderDataTable({
 
 )
 
+output$MIGOnet <- renderPlot({
+  obj <- miRNA_GO_obj()
+  if(!is.null(obj)){
+    term_enriched <- any(obj@result[["p.adjust"]]<= 0.05)
+    if(term_enriched){
+      goplot(obj)
+    }else{
+      validate(
+        need(term_enriched == TRUE, "0 enriched terms found (p-value < 0.05)")
+      )
+    }
+  
+  }
+})
+
+
 output$MIpG<- renderPlotly({
   tabi <- g2g()
-  tabi$percentage <- (tabi$Genes_in_list / tabi$Total_genes)*100
+  tabi <- tabi[tabi$significantly_expressed == input$UDMI, ]
+ #tabi <- filterGO(tabi,input$gos_of_interest)
+  tabi$percentage <- tabi$'%' *100
   #print(tabi$percentage)
-  tabi <- tabi[order(tabi$percentage),]
-  form <- list(categoryorder = "array",
-               categoryarray = tabi$id,
-               title = "category")
-  fig <- plot_ly(tabi, x = ~id, y = ~percentage, type = 'bar', name = 'percentage of target genes in category',text = ~Functional_Category ,marker = list(color = '#ba3131'))
-  #fig <- fig %>% add_trace(y = ~numInCat, name = 'number of genes in category', marker = list(color = '#ffe5ea'))
-  fig <- fig %>% layout(title = "percentage of target genes in GO categories", xaxis = form,
-                        yaxis = list(title = "percentage of target genes in category"),
-                        margin = list(b = 100)
-                        # barmode = 'group'
-  )
+  tabi <- as.data.table(tabi)
+  tabi$percentage <- as.numeric(tabi$percentage)
+  tabi <- tabi[order(tabi$percentage,decreasing = FALSE),]
+  #View(tabi)
+  # form <- list(categoryorder = "array",
+  #             categoryarray = tabi$id,
+  #             title = "category")
+  fig <- plot_ly(tabi, x = ~Category, y = ~percentage, type = 'bar', name = 'percentage of differentially expressed genes in category',text = ~Term,marker = list(color = '#ba3131'))
+  # barmode = 'group'
+  #)
   # fig
   
 })
@@ -440,12 +484,14 @@ output$MIpG<- renderPlotly({
 output$MIpFE <-renderPlotly({
   # n <- fthreshold()
   testtab <- g2g()#f_foldenrich(saved_GO(),n)
-  testtab <- testtab[order(testtab$Enrichment_FDR, decreasing = FALSE),]
-  testtab <- testtab %>% mutate(Enrichment_FDR = -log10(Enrichment_FDR))
+  testtab <- testtab[testtab$significantly_expressed == input$UDMI, ]
+  #testtab <- filterGO(testtab,input$gos_of_interest)
+  testtab <- testtab[order(testtab$FDR, decreasing = FALSE),]
+  testtab <- testtab %>% mutate(FDR = -log10(FDR))
   form <- list(categoryorder = "array",
-               categoryarray = testtab$id,
+               categoryarray = testtab$Category,
                title = "category")
-  fig2 <- plot_ly(testtab, x =~Enrichment_FDR, y = ~id, type = 'bar', name = 'enrichment FDR in categories',text = ~Functional_Category, orientation = 'h' ,marker = list(color = '#ba3131'))
+  fig2 <- plot_ly(testtab, x =~FDR, y = ~Category, type = 'bar', name = 'enrichment FDR in categories',text = ~Term, orientation = 'h' ,marker = list(color = '#ba3131'))
   #fig <- fig %>% add_trace(y = ~numInCat, name = 'number of genes in category', marker = list(color = '#ffe5ea'))
   fig2 <- fig2 %>% layout(title = "enrichment FDR in categories", xaxis = list(title = "enrichment FDR"),
                           yaxis = form,
@@ -454,35 +500,90 @@ output$MIpFE <-renderPlotly({
   
 })
 
-
-
-minet <- eventReactive(input$md_click,{
+output$MIGO_perc_term <- renderPlotly({
+  gotab <- g2g()
+  gotab <- gotab[gotab$significantly_expressed == input$UDMI, ]
+  #gotab <- filterGO(gotab,input$gos_of_interest)
+  gotab$percentage <- gotab$'%' *100
+  #print(tabi$percentage)
+  gotab <- as.data.table(gotab)
+  gotab$percentage <- as.numeric(gotab$percentage)
+  form <- list(categoryorder = "array",
+               categoryarray = gotab$percentage,
+               title = "Percentage")
+  fig2 <- plot_ly(gotab, x =~percentage, y = ~p.adjust, name = 'Top 10 categories with lowest adjusted p-values',mode = "markers", size = ~percentage, text = ~Term)
+  fig2 <- fig2 %>% layout(title = "adjusted p-values in categories", yaxis = list(title = "adjusted p-value"),
+                          xaxis = form,
+                          margin = list(b = 100))
+  # fig2
   
 })
+output$MIGO_padj_logFC <- renderPlotly({
+  gotab <- g2g()
+  gotab <- gotab[gotab$significantly_expressed == input$UDMI, ]
+  #gotab <- filterGO(gotab,input$gos_of_interest)
+  
+  circ_data <- make_circ_data(gotab,miRNA_saved_circ(),miRNA_saved_ontology())
+  
+  #gotab$percentage <- gotab$'%' *100
+  #print(tabi$percentage)
+  gotab <- as.data.table(circ_data)
+  #gotab$percentage <- as.numeric(gotab$percentage)
+  View(gotab)
+  form <- list(categoryorder = "array",
+               categoryarray = gotab$logFC,
+               title = "logFC")
+  fig2 <- plot_ly(gotab, x =~logFC, y = ~adj_pval, name = ~term,mode = "markers",color = ~term,customdata = ~term,size = ~logFC, text = ~genes, hovertemplate = paste('<br>gene: %{text}<br>', '<br>term: %{customdata}<br>'))
+  fig2 <- fig2 %>% layout(title = "adjusted p-values in categories", yaxis = list(title = "adjusted p-value"),
+                          xaxis = form,
+                          margin = list(b = 100))
+  # fig2
+  
+})
+
+
+
+output$MIGOC <- renderPlotly({
+  gotab <- g2g()
+  gotab <- gotab[gotab$significantly_expressed == input$UDMI, ]
+  #gotab <- filterGO(gotab,input$gos_of_interest)
+  circ_data <- make_circ_data(gotab,miRNA_saved_circ(),miRNA_saved_ontology())
+  chosen_terms <- circ_data[1:10,3] #top 10 highest logFC
+  filtered_tab <- circ_data[circ_data$term %in% chosen_terms,]
+  p<- plot_ly(filtered_tab,x = ~term, y = ~logFC, type = "violin",text = ~genes,color= ~regulation,hovertemplate = paste('%{x}', '<br>gene: %{text}<br>')) %>%
+    add_markers(size = 5)
+  p
+})
+
+
+
 ColourScale <- 'd3.scaleOrdinal()
             .domain(["mir", "Gene", "u", "d"])
            .range(["#0000ff","#a0b6fe","#008000","#d01212"]);'
 
 output$MInet <- renderForceNetwork({
-  minet()
+  #minet()
   t <- minod()
-  datasetname <- mi_name()
-  miud_liste<-getDIFmi(datasetname,input$mdTPM,input$mdfc,input$mdpc)
-  u <- miud_liste[[1]]
-  d <- miud_liste[[2]]
-  #View(u)
-  #View(d)
+  if(!is.null(t)){
+  #datasetname <- mi_name()
+  #miud_liste<-getDIFmi(datasetname,input$mdTPM,input$mdfc,input$mdpc)
+  u <- miRNA_up()
+  d <- miRNA_down()
   ensemb <- data.frame(t[,1],t[,3])
   hgnc <-data.frame(t[,1],t[,2])
   colnames(ensemb) <- c("from","to")
   colnames(hgnc) <- c("from", "to")
-  edges <- ensemb
+  if(input$miAnnot=="ENSEMBL ID"){
+    edges <- ensemb
+  }else{
+    edges <- hgnc
+  }
   nodes <- data.frame(name = unique(c(edges$from, edges$to)), stringsAsFactors = FALSE)
   nodes$id <- 0:(nrow(nodes) - 1)
   nodes$type <- "Gene"
   nodes$type[startsWith(nodes$name,"hsa-")] <- "mir"
-  nodes$type[nodes[,1] %in% u[,1]] <- "u"
-  nodes$type[nodes[,1] %in% d[,1]] <- "d"
+  nodes$type[nodes[,1] %in% u] <- "u"
+  nodes$type[nodes[,1] %in% d] <- "d"
   # View(nodes)
   miedges <- edges %>%
     left_join(nodes, by = c("from" = "name")) %>%
@@ -495,27 +596,139 @@ output$MInet <- renderForceNetwork({
   forceNetwork(Links = miedges, Nodes = nodes,
                Source = "from", Target = "to",
                #Value = "", 
-               NodeID = "name", Group = "type",opacity = 0.9,fontSize = 11, zoom = TRUE,colourScale = JS(ColourScale))
+               NodeID = "name", Group = "type",opacity = 0.9,fontSize = 11, zoom = TRUE,colourScale = JS(ColourScale))}
 })
 
-output$MIGOnet <- renderForceNetwork({
-  edgestab<-read.table(edg(),quote = "",sep = ",", header = TRUE)
-  nodestab<-read.table(nod(), quote = "",comment.char = "", dec = ".",sep = ",", header = TRUE ,na.strings = "NA", encoding = "automatic")
-  nodestab$tabid <- 0:(NROW(nodestab)-1)
-  edgestab$from <- trimws(edgestab$from, which = c("both"))
-  edgestab$to <- trimws(edgestab$to, which = c("both"))
-  nodestab$id<-trimws(nodestab$id, which = c("both"))
-  nodestab$type <- "term"
-  #View(nodestab)
-  edges <- edgestab %>%
-    left_join(nodestab, by = c("from" = "id")) %>%
-    select(-from) %>%
-    rename(from = tabid) %>%
-    left_join(nodestab, by = c("to" = "id")) %>%
-    select(-to) %>%
-    rename(to = tabid)
-  forceNetwork(Links = edges, Nodes = nodestab[, c(1,2,5,7)],
-               Source = "from", Target = "to",
-               Value = "width", NodeID = "id", Group = "type",opacity = 0.9,fontSize = 15 ,zoom = TRUE)
+# output$MIGOC <- renderPlotly({
+#   gotab <- saved_GO()
+#   gotab <- gotab[gotab$significantly_expressed == input$UDA, ]
+#   gotab <- filterGO(gotab,input$gos_of_interest)
+#   circ_data <- make_circ_data(gotab,saved_circ_mat(),saved_ontology())
+#   chosen_terms <- circ_data[1:10,3] #top 10 highest logFC
+#   filtered_tab <- circ_data[circ_data$term %in% chosen_terms,]
+#   p<- plot_ly(filtered_tab,x = ~term, y = ~logFC, type = "violin",text = ~genes,color= ~regulation,hovertemplate = paste('%{x}', '<br>gene: %{text}<br>')) %>%
+#     add_markers(size = 5)
+#   p
+# })
+
+output$MIGOp <- renderPlotly({
+  gotab <- g2g()
+  gotab <- gotab[gotab$significantly_expressed == input$UDMI & gotab$p.adjust <= 0.05, ]
+  #gotab <- filterGO(gotab,input$gos_of_interest)
+  #circ_data <- make_circ_data(gotab,saved_circ_mat(),saved_ontology())
+  #circ_data_sorted <- circ_data[,-4] %>% arrange(adj_pval)
+  #View(gotab)
+  gotab <- gotab%>% arrange(p.adjust)
+  circ_end <- gotab[1:10,]
+  form <- list(categoryorder = "array",
+               categoryarray = circ_end$Category,
+               title = "Category")
+  fig2 <- plot_ly(circ_end, x =~Category, y = ~p.adjust, type = 'bar', name = 'Top 10 categories with lowest adjusted p-values',text = ~Term, marker = list(color = '#ba3131'))
+  fig2 <- fig2 %>% layout(title = "adjusted p-values in categories", yaxis = list(title = "adjusted p-value"),
+                          xaxis = form,
+                          margin = list(b = 100))
+  # fig2
   
 })
+
+miRNA_fp <- "/Users/leonoraka/Desktop/Projekte/platlas/www/miRNA/new/"
+get_miRNA_datasets <- function(dataset, db, pC, fC, experimentally, significant){
+  data_name <- switch(dataset, "Mature Platelets vs. Reticulated - all data" = "rp_mp","in diseased patients" = "dis","only CAD patients" = "ccs"  )
+  database_name <- switch(db,"miRTarBase"= "tar", "miRDB" = "rdb")
+  miRNA_targets_filepath <- paste0(miRNA_fp,data_name,"_",database_name,"_db.tsv")
+  miRNA_expr_filepath <- switch(dataset,"Mature Platelets vs. Reticulated - all data" = "www/rp_vs_mp_diff_mir_counts.CSV", "in MI vs. CAD patients" = "www/disease_diff_mir_counts.CSV", "only CAD patients" = "www/ccs_rp_vs_mp_diff_mir_counts_noSample6_filtered_pCutoff0.05.CSV")
+  miRNA_targets <- fread(miRNA_targets_filepath)
+  miRNA_expr <- read.csv2(miRNA_expr_filepath,header = TRUE, na.strings = "_")
+  target_colnames <- switch(db, "miRDB" = c("Target Gene (Ref-Seq ID)", "Target Gene (HGNC Symbol)", "miRNA", "prediction score","Target Gene (ENSEMBL ID)"),"miRTarBase" = c("miRNA","miRTarBase ID", "Species (mRNA)", "Target Gene", "Target Gene (Entrez ID)", "Species (Target Gene)","Experiments","Support Type","References (PMID)","exp_type", "Target Gene (Ensembl ID)"))
+  colnames(miRNA_targets)= target_colnames
+  if(experimentally && db == "miRTarBase"){
+    miRNA_targets <- miRNA_targets[miRNA_targets$exp_type == "experimentally_retrieved",]
+  }
+  if(significant){
+    miRNA_expr_filtered <- miRNA_expr[!is.na(miRNA_expr$padj) & miRNA_expr$padj <= pC & abs(miRNA_expr$log2FoldChange) >= fC,1]
+    miRNA_targets <- miRNA_targets[miRNA_targets$miRNA %in% miRNA_expr_filtered,]
+  }
+  #up_miRNA <- miRNA_expr[miRNA_expr$log2FoldChange > 0 ,]
+  #down_miRNA <- miRNA_expr[miRNA_expr$log2FoldChange < 0 ,]
+  up_miRNA_expr <- miRNA_expr[miRNA_expr$log2FoldChange > 0 ,1]
+  down_miRNA_expr <- miRNA_expr[miRNA_expr$log2FoldChange < 0 ,1]
+  #universe <- getUniverse()
+  #View(universe)
+  up_miRNA_targets <- miRNA_targets[miRNA_targets$miRNA %in% up_miRNA_expr,]
+  down_miRNA_targets <- miRNA_targets[miRNA_targets$miRNA %in% down_miRNA_expr,]
+  
+  
+  return(list("upregulated" = up_miRNA_targets,"downregulated" = down_miRNA_targets))
+}
+
+
+makeNodes <- function(miRNATargets, db){
+  #View(miRNATargets)
+  nodes <- NULL
+  if(db == "miRTarBase"){
+    nodes <- miRNATargets[,c(1,4,11)]
+  }else if(db == "miRDB"){
+    nodes <- miRNATargets[,c(3,2,5)]
+  }
+  colnames(nodes) = c("miRNA", "hgnc_symbol", "ensembl_id")
+  # nodes$regulation <- "no regulation"
+  # if(annot == "ENSEMBL ID"){
+  #     nodes$regulation[nodes$ensembl_id %in% up] <- "upregulated"
+  #     nodes$regulation[nodes$ensembl_id %in% down] <- "downregulated"
+  # }else{
+  #     nodes$regulation[nodes$hgnc_symbol %in% up] <- "upregulated"
+  #     nodes$regulation[nodes$hgnc_symbol %in% down] <- "downregulated"
+  # }
+  return(nodes)
+}
+
+library(purrr)
+extract_genes_from_m2g <- function(miRNA_Targets, db, annot_type){
+  extracted <- NULL
+  if(db == "miRTarBase"){
+    annotate <- switch(annot_type, "ENSEMBL ID" = 11,"HGNC symbol" = 4)
+    extracted <- miRNA_Targets[,..annotate]
+  }else if(db == "miRDB"){
+    annotate <- switch(annot_type, "ENSEMBL ID" = 5,"HGNC symbol" = 2)
+    extracted <- miRNA_Targets[,..annotate]
+  }
+  extracted <- unlist(extracted)
+  extracted_new <- extracted[!is.na(extracted)] 
+  return(extracted_new)
+}
+
+getUniverse <- function(input_datapath,annot_type){
+  miRNA_expr_filepath <- switch(input_datapath,"Mature Platelets vs. Reticulated - all data" = "www/all_healthy_TPM-0-1.CSV", "in MI vs. CAD patients" = "www/all_diseased_TPM-0-1_disease-phenotype-all.CSV", "only CAD patients" = "www/all_diseased_TPM-0-2_phenotype-disease-stable-CAD.CSV")
+  miRNA2 <-  switch(input_datapath,"Mature Platelets vs. Reticulated - all data" = "www/all_diseased_TPM-0-1_phenotype-disease-all.CSV", "in MI vs. CAD patients" = "", "only CAD patients" = "")
+  extra_list <- c()
+  gncol <- switch(annot_type, "ENSEMBL ID"= 1, "HGNC symbol" = 11)
+  if(miRNA2 != ""){
+    matr2<- read.csv2(miRNA2)
+    extra_list <- matr2[,gncol]
+  }
+  matr <- read.csv2(miRNA_expr_filepath)
+  genes <- matr[,gncol]
+  all_genes <- c(genes,extra_list)
+  return(all_genes)
+}
+
+getGeneMat <- function(input_datapath,annot_type){
+  miRNA_expr_filepath <- switch(input_datapath,"Mature Platelets vs. Reticulated - all data" = "www/all_healthy_TPM-0-1.CSV", "in MI vs. CAD patients" = "www/all_diseased_TPM-0-1_disease-phenotype-all.CSV", "only CAD patients" = "www/all_diseased_TPM-0-2_phenotype-disease-stable-CAD.CSV")
+  miRNA2 <-  switch(input_datapath,"Mature Platelets vs. Reticulated - all data" = "www/all_diseased_TPM-0-1_phenotype-disease-all.CSV", "in MI vs. CAD patients" = "", "only CAD patients" = "")
+  extra_df <- NULL
+  gncol <- switch(annot_type, "ENSEMBL ID"= 1, "HGNC symbol" = 11)
+  if(miRNA2 != ""){
+    matr2<- read.csv2(miRNA2)
+    annot_colname <- colnames(matr2)[gncol]
+    extra_df <- matr2[,c(annot_colname,"log2FoldChange")]
+  }
+  matr <- read.csv2(miRNA_expr_filepath)
+  annot_colname <- colnames(matr)[gncol]
+  genes <- matr[,c(annot_colname,"log2FoldChange")]
+  all_genes <- rbind(genes,extra_df)
+  return(all_genes)
+}
+
+
+
+

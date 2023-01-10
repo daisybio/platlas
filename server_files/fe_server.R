@@ -93,6 +93,11 @@ library(stats)
 #path3 <- "C:/Users/Leonora/Desktop/Studium/6.Semester/Bachelor-Thema__implementierung_eines_Platelet_Atlas/R-programme-shiny/www/GOE_"
 #C:/Users/Leonora/Desktop/Studium/6.Semester/Bachelor-Thema__implementierung_eines_Platelet_Atlas/R-programme-shiny/www/
 functional_enrichment <- function(significant_genes_up,significant_genes_down,universal_genes, ontology, annotation_type){
+  #print(class(significant_genes_up))
+  #print("down:")
+  #print(na.omit(significant_genes_down))
+  #print("universe")
+  #print(universal_genes)
   res_up <- enrichGO(gene=significant_genes_up,universe = universal_genes,OrgDb="org.Hs.eg.db", ont=ontology,pAdjustMethod = "BH",keyType = annotation_type)#'ENSEMBL', pvalueCutoff = 0.05
   res_down <- enrichGO(gene=significant_genes_down,universe = universal_genes,OrgDb="org.Hs.eg.db", ont=ontology,pAdjustMethod = "BH",keyType = annotation_type)#'ENSEMBL', pvalueCutoff = 0.05
   
@@ -117,12 +122,13 @@ functional_enrichment <- function(significant_genes_up,significant_genes_down,un
   # print("is null")
   # print(is.null(erg$pvalue))
   
-  erg$fdr <- p.adjust(erg$pvalue, method="BH")#[!is.na(erg$pvalue) & !is.infinite(erg$pvalue) & !is.null(erg$pvalue)]#
-  erg <- erg[,c("ID","Description","Count","percent","pvalue","geneID","p.adjust","List Total","Pop Hits","Pop Total","richFactor","qvalue","fdr", "significantly_expressed")]
+  erg$fdr <-erg$p.adjust#p.adjust(erg$pvalue, method="BH")#[!is.na(erg$pvalue) & !is.infinite(erg$pvalue) & !is.null(erg$pvalue)]#
+  erg$GO <- ontology
+  erg <- erg[,c("GO","ID","Description","Count","percent","pvalue","geneID","p.adjust","List Total","Pop Hits","Pop Total","richFactor","qvalue","fdr", "significantly_expressed")]
   
   
   # rename the columns
-  names(erg) <- c("Category", "Term", "Count", "%", "PValue", "Genes", "p.adjust","List Total", "Pop Hits", "Pop Total", "Fold Enrichment", "q-value","FDR","significantly_expressed" ) #eig letztes sollte FDR sein
+  names(erg) <- c("GO","Category", "Term", "Count", "%", "PValue", "Genes", "p.adjust","List Total", "Pop Hits", "Pop Total", "Fold Enrichment", "q-value","FDR","significantly_expressed" ) #eig letztes sollte FDR sein
   return(list("tab" = erg, "obj_up" = res_up, "obj_down" = res_down))
 }
 
@@ -236,7 +242,7 @@ output$GOTab <- renderDataTable({
     cbind(' ' = '&oplus;', gotab), escape = -2,
     options = list(
       columnDefs = list(
-        list(visible = FALSE, targets = c(7)),
+        list(visible = FALSE, targets = c(8)),
         list(orderable = FALSE, className = 'details-control', targets = 1)
       ),
       lengthMenu = c(5, 10, 15),
@@ -247,7 +253,7 @@ output$GOTab <- renderDataTable({
   table.column(1).nodes().to$().css({cursor: 'pointer'});
   var format = function(d) {
     return '<div style=\"background-color:#eee; padding: .5em;\">  ' +
-            'Genes: ' + d[7] + '</div>';
+            'Genes: ' + d[8] + '</div>';
   };
   table.on('click', 'td.details-control', function() {
     var td = $(this), row = table.row(td.closest('tr'));
@@ -385,6 +391,7 @@ output$GO_padj_logFC <- renderPlotly({
 
 #TODO: noch einen Plot mit sortierung nach p.adjusted terms (dh die make_circ_data methode noch mal umschreiben)
 make_circ_data <- function(erg_table, difex_tab,categ){
+  #View(difex_tab)
   erg_table$Genes <- str_replace_all(erg_table$Genes,"/", ",")
   erg_table <- separate_rows(erg_table,Genes, sep = ",", convert = FALSE)
   go_tab <- erg_table[,c("Category","Term","Genes","p.adjust")]
@@ -455,20 +462,19 @@ filterGO <- function(tabs, gos_of_interest){
 
 
 
-
-
 output$GObar <- renderPlot({ #
   tab <- saved_GO()
   #todo anpassed
   panther_result_up_ref <- tab[tab$significantly_expressed == "upregulated",]
   panther_result_down_ref <- tab[tab$significantly_expressed == "downregulated",]
   
-  p <- myGObarplot(panther_result_up = panther_result_up_ref, 
+  print("in output GO bar")
+  p <- myGObarplot_new(panther_result_up = panther_result_up_ref, 
                     panther_result_down = panther_result_down_ref, 
                     count_threshold = input$countGO, 
                     fdr_threshold = input$fdrGO,
-                    padj_threshold = padj$padjGO,
-                    gos_of_interest = c("platelet", "hemostasis", "coagulation"),
+                    padj_threshold = input$padjGO,
+                    gos_of_interest = c("%platelet%", "%hemostasis%", "%coagulation%"),
                     background = "Reference genes")
   p
 })

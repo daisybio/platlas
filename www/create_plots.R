@@ -455,32 +455,32 @@ myVolcanoPlot <- function(deseq_results, data_type, pCutoff = 0.01, FCcutoff = 0
 
 
 
-myGObarplot <- function(panther_result_up, panther_result_down, count_threshold, fdr_threshold, num_tops = 10, 
-                        padj_threshold, background, gos_of_interest = c()){
+myGObarplot_new <- function(panther_result_up, panther_result_down, count_threshold, fdr_threshold, num_tops = 10, 
+                        padj_threshold, background, gos_of_interest){
+  print("in myGObarplot")
+  panther_result_up <- as.data.table(panther_result_up)
+  panther_result_down <- as.data.table(panther_result_down)
   
   prepare_go_result <- function(panther_result_up, panther_result_down, 
                                 count_threshold, fdr_threshold, gos_of_interest, num_tops){
     panther_result <- rbind(panther_result_up %>% mutate(enriched_platelet = rep("RPs", n())),
                             panther_result_down %>% mutate(enriched_platelet = rep("MPs", n()))) %>%
-      separate(Term, c("GO_ID", "GO_Term"), sep = "~") %>%
-      dplyr::select(Category, GO_ID, GO_Term, Count, PValue, `Fold Enrichment`, FDR, enriched_platelet) %>%
+      dplyr::select(GO, Category, Term, Count, PValue, `Fold Enrichment`, FDR, enriched_platelet) %>%
       rename(p_value = PValue, fold_enrichment = `Fold Enrichment`) %>%
       rename_all(tolower) %>%
       filter(count >= count_threshold,
              fdr <= fdr_threshold) %>%
-      mutate(category = gsub("GOTERM_", "", category),
-             category = gsub("_DIRECT", "", category),
-             lab_color = ifelse(go_term %like% paste0(gos_of_interest, collapse = "|"), "red", "black"),
+      mutate(lab_color = ifelse(term %like any% gos_of_interest, "red", "black"),
              log_pvalue = -log(p_value, base = 10),
-             grouped_go_term = paste0(enriched_platelet, "_", go_term),
-             grouped_go_term = factor(grouped_go_term, 
+             grouped_go_term = paste0(enriched_platelet, "_", term),
+             grouped_go_term = factor(grouped_go_term,
                                       levels = grouped_go_term[order(enriched_platelet, fold_enrichment)]),
              fold_enrichment = ifelse(enriched_platelet == "RPs", fold_enrichment, (fold_enrichment * -1)),
              rp_score = ifelse(enriched_platelet == "RPs", log_pvalue, rep(0, num_tops)),
              mp_score = ifelse(enriched_platelet == "RPs", rep(0, num_tops), log_pvalue),
              label_y = ifelse(enriched_platelet == "RPs", -0.2, 0.2),
              label_hjust = ifelse(enriched_platelet == "RPs", 1, 0))
-    
+    #View(panther_result)
     
     panther_result_tops <- setNames(data.table(matrix(nrow = 0, ncol = ncol(panther_result))), 
                                     colnames(panther_result))
@@ -488,13 +488,13 @@ myGObarplot <- function(panther_result_up, panther_result_down, count_threshold,
       for(platelet in c("RPs", "MPs")){
         
         panther_result_subset <- panther_result %>%
-          filter(category == go_category,
+          filter(go == go_category,
                  enriched_platelet == platelet) %>%
           slice_max(abs(fold_enrichment), n = num_tops)
         
         if(nrow(panther_result_subset) > num_tops){
-          temp <- panther_result_subset[go_term %like% paste0(gos_of_interest, collapse = "|"), ]
-          panther_result_subset <- panther_result_subset[!go_term %in% temp$go_term, ] %>%
+          temp <- panther_result_subset[term %like any% gos_of_interest, ]
+          panther_result_subset <- panther_result_subset[!term %in% temp$term, ] %>%
             slice_max(abs(fold_enrichment), n = num_tops-nrow(temp)) %>%
             rbind(temp)
         }
@@ -502,6 +502,7 @@ myGObarplot <- function(panther_result_up, panther_result_down, count_threshold,
       }
     }
     
+    View(panther_result_tops)
     return(panther_result_tops)
   }
   plot_single_go_barplot <- function(panther_result, rp_limit, mp_limit, go_category){
@@ -533,7 +534,7 @@ myGObarplot <- function(panther_result_up, panther_result_down, count_threshold,
       theme(plot.title = element_text(hjust = 0.5, face = "bold", color = "royalblue1", size = 16)) +
       
       labs(x = "", y = "Fold enrichment") +
-      geom_text(aes(y = label_y, label = go_term, hjust = label_hjust, color = lab_color), show.legend = FALSE) +
+      geom_text(aes(y = label_y, label = term, hjust = label_hjust, color = lab_color), show.legend = FALSE) +
       scale_colour_manual(values=c("black", "green4")) +
       
       theme(axis.text.y = element_blank(),
@@ -577,27 +578,34 @@ myGObarplot <- function(panther_result_up, panther_result_down, count_threshold,
                                         fdr_threshold = fdr_threshold,
                                         gos_of_interest = gos_of_interest,
                                         num_tops = num_tops)
-
+    View(panther_result)
     plots <- List()
     mp_limit <- c(min(panther_result[enriched_platelet == "MPs", mp_score]),
                   max(panther_result[enriched_platelet == "MPs", mp_score]))
+    View(mp_limit)
     rp_limit <- c(min(panther_result[enriched_platelet == "RPs", rp_score]),
                   max(panther_result[enriched_platelet == "RPs", rp_score]))
+    View(rp_limit)
     for(term in c("BP", "CC", "MF")){
-      plot <- plot_single_go_barplot(panther_result = panther_result[category == term,],
+      plot <- plot_single_go_barplot(panther_result = panther_result[go == term,],
                                      mp_limit = mp_limit,
                                      rp_limit = rp_limit,
                                      go_category = term)
       plots[[term]] <- plot
+      plot(plot)
     }
-  
+    #View(plots@listData[["BP"]])
+    padj <- "NA"
+    count <- "NA"
+    fdr <- "NA"
+    background <- "NA"
     plot_title <- paste0("Sign. padj = ", padj, ", count = ", count, ", fdr = ", fdr, ", Background = ", background)
     footnote <- paste0("Significant genes padj < ", padj_threshold,
                        "\nBackgroung for GO analysis: ", background,
                        "\nGene count per GO Term >= ", count_threshold, 
                        "\nFDR for GO Term <= ", fdr_threshold)
     shared_legend <- get_shared_legend(panther_result)
-    plot <- ggarrange(plots$BP, plots$CC, plots$MF, nrow = 1, ncol = 3, legend.grob = shared_legend, legend = "bottom")
+    plot <- plots$BP#ggarrange(plots$BP, plots$CC, plots$MF, nrow = 1, ncol = 3, legend.grob = shared_legend, legend = "bottom")
     plot <- annotate_figure(plot, 
                             top = text_grob(plot_title, color = "black", face = "bold", size = 18),
                             bottom = text_grob(footnote, color = "darkmagenta", face = "italic", size = 10, 

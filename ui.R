@@ -406,7 +406,7 @@ ui<- dashboardPage(
               width = NULL
             ),
             tabPanel(
-              id="GOtab",title = "Top 500 GO Terms", solidHeader = TRUE,
+              id="GOtab",title = "GO Terms", solidHeader = TRUE,
               "",
               #selectInput(inputId = "FeA" , label = "Choose gene annotation in GO categories" , choices = c("ENSEMBL ID","ENTREZ ID","HGNC symbol"), multiple = FALSE),
               #actionButton(inputId = "clickFeA",label = "Get GOs",icon = icon('arrow'), style = "color: #FFF; background-color: #000000; border-color: #000000"),
@@ -489,7 +489,7 @@ ui<- dashboardPage(
               numericInput(inputId = "fdrGO",value =  0.01 , label = "FDR cutoff", min = 0.00 , max = 1, step = 0.05),
               numericInput(inputId = "countGO",value =  2 , label = "gene count cutoff", min = 0 , max = 20.0, step = 5),
               
-              plotlyOutput("GObarplot",height = "800px")%>% withSpinner(color= "#000000"),
+              plotOutput("GObar",height = "800px")%>% withSpinner(color= "#000000"),
               #downloadButton("dlPNGGO", "Download plot in PNG format")
             )
             # tabPanel(
@@ -524,6 +524,9 @@ ui<- dashboardPage(
         
       ),
       
+
+# miRNA Analysis ----------------------------------------------------------
+
       tabItem(
         tabName = "miA",
         #"miRNA Analysis Page under construction"
@@ -556,8 +559,13 @@ ui<- dashboardPage(
               "",
               selectInput(inputId = "miF2" , label = "Choose the dataset in which you want to start the analysis" , choices = c("Mature Platelets vs. Reticulated - all data", "in diseased patients", "only CAD patients"), multiple = FALSE),
               selectInput(inputId = "miOnt" , label = "Choose ontology" , choices = c("Biological Process", "Cellular Component", "Molecular Function"), multiple = FALSE),
-              selectInput(inputId = "UDMI" , label = "Choose upregulated / downregulated" , choices = c("upregulated", "downregulated"), multiple = FALSE),
-              selectInput(inputId = "miDB" , label = "Choose database to map" , choices = c("miRTarBase", "miRDB"), multiple = FALSE),
+             # selectInput(inputId = "UDMI" , label = "Choose upregulated / downregulated" , choices = c("upregulated", "downregulated"), multiple = FALSE),
+             selectInput(inputId = "miAnnot" , label = "Choose gene annotation" , choices = c("ENSEMBL ID", "HGNC symbol"), multiple = FALSE),
+             
+             numericInput(inputId = "mTpCO",value = 0.05 ,label = "p-value cutoff", min = 0.01 , max = 0.05,step = 0.005),
+             numericInput(inputId = "mTfCO",value = 1.5 ,label = "log2(Foldchange) cutoff", min = 0 , max = 4.0, step = 0.5),
+             
+             selectInput(inputId = "miDB" , label = "Choose database to map" , choices = c("miRTarBase", "miRDB"), multiple = FALSE),
               
               checkboxInput(inputId = "miEXP", label = "Choose miRNA Targets retrieved experimentally (miRTarBase)",value = FALSE),
               checkboxInput(inputId = "miSign", label = "Choose only significant miRNAs to map",value = FALSE),
@@ -628,11 +636,13 @@ ui<- dashboardPage(
             tabBox(
               width = 12, 
               height = "1000px",
+              selectInput(inputId = "UDMI" , label = "Choose upregulated / downregulated" , choices = c("upregulated", "downregulated"), multiple = FALSE),
+              
               tabPanel(
                 id= "tE","miRNA Targets",
                 downloadButton("dlMIDT", "Download table"),
                 br(),br(),
-                dataTableOutput("MIDT"),
+                dataTableOutput("MIDT")%>% withSpinner(color= "#000000"),
                 tags$head(tags$style("#DTMIT table {background-color: #DCDCDC; color : #000000;  }", media="screen", type="text/css")),
                 
                 tags$head(tags$style(".table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
@@ -642,10 +652,10 @@ ui<- dashboardPage(
                 id="t10","miRNA Target Enrichment", 
                 #selectInput(inputId = "MSIG" , label = "Choose significant or all mRNA" , choices = c("significant","all"), multiple = FALSE),
                 #actionButton(inputId = "clickSIG",label = "Get mRNA ",icon = icon('arrow'), style = "color: #FFF; background-color: #000000; border-color: #000000"),
-                span("The 30 Most significant GO terms" ,style = "color: black; font-size: 18px"),br(),
+                span("The  GO terms" ,style = "color: black; font-size: 18px"),br(),
                 downloadButton("dlDTMIT", "Download table"),
                 br(),br(),
-                dataTableOutput("DTMIT"),
+                dataTableOutput("DTMIT")%>% withSpinner(color= "#000000"),
                 tags$head(tags$style("#DTMIT table {background-color: #DCDCDC; color : #000000;  }", media="screen", type="text/css")),
                 
                 tags$head(tags$style(".table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
@@ -657,22 +667,18 @@ ui<- dashboardPage(
                 span("Search if miRNA Targets are differentially expressed, by first defining differentially expressed genes with the filters below. The results show miRNAs (darkblue nodes) and their mapping genes (light blue nodes), while green nodes are upregulated genes and red nodes are downregulated genes.",
                      style = "color: black; font-size: 18px"),
                 br(),
-                selectInput(inputId = "mdTPM" , label = "Read count normalization: Choose TPM (Transcripts per million) threshholds" , choices = c("TPM > 0.1","TPM > 0.3", "TPM > 1", "TPM > 2"), multiple = FALSE),
-                numericInput(inputId = "mdpc",value = 0.05 , label = "p-value cutoff", min = 0.01 , max = 0.05, step = 0.005),
-                numericInput(inputId = "mdfc",value =  1.5 , label = "Foldchange cutoff", min = 0 , max = 4.0, step = 0.5),
-                actionButton(inputId = "md_click",label = "Start Analysis", style = "color: #fff; background-color: #000000; border-color: #000000"),
-                forceNetworkOutput("MInet", height = "850px")
+                forceNetworkOutput("MInet", height = "700px")%>% withSpinner(color= "#000000")
                 
               ),
               tabPanel(
                 id="t12","miRNA Target Enrichment Graph", 
                 span("miRNA Target Enrichment Graph",style = "color: black; font-size: 24px"),br(),br(),
-                forceNetworkOutput("MIGOnet", height = "850px")
+                plotOutput("MIGOnet", height = "850px")%>% withSpinner(color= "#000000")
                 
               ),
               tabPanel(
                 title = "percentage of target genes in GO categories", solidHeader = TRUE,# width = 12,
-                plotlyOutput("MIpG",height = "800px"),
+                plotlyOutput("MIpG",height = "800px")%>% withSpinner(color= "#000000"),
                 #downloadButton("dlPNGGO", "Download plot in PNG format")
               ),
               tabPanel(
@@ -680,7 +686,42 @@ ui<- dashboardPage(
                 #numericInput(inputId = "GOFE",value = 1.0 ,label = "Choose fold enrichment threshhold", min = 0 , max = 10, step = 0.5),
                 #actionButton(inputId = "clickGOFE",label = "get Plot ",icon = icon('arrow'), style = "color: #fff; background-color: #000000; border-color: #000000"),
                 #br(),
-                plotlyOutput("MIpFE",height = "800px"),
+                plotlyOutput("MIpFE",height = "800px")%>% withSpinner(color= "#000000"),
+                #downloadButton("dlPNGGO", "Download plot in PNG format")
+              ),#MIGOp
+              tabPanel(
+                title = "Top 10 most significant GO categories", solidHeader = TRUE,# width = 12,
+                #numericInput(inputId = "GOFE",value = 1.0 ,label = "Choose fold enrichment threshhold", min = 0 , max = 10, step = 0.5),
+                #actionButton(inputId = "clickGOFE",label = "get Plot ",icon = icon('arrow'), style = "color: #fff; background-color: #000000; border-color: #000000"),
+                #br(),
+                plotlyOutput("MIGOp",height = "800px")%>% withSpinner(color= "#000000"),
+                #downloadButton("dlPNGGO", "Download plot in PNG format")
+              ),
+              tabPanel(
+                title = "Violinplot", solidHeader = TRUE,# width = 12,
+                #numericInput(inputId = "GOFE",value = 1.0 ,label = "Choose fold enrichment threshhold", min = 0 , max = 10, step = 0.5),
+                #actionButton(inputId = "clickGOFE",label = "get Plot ",icon = icon('arrow'), style = "color: #fff; background-color: #000000; border-color: #000000"),
+                #br(),
+                plotlyOutput("MIGOC",height = "800px")%>% withSpinner(color= "#000000"),
+                #downloadButton("dlPNGGO", "Download plot in PNG format")
+              ),
+              tabPanel(
+                title = "Scatterplot- p.adjusted vs. identity percentage", solidHeader = TRUE,# width = 12,
+                #span("The z-score, computed by the circ_dat() Method from the GOplot package, is a score meant to give an orientation to understand if a category is more likely to be increased (z-score = positive) or decreased (z-score = negative)",style = "color: black; font-size: 15px"),
+                #br(),
+                #withMathJax(),
+                #helpText("$$ zscore= \\frac{(up-down)}{\\sqrt{count}}$$"),
+                plotlyOutput("MIGO_perc_term",height = "800px")%>% withSpinner(color= "#000000"),
+                #downloadButton("dlPNGGO", "Download plot in PNG format")
+                #downloadButton("dlPNGGO", "Download plot in PNG format")
+              ),
+              tabPanel(
+                title = "Scatterplot- p.adjusted vs. gene logFC", solidHeader = TRUE,# width = 12,
+                #span("The z-score, computed by the circ_dat() Method from the GOplot package, is a score meant to give an orientation to understand if a category is more likely to be increased (z-score = positive) or decreased (z-score = negative)",style = "color: black; font-size: 15px"),
+                #br(),
+                #withMathJax(),
+                #helpText("$$ zscore= \\frac{(up-down)}{\\sqrt{count}}$$"),
+                plotlyOutput("MIGO_padj_logFC",height = "800px")%>% withSpinner(color= "#000000"),
                 #downloadButton("dlPNGGO", "Download plot in PNG format")
               )
             )
