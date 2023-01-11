@@ -87,27 +87,27 @@ ui<- dashboardPage(
         # icon = icon("ambulance")#,
         
       ),
-      br(),
-      menuItem(
-        "De novo Network Enrichment",
-        tabName = "KPM"
-        #icon = icon("flask")#,
-        
-      ),
+      # br(),
+      # menuItem(
+      #   "De novo Network Enrichment",
+      #   tabName = "KPM"
+      #   #icon = icon("flask")#,
+      # 
+      # ),
       br(),
       menuItem(
         "Differential Alternative Splicing",
         tabName = "DAS"
         #icon = icon("flask")#,
         
-      ),
-      br(),
-      menuItem(
-        "Integrative Analysis",
-        tabName = "CA"
-        #icon = icon("calendar")#,
-        
-      )
+      )#,
+      # br(),
+      # menuItem(
+      #   "Integrative Analysis",
+      #   tabName = "CA"
+      #   #icon = icon("calendar")#,
+      #   
+      # )
       
     )
   ),
@@ -439,8 +439,8 @@ ui<- dashboardPage(
               #downloadButton("dlPNGGO", "Download plot in PNG format")
             ),
             tabPanel(
-              title = "increased/decreased categories and their terms & their genes", solidHeader = TRUE,# width = 12,
-              span("Increased/decreased categories and their terms in relation to upregulated and downregulated genes in the corresponding category",style = "color: black; font-size: 19px"),
+              title = "GO categories with the 10 highest DE genes", solidHeader = TRUE,# width = 12,
+              #span("Increased/decreased categories and their terms in relation to upregulated and downregulated genes in the corresponding category",style = "color: black; font-size: 19px"),
               br(),
               downloadButton("dlGOC", "Download plot in PNG format"),
               br(),
@@ -448,7 +448,7 @@ ui<- dashboardPage(
               #downloadButton("dlPNGGO", "Download plot in PNG format")
             ),
             tabPanel(
-              title = "GO categories and their z-score", solidHeader = TRUE,# width = 12,
+              title = "GO category graph", solidHeader = TRUE,# width = 12,
               #span("The z-score, computed by the circ_dat() Method from the GOplot package, is a score meant to give an orientation to understand if a category is more likely to be increased (z-score = positive) or decreased (z-score = negative)",style = "color: black; font-size: 15px"),
               #br(),
               #withMathJax(),
@@ -664,7 +664,7 @@ ui<- dashboardPage(
               ),
               tabPanel(
                 id="t11","miRNA Target Network Graph", 
-                span("Search if miRNA Targets are differentially expressed, by first defining differentially expressed genes with the filters below. The results show miRNAs (darkblue nodes) and their mapping genes (light blue nodes), while green nodes are upregulated genes and red nodes are downregulated genes.",
+                span("Search if miRNA Targets are differentially expressed, by first defining differentially expressed genes with the filters below. The results show miRNAs (darkblue nodes) and their mapping genes, while green nodes are upregulated genes and red nodes are downregulated genes.",
                      style = "color: black; font-size: 18px"),
                 br(),
                 forceNetworkOutput("MInet", height = "700px")%>% withSpinner(color= "#000000")
@@ -682,7 +682,7 @@ ui<- dashboardPage(
                 #downloadButton("dlPNGGO", "Download plot in PNG format")
               ),
               tabPanel(
-                title = "enrichment FDR per GO categories", solidHeader = TRUE,# width = 12,
+                title = "enrichment FDR per GO categories of categories", solidHeader = TRUE,# width = 12,
                 #numericInput(inputId = "GOFE",value = 1.0 ,label = "Choose fold enrichment threshhold", min = 0 , max = 10, step = 0.5),
                 #actionButton(inputId = "clickGOFE",label = "get Plot ",icon = icon('arrow'), style = "color: #fff; background-color: #000000; border-color: #000000"),
                 #br(),
@@ -698,7 +698,7 @@ ui<- dashboardPage(
                 #downloadButton("dlPNGGO", "Download plot in PNG format")
               ),
               tabPanel(
-                title = "Violinplot", solidHeader = TRUE,# width = 12,
+                title = "GO categories with the 10 highest DE genes", solidHeader = TRUE,# width = 12,
                 #numericInput(inputId = "GOFE",value = 1.0 ,label = "Choose fold enrichment threshhold", min = 0 , max = 10, step = 0.5),
                 #actionButton(inputId = "clickGOFE",label = "get Plot ",icon = icon('arrow'), style = "color: #fff; background-color: #000000; border-color: #000000"),
                 #br(),
@@ -730,6 +730,9 @@ ui<- dashboardPage(
         
         
       ),
+
+# ciRNA Analysis ----------------------------------------------------------
+
       tabItem(
         tabName = "cA",
         fluidRow(
@@ -758,7 +761,40 @@ ui<- dashboardPage(
           )
         ),
         fluidRow(
-          uiOutput("Crna")
+          #uiOutput("Crna")
+          tagList(
+            tabBox(
+              width = 12, 
+              height = "1000px",
+              tabPanel(id = "CIVP1", "Differentially Expressed circRNA", "",
+                       br(),
+                       downloadButton("dlCIVP", "Download plot in PNG format"),
+                       br(),
+                       plotOutput("CIVP", height = "800px")
+              ),
+              tabPanel(id = "CR1", "List of differentially expressed circRNA", "",
+                       selectInput(inputId = "circUD" , label = "Choose up or downregulated ciRNAs" , choices = c("upregulated","downregulated"), multiple = FALSE),
+                       actionButton(inputId = "clickCUD",label = "Get ciRNAs ",icon = icon('arrow'), style = "color: #FFF; background-color: #000000; border-color: #000000"),
+                       br(),
+                       downloadButton("dlCTO", "Download Table"),
+                       br(),
+                       dataTableOutput("CTO"),
+                       tags$head(tags$style("#CTO table {background-color: #DCDCDC; color : #000000;  }", media="screen", type="text/css")),
+                       
+                       tags$head(tags$style(".table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
+                                    border-top: 1px solid #000000;}",media="screen", type="text/css"))
+                       
+              ),
+              # tabPanel(id = "CR2", "Heatmap", "",
+              #          plotOutput("CHM")
+              # ),
+              tabPanel(id = "CR3", "Mapped out circRNA", "",
+                       plotOutput("CGviz")
+              )
+              
+            )
+          )
+          
         )
         #))
       ),

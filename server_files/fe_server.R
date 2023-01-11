@@ -93,9 +93,9 @@ library(stats)
 #path3 <- "C:/Users/Leonora/Desktop/Studium/6.Semester/Bachelor-Thema__implementierung_eines_Platelet_Atlas/R-programme-shiny/www/GOE_"
 #C:/Users/Leonora/Desktop/Studium/6.Semester/Bachelor-Thema__implementierung_eines_Platelet_Atlas/R-programme-shiny/www/
 functional_enrichment <- function(significant_genes_up,significant_genes_down,universal_genes, ontology, annotation_type){
-  #print(class(significant_genes_up))
+  #View(significant_genes_up)
   #print("down:")
-  #print(na.omit(significant_genes_down))
+  #View(significant_genes_down)
   #print("universe")
   #print(universal_genes)
   res_up <- enrichGO(gene=significant_genes_up,universe = universal_genes,OrgDb="org.Hs.eg.db", ont=ontology,pAdjustMethod = "BH",keyType = annotation_type)#'ENSEMBL', pvalueCutoff = 0.05

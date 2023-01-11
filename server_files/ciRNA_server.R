@@ -1,41 +1,41 @@
-CRUI <- eventReactive(input$clickCirc,{
-  tagList(
-    tabBox(
-      width = 12, 
-      height = "1000px",
-      tabPanel(id = "CIVP1", "Differentially Expressed circRNA", "",
-               br(),
-               downloadButton("dlCIVP", "Download plot in PNG format"),
-               br(),
-               plotOutput("CIVP", height = "800px")
-      ),
-      tabPanel(id = "CR1", "List of differentially expressed circRNA", "",
-               selectInput(inputId = "circUD" , label = "Choose up or downregulated ciRNAs" , choices = c("upregulated","downregulated"), multiple = FALSE),
-               actionButton(inputId = "clickCUD",label = "Get ciRNAs ",icon = icon('arrow'), style = "color: #FFF; background-color: #000000; border-color: #000000"),
-               br(),
-               downloadButton("dlCTO", "Download Table"),
-               br(),
-               dataTableOutput("CTO"),
-               tags$head(tags$style("#CTO table {background-color: #DCDCDC; color : #000000;  }", media="screen", type="text/css")),
-               
-               tags$head(tags$style(".table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
-                                    border-top: 1px solid #000000;}",media="screen", type="text/css"))
-               
-      ),
-      # tabPanel(id = "CR2", "Heatmap", "",
-      #          plotOutput("CHM")
-      # ),
-      tabPanel(id = "CR3", "Mapped out circRNA", "",
-               plotOutput("CGviz")
-      )
-      
-    )
-  )
-})
+# CRUI <- eventReactive(input$clickCirc,{
+#   tagList(
+#     tabBox(
+#       width = 12, 
+#       height = "1000px",
+#       tabPanel(id = "CIVP1", "Differentially Expressed circRNA", "",
+#                br(),
+#                downloadButton("dlCIVP", "Download plot in PNG format"),
+#                br(),
+#                plotOutput("CIVP", height = "800px")
+#       ),
+#       tabPanel(id = "CR1", "List of differentially expressed circRNA", "",
+#                selectInput(inputId = "circUD" , label = "Choose up or downregulated ciRNAs" , choices = c("upregulated","downregulated"), multiple = FALSE),
+#                actionButton(inputId = "clickCUD",label = "Get ciRNAs ",icon = icon('arrow'), style = "color: #FFF; background-color: #000000; border-color: #000000"),
+#                br(),
+#                downloadButton("dlCTO", "Download Table"),
+#                br(),
+#                dataTableOutput("CTO"),
+#                tags$head(tags$style("#CTO table {background-color: #DCDCDC; color : #000000;  }", media="screen", type="text/css")),
+#                
+#                tags$head(tags$style(".table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
+#                                     border-top: 1px solid #000000;}",media="screen", type="text/css"))
+#                
+#       ),
+#       # tabPanel(id = "CR2", "Heatmap", "",
+#       #          plotOutput("CHM")
+#       # ),
+#       tabPanel(id = "CR3", "Mapped out circRNA", "",
+#                plotOutput("CGviz")
+#       )
+#       
+#     )
+#   )
+# })
 
-output$Crna <- renderUI({
-  CRUI()
-})
+# output$Crna <- renderUI({
+#   CRUI()
+# })
 
 
 
