@@ -1,14 +1,6 @@
 library(plotly)
 library(DT)
 library(matrixStats)
-#library(crosstalk)
-# DIFEX <- eventReactive(c(input$click1, input$click2),ignoreInit = T,{ 
-#  
-# })
-# output$DIFEXtab <- renderUI({
-#   DIFEX()
-# })
-
 
 #___________matrix erstellen___________
 clicked1 = reactiveVal(isolate(input$click1))
@@ -19,17 +11,18 @@ nameTPM1 <- reactiveVal("")
 pcReactive <- reactiveVal("")
 fcReactive <- reactiveVal("")
 gene_name_column <- reactiveVal()
+difex_title <- reactiveVal()
 
 Mat <- eventReactive(c(input$click1,input$click2),{#ignoreInit = T,
   ma <- data.frame()
   if(clicked1() < input$click1){#####komisch
     print("in mat1")
-    #Click1<- TRUE
     finalpath <-paths2frames("1",path,input$TPM1,input$HoD,".CSV")
     print(finalpath)
     matriks2 <- read.csv2(finalpath)
     ma <- matriks2
     Titl('Volcano Plot: MP vs. RP')
+    difex_title("MP vs. RP")
     nameHod(as.character(input$HoD))
     nameTPM1(as.character(input$TPM1))
     pcReactive(as.numeric(input$pCO1))
@@ -42,6 +35,7 @@ Mat <- eventReactive(c(input$click1,input$click2),{#ignoreInit = T,
     matriks3 <- read.csv2(finalpath)
     ma <- matriks3
     Titl('Volcano Plot: CCS vs. MI')
+    difex_title("CCS vs. MI")
     nameHod(as.character(input$HoD02))
     nameTPM1(as.character(input$TPM2))
     pcReactive(as.numeric(input$pCO2))
@@ -113,20 +107,12 @@ heat <-  eventReactive(c(input$click1,input$click2),{
   neuer <- data.matrix(h)
   neuer<-log(neuer,2)
   neuer[neuer < 0] <- 0
-  #endtab<- neuer
-  #print(neuer)
-  #View(neuer)
   merged_annotation <- fread("www/simulated_sample_names_all.tsv")
-  #View(merged_annotation)
   merged_annotation <- as.data.frame(merged_annotation)
   rownames(merged_annotation) <- merged_annotation$original_sample_name
   to_translate <- colnames(neuer)
   new_names <- merged_annotation[to_translate,]
-  #print(to_translate)
-  #print(new_names)
-  #View(new_names)
   colnames(neuer) <- new_names$sample_name
-  #View(neuer)
   if(nameHod()=="disease - CCS"){
     #threshold <- sort(rowVars(counts), decreasing = T)[150]
     #counts = counts[which(rowVars(counts) >= threshold),]
@@ -161,7 +147,7 @@ output$heatmap <- renderPlot({
     #View(counts)
     
   }
-  
+  heatmap_title <- paste0("Heatmap: ", difex_title(), " in ", nameHod(), " dataset")
   dbo_file <- fread("www/simulated_sample_names_all.tsv")
   dbo <- data.frame("names" = dbo_file$sample_name, "Condition" = dbo_file$condition, "Platelet type" = dbo_file$platelet )
   rownames(dbo) = dbo$names
@@ -177,22 +163,18 @@ output$heatmap <- renderPlot({
                border_color = NA,
                annotation_colors = ann_col,
                annotation_col = dbo,#dbo %>% select('Platelet type' = dbo$`Platelet type`, 'Disease' = dbo$Disease),
-               show_rownames = FALSE, show_colnames = TRUE, scale="row"
+               show_rownames = FALSE, show_colnames = TRUE, scale="row",
+               main = heatmap_title
   )
   saved_heatmap_plot(p)
   p
   }
-  # plot_ly(x= colnames(hm()),y = rownames(hm()),z = hm(), colors = colorRamp(c("blue","green" ,"yellow")), type = "heatmap")
-  
 })
 cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 saved_pcabi = reactiveVal()
 output$pcabi<- renderPlot({
   heat()
   if(!is.null(sav_path())){
-    #CAD_MI <- read.csv2(sav_path())
-  #cmeta <- pickGeneAnnot("e",CAD_MI)
-  #View(cmeta)
   cmeta <- hm()
   #View(cmeta)
   dis_metatab <- metatab
@@ -200,16 +182,6 @@ output$pcabi<- renderPlot({
   #View(dis_metatab)
   p <- pca(cmeta, metadata = dis_metatab, removeVar = 0.1)
   b<- biplot(p,colby = 'platelet', colkey = c('MP' = 'blue', 'RP' = 'red', "0" = 'black'),
-             # colLegendTitle = 'types of platelets',
-             # encircle config
-             #encircle = TRUE,
-             #encircleFill = TRUE,
-             # ellipse = TRUE,
-             # ellipseConf = 0.95,
-             # ellipseFill = TRUE,
-             # ellipseAlpha = 1/4,
-             # ellipseLineSize = 1.0,
-             # xlim = c(-125,125), ylim = c(-50, 80),
              shape = 'condition', shapekey = c('CCS'=15, 'ACS'=17, 'healthy' = 15 ),#'Grade 3'=8
              hline = 0, vline = c(-25, 0, 25),
              legendPosition = 'right', legendLabSize = 16, legendIconSize = 8.0,
@@ -333,7 +305,7 @@ output$VP <- renderPlot({
 matt<-eventReactive(c(input$click1,input$click2),{
   print("in matt ")
   if(!is.null(Mat())){
-  View(Mat())
+  #View(Mat())
   tab <- Mat()
   if(gene_name_column() == 11){
     #print("is hgnc")
@@ -435,7 +407,8 @@ output$DMA_plot <- renderPlot({
     
     d[,7] = as.numeric(d[,7])
     annot <- gene_name_column()
-    p <- myMAplot_lim(d, fdr = pcReactive(), fc = fcReactive(), ylim = c(-4, 4)) #fdr ... + make ylim scalable
+    MA_title <- paste0("MA plot: ", difex_title(), " in ", nameHod(), " dataset")
+    p <- myMAplot_lim(d, fdr = pcReactive(), fc = fcReactive(), ylim = c(-4, 4), MA_title) #fdr ... + make ylim scalable
 
     p
   }
@@ -451,7 +424,8 @@ output$Dbiotype_plot <- renderPlot({ ##passt nicht ganz mit barplot
     }else{
       id_type = "hgnc_symbol"
     }
-    p<- myBiotypeBarplot(as.data.frame(d), paste0("CCS only - ", "test"), id_type = id_type)#hier noch namenparameter
+    Bt_title <- paste0("Biotype plot: ", difex_title(), " in ", nameHod(), " dataset")
+    p<- myBiotypeBarplot(as.data.frame(d), Bt_title, id_type = id_type)#hier noch namenparameter
     
     #p$biotype_plot
     p$biotype_plot
@@ -462,8 +436,12 @@ output$Dexpression_plot <- renderPlot({
   heat()
   d <- hm()
   if(!is.null(d)){
+    if(nameHod()=="disease - CCS"){
+      EA_title <-  paste0("Expression analysis plot: ", difex_title(), " in ", nameHod(), " dataset before filtering")
+    }
+    EA_title <- paste0("Expression analysis plot: ", difex_title(), " in ", nameHod(), " dataset after filtering")
     #View(d)
-    p <- myCountAnalysisPlot(as.data.frame(d), "gene", "test title")#fdr ... + make ylim scalable
+    p <- myCountAnalysisPlot(as.data.frame(d), "gene", EA_title)#fdr ... + make ylim scalable
     
     p
   }

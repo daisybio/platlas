@@ -108,12 +108,18 @@
 
 # MiRNA Section -----------------------------------------------------------
 
+MI_first_dataset = reactiveVal()
+MI_first_pc = reactiveVal()
+MI_first_fc = reactiveVal()
 getDTVP <- eventReactive(input$clickMIF,{
   df <- data.frame()
   mipa <- switch(input$miF,"Mature Platelets vs. Reticulated - all data" = "www/rp_vs_mp_diff_mir_counts.CSV", "in MI vs. CAD patients" = "www/disease_diff_mir_counts.CSV" , "only CAD patients"= "www/cad_rp_vs_mp_diff_mir_counts.CSV")
   df <- read.csv2(mipa,header = TRUE, na.strings = "_")
   pval <- input$mpCO
   fc <- input$mfCO
+  MI_first_dataset(input$miF)
+  MI_first_pc(pval)
+  MI_first_fc(fc)
   df <- df[abs(df$log2FoldChange)>= fc & df$padj < pval, ]
   df <- df[!(is.na(df$baseMean)),]
   names2milinks(df)
@@ -279,14 +285,16 @@ output$VPMI <- renderPlot({
    downreg_genes <- downreg_genes[downreg_genes[,1]!= "",]
    top10_downreg_genes <- downreg_genes[order(downreg_genes$padj, decreasing = FALSE), 1][1:10]
    
-  #View(getVP())
-  p <- myVolcanoPlot(tab,
+   VP = paste0("Volcanoplot: ", MI_first_dataset())
+  #View(getVP()
+   VP_subtitel = paste0("p-value cutoff: ",MI_first_pc(),", log2FoldChange: ",MI_first_fc())
+   p <- myVolcanoPlot(tab,
                 data_type = "miRNA",
                 pCutoff = as.numeric(input$mpCO),
                 FCcutoff = as.numeric(input$mfCO),
                 xlim = c(-6, 6),
                 lab_selection = c(top10_upreg_genes,top10_downreg_genes),
-                symbol_type = colnames(getVP())[1] , titel = "", subtitel = "")
+                symbol_type = colnames(getVP())[1] , titel = VP, subtitel = VP_subtitel)
 
   saved_VPMI(p)
   p}
@@ -325,12 +333,15 @@ output$HMMI <- renderPlot({
   # names(d_names) = c("MI", "stable CAD")
   # 
   #View(counts)
+  HM_title= paste0("Volcanoplot: ", MI_first_dataset(),", p-value cutoff: ",MI_first_pc(),", log2FoldChange: ",MI_first_fc())
+  #View(getVP()
+  #VP_subtitel = paste0()
   ann_col = list(`Platelet type` = pl_names,Disease = d_names)
   p <- pheatmap(counts,
                 color = colorRampPalette(c("blue", "red"))(50),
                 annotation_colors = ann_col,
                 annotation_col = dbo,#dbo %>% select('Platelet type' = dbo$`Platelet type`, 'Disease' = dbo$Disease),
-                show_rownames = FALSE, show_colnames = TRUE, scale="row")
+                show_rownames = FALSE, show_colnames = TRUE, scale="row", main = HM_title)
   saved_HMMI(p)
   p
   }
@@ -349,7 +360,8 @@ output$MAMI <- renderPlot({
     
     tab[,7] = as.numeric(tab[,7])
     annot <- gene_name_column()
-    p <- myMAplot_lim(tab, fdr = as.numeric(input$mpCO), fc = as.numeric(input$mfCO), ylim = c(-4, 4)) #fdr ... + make ylim scalable
+    MA_title = paste0("MA plot: ", MI_first_dataset())
+    p <- myMAplot_lim(tab, fdr = as.numeric(input$mpCO), fc = as.numeric(input$mfCO), ylim = c(-4, 4), MA_title) #fdr ... + make ylim scalable
     
     p
   }
@@ -366,21 +378,13 @@ output$PCAMI <- renderPlot({
     dis_metatab <- metatab
     dis_metatab <-dis_metatab[row.names(dis_metatab) %in% colnames(tab),]
     p <- pca(tab, metadata = dis_metatab, removeVar = 0.1)
+    p_title = paste0("Biplot: ", MI_first_dataset())
+    
     b<- biplot(p,colby = 'platelet', colkey = c('MP' = 'blue', 'RP' = 'red', "0" = 'black'),
-               # colLegendTitle = 'types of platelets',
-               # encircle config
-               #encircle = TRUE,
-               #encircleFill = TRUE,
-               # ellipse = TRUE,
-               # ellipseConf = 0.95,
-               # ellipseFill = TRUE,
-               # ellipseAlpha = 1/4,
-               # ellipseLineSize = 1.0,
-               # xlim = c(-125,125), ylim = c(-50, 80),
                shape = 'condition', shapekey = c('CCS'=15, 'ACS'=17, 'healthy' = 15 ),#'Grade 3'=8
                hline = 0, vline = c(-25, 0, 25),
                legendPosition = 'right', legendLabSize = 16, legendIconSize = 8.0,
-               title = "Principal component analysis bi-plot",
+               title = p_title,
                
     )
     b
@@ -393,7 +397,8 @@ output$ExpMI <- renderPlot({
   d <- getHM()
   if(!is.null(d)){
     #View(d)
-    p <- myCountAnalysisPlot(as.data.frame(d), "miRNA", "test title")#fdr ... + make ylim scalable
+    p_title = paste0("Expression Analysis: ", MI_first_dataset())
+    p <- myCountAnalysisPlot(as.data.frame(d), "miRNA", p_title)#fdr ... + make ylim scalable 
     
     p
   }
@@ -475,7 +480,9 @@ output$MIpG<- renderPlotly({
   #             categoryarray = tabi$id,
   #             title = "category")
   fig <- plot_ly(tabi, x = ~Category, y = ~percentage, type = 'bar', name = 'percentage of differentially expressed genes in category',text = ~Term,marker = list(color = '#ba3131'))
-  # barmode = 'group'
+  fig <- fig %>% layout(title = "Percentage of differentially expressed target genes in GO categories")
+  fig
+   # barmode = 'group'
   #)
   # fig
   
@@ -511,8 +518,8 @@ output$MIGO_perc_term <- renderPlotly({
   form <- list(categoryorder = "array",
                categoryarray = gotab$percentage,
                title = "Percentage")
-  fig2 <- plot_ly(gotab, x =~percentage, y = ~p.adjust, name = 'Top 10 categories with lowest adjusted p-values',mode = "markers", size = ~percentage, text = ~Term)
-  fig2 <- fig2 %>% layout(title = "adjusted p-values in categories", yaxis = list(title = "adjusted p-value"),
+  fig2 <- plot_ly(gotab, x =~percentage, y = ~p.adjust, name = 'Scatterplot: percentage of genes in a GO Term and its adjusted p-value',mode = "markers", size = ~percentage, text = ~Term)
+  fig2 <- fig2 %>% layout(title = "Scatterplot: percentage of target genes in a GO Term and its adjusted p-value", yaxis = list(title = "adjusted p-value"),
                           xaxis = form,
                           margin = list(b = 100))
   # fig2
@@ -534,7 +541,7 @@ output$MIGO_padj_logFC <- renderPlotly({
                categoryarray = gotab$logFC,
                title = "logFC")
   fig2 <- plot_ly(gotab, x =~logFC, y = ~adj_pval, name = ~term,mode = "markers",color = ~term,customdata = ~term,size = ~logFC, text = ~genes, hovertemplate = paste('<br>gene: %{text}<br>', '<br>term: %{customdata}<br>'))
-  fig2 <- fig2 %>% layout(title = "adjusted p-values in categories", yaxis = list(title = "adjusted p-value"),
+  fig2 <- fig2 %>% layout(title = "Scatterplot: logFC of target genes in a GO Term and its adjusted p-value", yaxis = list(title = "adjusted p-value"),
                           xaxis = form,
                           margin = list(b = 100))
   # fig2
@@ -552,6 +559,7 @@ output$MIGOC <- renderPlotly({
   filtered_tab <- circ_data[circ_data$term %in% chosen_terms,]
   p<- plot_ly(filtered_tab,x = ~term, y = ~logFC, type = "violin",text = ~genes,color= ~regulation,hovertemplate = paste('%{x}', '<br>gene: %{text}<br>')) %>%
     add_markers(size = 5)
+  p <- p %>% layout(title = "GO categories with the 10 highest DE target genes")
   p
 })
 
@@ -624,7 +632,7 @@ output$MIGOp <- renderPlotly({
                categoryarray = circ_end$Category,
                title = "Category")
   fig2 <- plot_ly(circ_end, x =~Category, y = ~p.adjust, type = 'bar', name = 'Top 10 categories with lowest adjusted p-values',text = ~Term, marker = list(color = '#ba3131'))
-  fig2 <- fig2 %>% layout(title = "adjusted p-values in categories", yaxis = list(title = "adjusted p-value"),
+  fig2 <- fig2 %>% layout(title = "Top 10 categories with lowest adjusted p-values", yaxis = list(title = "adjusted p-value"),
                           xaxis = form,
                           margin = list(b = 100))
   # fig2

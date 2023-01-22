@@ -181,10 +181,14 @@ ui<- dashboardPage(
             # tabPanel(id= "t1","Guide", "The Differential Expression results, browsable on this page by using different filters, are obtained from the transcriptome analysis of reticulated and mature platelets from 4 healthy patients and 10 diseased patients, of which 6 were diagnosed with Chronic coronary syndrome (CCS) and 4 were diagnosed with Acute coronary syndrome (ACS).",br(), br() ,"By clicking on the first filter (Mature vs Reticulated) and filtering between the datasets of the patients, the different thresholds of read count normalizations (with TPM), p-value cutoffs and foldchange cutoffs, the differentially expressed genes of mature platelets versus reticulated platelets, which were computed by using DESeq2, visualized by downloadable plots and represented by downloadable data tables will be shown on the right side of the page.",br(),br() ,"Analogously by clicking on the second filter (CCS vs ACS), refinement of the search is possible by the same parameters as mentioned before and the differentially expressed genes of patients with Chronic coronary syndrome and the patients with Acute coronary syndrome, computed by using DESeq2, will be shown on the right side of the page, represented by downloadable data tables and plots as well."),
             tabPanel(id="t2","Mature vs. Reticulated", 
                      span("Mature Platelets vs. Reticulated Platelets",style = "color: black; font-size: 14px; font-weight: bold"),
-                     selectInput(inputId = "HoD" , label = "Choose from patient datasets" , choices = c("healthy","diseased", "disease - CCS" , "disease - ACS"), multiple = FALSE),
-                     selectInput(inputId = "TPM1" , label = "Read count normalization: Choose TPM (Transcripts per million) threshholds" , choices = c(), multiple = FALSE), #"TPM > 0.1","TPM > 0.3", "TPM > 1", "TPM > 2" 
-                     numericInput(inputId = "pCO1",value = 0.05 ,label = "p-value cutoff", min = 0.01 , max = 0.05,step = 0.005),
-                     numericInput(inputId = "fcO1",value = 1.5 ,label = "log2(Foldchange) cutoff", min = 0 , max = 4.0, step = 0.5),
+                    #splitLayout(
+                      selectInput(inputId = "HoD" , label = "Choose from patient datasets" , choices = c("healthy","diseased", "disease - CCS" , "disease - ACS"), multiple = FALSE),
+                      selectInput(inputId = "TPM1" , label = "Read count normalization: Choose TPM (Transcripts per million) threshholds" , choices = c(), multiple = FALSE), #"TPM > 0.1","TPM > 0.3", "TPM > 1", "TPM > 2" 
+                     #),
+                     #splitLayout(
+                      numericInput(inputId = "pCO1",value = 0.05 ,label = "p-value cutoff", min = 0.01 , max = 0.05,step = 0.005),
+                      numericInput(inputId = "fcO1",value = 1.5 ,label = "log2(Foldchange) cutoff", min = 0 , max = 4.0, step = 0.5),
+                    # ),
                      selectInput(inputId = "DVP1" , label = "Choose gene annotation" , choices = c("ENSEMBL ID", "HGNC symbol"), multiple = FALSE),
                      #actionButton(inputId = "clickDVP1",label = "Get plot ",icon = icon('arrow'), style = "color: #FFF; background-color: #000000; border-color: #000000"),
                      
@@ -312,19 +316,19 @@ ui<- dashboardPage(
               br(),
               # downloadButton("dlPNG3", "Download plot in PNG format")
               
-            ),
-            tabPanel(
-              id= "tP", 
-              #uiOutput("HMO")
-              title = "PCA Analysis: CCS vs. MI and MP vs. RP", background = "red" , solidHeader = TRUE,
-              br(),
-              downloadButton("dlpcah", "Download plot in PNG format"),
-              br(),
-              plotOutput("pcah",height = "800px") %>% withSpinner(color= "#000000"),
-              br(),
-              # downloadButton("dlPNG3", "Download plot in PNG format")
-              
-            )
+            )#,
+            # tabPanel(
+            #   id= "tP", 
+            #   #uiOutput("HMO")
+            #   title = "PCA Analysis: CCS vs. MI and MP vs. RP", background = "red" , solidHeader = TRUE,
+            #   br(),
+            #   downloadButton("dlpcah", "Download plot in PNG format"),
+            #   br(),
+            #   plotOutput("pcah",height = "800px") %>% withSpinner(color= "#000000"),
+            #   br(),
+            #   # downloadButton("dlPNG3", "Download plot in PNG format")
+            #   
+            # )
           )
         )
    
@@ -347,7 +351,9 @@ ui<- dashboardPage(
             tabPanel(id="t4","Mature vs. Reticulated", 
                      span("Mature Platelets vs. Reticulated Platelets",style = "color: black; font-size: 14px; font-weight: bold"),
                      selectInput(inputId = "HoDGO" , label = "Choose from patient datasets" , choices = c("healthy","diseased", "disease - CCS" , "disease - ACS"), multiple = FALSE),
-                     selectInput(inputId = "TPMGO" , label = "Read count normalization: Choose TPM (Transcripts per million) threshholds" , choices = c("TPM > 0.1","TPM > 0.3", "TPM > 1", "TPM > 2"), multiple = FALSE),
+                    # selectInput(inputId = "TPMGO" , label = "Read count normalization: Choose TPM (Transcripts per million) threshholds" , choices = c("TPM > 0.1","TPM > 0.3", "TPM > 1", "TPM > 2"), multiple = FALSE),
+                     selectInput(inputId = "TPMGO" , label = "Read count normalization: Choose TPM (Transcripts per million) threshholds" , choices = c(), multiple = FALSE), #"TPM > 0.1","TPM > 0.3", "TPM > 1", "TPM > 2" 
+                     
                      selectInput(inputId = "DVP1GO" , label = "Choose gene annotation" , choices = c("ENSEMBL ID", "HGNC symbol"), multiple = FALSE),
                      numericInput(inputId = "pCO1GO",value = 0.05 , label = "p-value cutoff", min = 0.01 , max = 0.05, step = 0.005),
                      numericInput(inputId = "fcO1GO",value =  1.5 , label = "Foldchange cutoff", min = 0 , max = 4.0, step = 0.5),
@@ -364,11 +370,12 @@ ui<- dashboardPage(
                      span("Diseased: Chronic coronary syndrome vs. Myocardial infarction",style = "color: black; font-size: 14px; font-weight: bold"),
                      selectInput(inputId = "HoD2GO" , label = "Choose from patient datasets" , choices = c("diseased","disease - mature platelets", "disease - reticulated platelets"), multiple = FALSE),
                      selectInput(inputId = "TPM2GO" , label = "Read count normalization: Choose TPM (Transcripts per million) threshholds" , choices = c("TPM > 0.1","TPM > 0.3", "TPM > 1", "TPM > 2"), multiple = FALSE),
+                     selectInput(inputId = "DVP2GO" , label = "Choose gene annotation" , choices = c("ENSEMBL ID", "HGNC symbol"), multiple = FALSE),
+
                      numericInput(inputId = "pCO2GO",value = 0.05 , label = "p-value cutoff", min = 0.01 , max = 0.05, step = 0.005),
                      numericInput(inputId = "fcO2GO",value =  1.5 , label = "Foldchange cutoff", min = 0 , max = 4.0, step = 0.5),
-                     selectInput(inputId = "DVP2GO" , label = "Choose gene annotation" , choices = c("ENSEMBL ID", "HGNC symbol"), multiple = FALSE),
                      
-                     selectInput(inputId = "GOSS2" , label = "Choose ontology" ,choices = c("biological process","cellular component", "molecular_function"), multiple = FALSE),
+                     selectInput(inputId = "GOSS2" , label = "Choose ontology" ,choices = c("cellular component", "biological process","molecular_function"), multiple = FALSE),
                      #selectInput(inputId = "UDA2" , label = "Choose Up/Down/All" , choices = c("upregulated","downregulated","all"), multiple = FALSE),
                      #selectInput(inputId = "AdjMethod2" , label = "Choose the p-value adjustment method/correction method" , choices = c("Benjamini-Hochberg","FDR"), multiple = FALSE),
                      
@@ -380,7 +387,7 @@ ui<- dashboardPage(
             title = span("Functional Enrichment Results - Guide", 
                          style = "color: white; font-size: 18px; font-weight: bold"), background = "black" , solidHeader = TRUE,
             "This page shows the Functional Enrichment Results, browsable by using two general filters that represent different approaches to the genetic analysis of platelets: The first being the differentiation of mature platelets versus reticulated platelets and the second being the comparative analysis between two diseased groups of patients - patients with Chronic coronary syndrome and patients with Acute coronary syndrome. The results are based on the transcriptome analysis of reticulated and mature platelets from 4 healthy patients and 10 diseased patients, of which 6 were diagnosed with Chronic coronary syndrome (CCS) and 4 were diagnosed with Acute coronary syndrome (ACS).",br(),br(),
-            "The shown results of the functional enrichment analysis were retrieved from the use of ShinyGO and are browsable by the TPM (transcript per million) read count normalization threshold of the original data, the patient datasets, the desired ontology (Biological Process, Cellular Component and Molecular function) and the GO-Entries discovered on upregulated genes or downregulated genes in both filters. We used a log2(Foldchange) cutoff of 0.8 and p-value cutoff of 0.05 to compute the differentially expressed genes",br(),br(),
+            "The shown results of the functional enrichment analysis were computed using the enrichGO() function in the clusterProfiler package and are browsable the patient datasets, the criteria for a gene to be differentially expressed, the desired ontology (Biological Process, Cellular Component and Molecular function) and the desired gene annotation output in both filters. ",br(),br(),
             "The representation of these results was done with various plots and a data table of the discovered GO- Entries."
           )
           
@@ -392,11 +399,13 @@ ui<- dashboardPage(
             width = 12,
             height = "1000px",
             title = "Get the results",
+            
             selectInput(inputId = "UDA" , label = "Choose Up/Downregulated" , choices = c("upregulated","downregulated"), multiple = FALSE, selected = "upregulated"),
             #slider only gos of interest
-            prettySwitch(
+            conditionalPanel("input.GOSS == 'biological process' || input.GOSS2 == 'biological process'",
+              prettySwitch(
               "gos_of_interest",
-              label = "Plot only the GO Terms of interest (containing the words platelet, hemostasis andcoagulation):",
+              label = "Plot only the GO Terms of interest (containing the words platelet, hemostasis and coagulation):",
               value = FALSE,
               status = "default",
               slim = FALSE,
@@ -404,7 +413,9 @@ ui<- dashboardPage(
               bigger = FALSE,
               inline = FALSE,
               width = NULL
+            )            
             ),
+           
             tabPanel(
               id="GOtab",title = "GO Terms", solidHeader = TRUE,
               "",
@@ -492,28 +503,7 @@ ui<- dashboardPage(
               plotOutput("GObar",height = "800px")%>% withSpinner(color= "#000000"),
               #downloadButton("dlPNGGO", "Download plot in PNG format")
             )
-            # tabPanel(
-            #   id= "tN", 
-            #   #uiOutput("HMO")
-            #   
-            #   title = "GO Network", background = "red" , solidHeader = TRUE,
-            #   #plotOutput(""),
-            #   forceNetworkOutput("GOnet", height = "850px")%>% withSpinner(color= "#000000")
-            #   #  br(),
-            #   # downloadButton("dlKPMN", "Download plot in PNG format")
-            #   
-            # ),
-            # tabPanel(
-            #   id= "tH", 
-            #   #uiOutput("HMO")
-            #   
-            #   title = "GO Hierarchy Tree", background = "red" , solidHeader = TRUE,
-            #   #plotOutput(""),
-            #   imageOutput("GOH", height = "850px")%>% withSpinner(color= "#000000"),
-            #   br(),
-            #   downloadButton("dlGOH", "Download plot in PNG format")
-            #   
-            # )
+
           )
         )
         

@@ -294,9 +294,8 @@ output$GOpG <- renderPlotly({
   #             title = "category")
   fig <- plot_ly(tabi, x = ~Category, y = ~percentage, type = 'bar', name = 'percentage of differentially expressed genes in category',text = ~Term,marker = list(color = '#ba3131'))
   #fig <- fig %>% add_trace(y = ~numInCat, name = 'number of genes in category', marker = list(color = '#ffe5ea'))
-  # fig <- fig %>% layout(title = "percentage of differentially expressed genes in GO categories", xaxis = form,
-  #                       yaxis = list(title = "percentage of DE genes in category"),
-  #                       margin = list(b = 100))
+  fig <- fig %>% layout(title = "Percentage of differentially expressed genes in GO categories")
+  fig
   #barmode = 'group'
  # )
   # fig
@@ -320,10 +319,10 @@ output$GOpFE <- renderPlotly({
                title = "category")
   fig2 <- plot_ly(testtab, x =~FDR, y = ~Category, type = 'bar', name = 'enrichment FDR in categories',text = ~Term, orientation = 'h' ,marker = list(color = '#ba3131'))
   #fig <- fig %>% add_trace(y = ~numInCat, name = 'number of genes in category', marker = list(color = '#ffe5ea'))
-  fig2 <- fig2 %>% layout(title = "enrichment FDR in categories", xaxis = list(title = "enrichment FDR"),
+  fig2 <- fig2 %>% layout(title = "Enrichment FDR in categories", xaxis = list(title = "enrichment FDR"),
                           yaxis = form,
                           margin = list(b = 100))
-  # fig2
+  fig2
   
 })
 output$GOp <- renderPlotly({
@@ -339,7 +338,7 @@ output$GOp <- renderPlotly({
                categoryarray = circ_end$Category,
                title = "Category")
   fig2 <- plot_ly(circ_end, x =~Category, y = ~p.adjust, type = 'bar', name = 'Top 10 categories with lowest adjusted p-values',text = ~Term, marker = list(color = '#ba3131'))
-  fig2 <- fig2 %>% layout(title = "adjusted p-values in categories", yaxis = list(title = "adjusted p-value"),
+  fig2 <- fig2 %>% layout(title = "Top 10 most significant GO categories", yaxis = list(title = "adjusted p-value"),
                           xaxis = form,
                           margin = list(b = 100))
   # fig2
@@ -357,8 +356,8 @@ output$GO_perc_term <- renderPlotly({
   form <- list(categoryorder = "array",
                categoryarray = gotab$percentage,
                title = "Percentage")
-  fig2 <- plot_ly(gotab, x =~percentage, y = ~p.adjust, name = 'Top 10 categories with lowest adjusted p-values',mode = "markers", size = ~percentage, text = ~Term)
-  fig2 <- fig2 %>% layout(title = "adjusted p-values in categories", yaxis = list(title = "adjusted p-value"),
+  fig2 <- plot_ly(gotab, x =~percentage, y = ~p.adjust, name = "Scatterplot: percentage of genes in a GO Term and its adjusted p-value",mode = "markers", size = ~percentage, text = ~Term)
+  fig2 <- fig2 %>% layout(title = "Scatterplot: percentage of genes in a GO Term and its adjusted p-value", yaxis = list(title = "adjusted p-value"),
                           xaxis = form,
                           margin = list(b = 100))
   # fig2
@@ -376,18 +375,27 @@ output$GO_padj_logFC <- renderPlotly({
   #print(tabi$percentage)
   gotab <- as.data.table(circ_data)
   #gotab$percentage <- as.numeric(gotab$percentage)
-  View(gotab)
+ # View(gotab)
   form <- list(categoryorder = "array",
                categoryarray = gotab$logFC,
                title = "logFC")
   fig2 <- plot_ly(gotab, x =~logFC, y = ~adj_pval, name = ~term,mode = "markers",color = ~term,customdata = ~term,size = ~logFC, text = ~genes, hovertemplate = paste('<br>gene: %{text}<br>', '<br>term: %{customdata}<br>'))
-  fig2 <- fig2 %>% layout(title = "adjusted p-values in categories", yaxis = list(title = "adjusted p-value"),
+  fig2 <- fig2 %>% layout(title = "Scatterplot: logFC of genes in a GO Term and its adjusted p-value", yaxis = list(title = "adjusted p-value"),
                           xaxis = form,
                           margin = list(b = 100))
   # fig2
   
 })
 
+observe({
+  if(!is.null(input$HoDGO)){
+    if(input$HoDGO == "disease - CCS"){
+      updateSelectInput(session, "TPMGO", choices = c("TPM > 0.2"))
+    }else{
+      updateSelectInput(session, "TPMGO", choices = c("TPM > 0.1","TPM > 0.3", "TPM > 1", "TPM > 2"))
+    }
+  }
+})
 
 #TODO: noch einen Plot mit sortierung nach p.adjusted terms (dh die make_circ_data methode noch mal umschreiben)
 make_circ_data <- function(erg_table, difex_tab,categ){
@@ -421,8 +429,9 @@ output$GOC <- renderPlotly({
   circ_data <- make_circ_data(gotab,saved_circ_mat(),saved_ontology())
   chosen_terms <- circ_data[1:10,3] #top 10 highest logFC
   filtered_tab <- circ_data[circ_data$term %in% chosen_terms,]
-  p<- plot_ly(filtered_tab,x = ~term, y = ~logFC, type = "violin",text = ~genes,color= ~regulation,hovertemplate = paste('%{x}', '<br>gene: %{text}<br>')) %>%
+  p <- plot_ly(filtered_tab,x = ~term, y = ~logFC, type = "violin",text = ~genes,color= ~regulation,hovertemplate = paste('%{x}', '<br>gene: %{text}<br>')) %>%
     add_markers(size = 5)
+  p <- p %>% layout(title = "GO categories with the 10 highest DE genes")
   p
 })
 
@@ -450,7 +459,7 @@ output$GOZ <- renderPlot({
 })
 
 filterGO <- function(tabs, gos_of_interest){
-  gos <- c("%platelet%", "%hemostasis%", "%coagulation%")
+  gos <- c("%platelet%", "%hemostasis%", "%coagulation%", "%blood%", "%thrombosis%", "%atherosclerosis%", "%coronary artery disease%", "%clotting%", "%fibrin clot formation%", "%prothrombin activation%", "%inflammatory response to injury%")
   res_tab <- NULL
   if(gos_of_interest){
     res_tab <- tabs[tabs$Term %like any% gos,]
@@ -480,40 +489,40 @@ output$GObar <- renderPlot({ #
 })
 
 
-output$GOnet <- renderForceNetwork({
-  GOEtab<-sav_edges()#read.table(sav_edges(),quote = "",sep = " ", header = FALSE)
-  GOE <- GOEtab[,c(1,2)]
-  colnames(GOE)<- c("from","to")
-  nodes <- data.frame(name = unique(c(GOE$from, GOE$to)), stringsAsFactors = FALSE)
-  nodes$id <- 0:(nrow(nodes) - 1)
-  nodes$type <- "type"
-  GOE_edges <- GOE %>%
-    left_join(nodes, by = c("from" = "name")) %>%
-    select(-from) %>%
-    rename(from = id) %>%
-    left_join(nodes, by = c("to" = "name")) %>%
-    select(-to) %>%
-    rename(to = id)
-  forceNetwork(Links = GOE_edges, Nodes = nodes,
-               Source = "from", Target = "to",
-               #Value = "", 
-               NodeID = "name", Group = "type",opacity = 0.9,fontSize = 10 ,zoom = TRUE)
-  
-})
+# output$GOnet <- renderForceNetwork({
+#   GOEtab<-sav_edges()#read.table(sav_edges(),quote = "",sep = " ", header = FALSE)
+#   GOE <- GOEtab[,c(1,2)]
+#   colnames(GOE)<- c("from","to")
+#   nodes <- data.frame(name = unique(c(GOE$from, GOE$to)), stringsAsFactors = FALSE)
+#   nodes$id <- 0:(nrow(nodes) - 1)
+#   nodes$type <- "type"
+#   GOE_edges <- GOE %>%
+#     left_join(nodes, by = c("from" = "name")) %>%
+#     select(-from) %>%
+#     rename(from = id) %>%
+#     left_join(nodes, by = c("to" = "name")) %>%
+#     select(-to) %>%
+#     rename(to = id)
+#   forceNetwork(Links = GOE_edges, Nodes = nodes,
+#                Source = "from", Target = "to",
+#                #Value = "", 
+#                NodeID = "name", Group = "type",opacity = 0.9,fontSize = 10 ,zoom = TRUE)
+#   
+# })
 
-output$GOH <- renderImage({
-  GO()
-  
-  #neu <- str_split(sav_go_h_p(), "www/")[[1]]
-  
-  filename <- normalizePath(sav_go_h_p())
-  #print(filename)
-  #tags$img(src = filename)
-  #  print(filename)
-  list(src = filename,
-       width = "900px",
-       height = "600px"
-  )
-}, deleteFile = FALSE)
+# output$GOH <- renderImage({
+#   GO()
+#   
+#   #neu <- str_split(sav_go_h_p(), "www/")[[1]]
+#   
+#   filename <- normalizePath(sav_go_h_p())
+#   #print(filename)
+#   #tags$img(src = filename)
+#   #  print(filename)
+#   list(src = filename,
+#        width = "900px",
+#        height = "600px"
+#   )
+# }, deleteFile = FALSE)
 # })
 

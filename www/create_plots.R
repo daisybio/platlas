@@ -271,7 +271,11 @@ myBiotypeBarplot <- function(counts, plot_title,id_type,num_tops = 10){
       geom_bar(width = 1, stat = "identity", color = "white") +
       coord_polar("y", start = 0)+
       scale_fill_brewer(palette="Spectral") +
-      theme_void()
+      theme_void() + 
+      ggtitle(plot_title) + 
+      theme(plot.title = element_text(size = 18, face = "bold")) 
+      
+      
     
     return(plot)
   }
@@ -309,7 +313,7 @@ myMAplot <- function(deseq_results, fdr = 0.1, fc = 1.5) {
                                                                 color = c(cols$col_upregulated, cols$col_downregulated, NA))))
 }
 
-myMAplot_lim <- function(deseq_results, fdr = 0.1, fc = 1.5, ylim) {
+myMAplot_lim <- function(deseq_results, fdr = 0.1, fc = 1.5, ylim, t) {
   cols <- get_specified_colors()
   sig <- rep(3, nrow(deseq_results))
   sig[which(deseq_results$padj <= fdr & deseq_results$log2FoldChange < 0 & abs(deseq_results$log2FoldChange) >= fc)] = 2
@@ -320,6 +324,9 @@ myMAplot_lim <- function(deseq_results, fdr = 0.1, fc = 1.5, ylim) {
            legend = "top", top = 0,
            font.legend = "bold",
            ylim = ylim,
+           main = t,
+           font.label = "bold",
+           font.main = c("bold", 18),
            ggtheme = ggplot2::theme_minimal()) +
     theme(axis.title = element_text(size = 13), legend.text = element_text(size = 11)) +
     geom_hline(yintercept = c(-fdr, fdr) , linetype = "dashed") + 
