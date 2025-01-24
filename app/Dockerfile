@@ -29,7 +29,8 @@ libbz2-dev \
 libc6-dev \
 libobjc4 \
 cmake \
-libmagick++-dev 
+libmagick++-dev \
+libv8-dev 
 
 
 WORKDIR /Leonora/
