@@ -16,7 +16,7 @@ difex_title <- reactiveVal()
 Mat <- eventReactive(input$click1,{#ignoreInit = T,c(input$click1,input$click2)
   ma <- data.frame()
 #  if(clicked1() < input$click1){#####komisch
-  HoD <- "disease - CCS"
+  HoD <- "disease - CAD"
   TPM1 <- "TPM > 0.2"
     print("in mat1")
     finalpath <-paths2frames("1",path,TPM1,HoD,".CSV")
@@ -56,7 +56,7 @@ Mat <- eventReactive(input$click1,{#ignoreInit = T,c(input$click1,input$click2)
 
 #observe({
 #  if(!is.null(input$HoD)){
-#    if(input$HoD == "disease - CCS"){
+#    if(input$HoD == "disease - CAD"){
 #      updateSelectInput(session, "TPM1", choices = c("TPM > 0.2"))
 #    }else{
 #      updateSelectInput(session, "TPM1", choices = c("TPM > 0.1","TPM > 0.3", "TPM > 1", "TPM > 2"))
@@ -75,7 +75,7 @@ gene_name_column_heat = reactiveVal()
 heat <-  eventReactive(c(input$click1,input$click2),{ ##debug
   finalpath <- ""
   #if(clicked1_H() < input$click1){
-    HoD <- "disease - CCS"
+    HoD <- "disease - CAD"
     TPM1 <- "TPM > 0.2"
     finalpath <-paths2frames("1",path1,TPM1,HoD,".CSV")
     clicked1_H(input$click1)
@@ -134,7 +134,7 @@ heat <-  eventReactive(c(input$click1,input$click2),{ ##debug
   ordered_col_names <- col_suffix_df$col_name
   # Reorder the data frame columns
   neuer<- neuer[, ordered_col_names]
-  if(nameHod()=="disease - CCS"){
+  if(nameHod()=="disease - CAD"){
     #threshold <- sort(rowVars(counts), decreasing = T)[150]
     #counts = counts[which(rowVars(counts) >= threshold),]
     neuer <- neuer[ , !(colnames(neuer) %in% c("6_MPs","6_RPs"))]
@@ -182,7 +182,7 @@ output$DIFVIO <- renderPlotly({
       chosen_gene <- input$select_genes
       gl_fc <- gene_list[gene_list[,annot]== chosen_gene,"log2FoldChange"]
       gl_padj <- gene_list[gene_list[,annot]== chosen_gene,"padj"]
-      if(nameHod()=="disease - CCS"){
+      if(nameHod()=="disease - CAD"){
         acs <- c("25_MPs","25_RPs","26_MPs","26_RPs","27_MPs","27_RPs","28_MPs","28_RPs")
         counts <- counts[, !(colnames(counts) %in% acs)]
       }
@@ -232,7 +232,7 @@ output$DIFXlist <- renderDataTable({
   d <- Mat()
   if(!is.null(hm()) && !is.null(d)){
     counts <- hm()
-    if(nameHod()=="disease - CCS"){
+    if(nameHod()=="disease - CAD"){
       acs <- c("25_MPs","25_RPs","26_MPs","26_RPs","27_MPs","27_RPs","28_MPs","28_RPs")
       counts <- counts[, !(colnames(counts) %in% acs)]
     }
@@ -278,7 +278,7 @@ output$heatmap <- renderPlot({
   #DBO <- "www/complete_sample_names.tsv"
   counts <- hm()
   copy_counts <- counts
-  if(nameHod()=="disease - CCS"){
+  if(nameHod()=="disease - CAD"){
     threshold <- sort(rowVars(counts), decreasing = T)[150]
     counts = counts[which(rowVars(counts) >= threshold),]
     #counts <- counts[ , !(colnames(counts) %in% c("6_MPs","6_RPs"))]
@@ -327,7 +327,7 @@ output$pcabi<- renderPlot({
   heat()
   if(!is.null(sav_path())){
   cmeta <- hm()
-  if(nameHod()=="disease - CCS"){
+  if(nameHod()=="disease - CAD"){
     threshold <- sort(rowVars(cmeta), decreasing = T)[150]
     cmeta = cmeta[which(rowVars(cmeta) >= threshold),]
     #counts <- counts[ , !(colnames(counts) %in% c("6_MPs","6_RPs"))]
@@ -625,7 +625,7 @@ output$Dexpression_plot <- renderPlot({
   heat()
   d <- hm()
   if(!is.null(d)){
-    if(nameHod()=="disease - CCS"){
+    if(nameHod()=="disease - CAD"){
       EA_title <-  paste0("Expression analysis plot: ", difex_title(), " in ", nameHod(), " dataset before filtering")
     }else{
       EA_title <- paste0("Expression analysis plot: ", difex_title(), " in ", nameHod(), " dataset after filtering")

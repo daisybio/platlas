@@ -140,7 +140,7 @@ names2milinks <- function(tab){
   hi <- data.frame()
   i <- 1
   for(g in tab[,1]){#
-    link <- HTML(paste('<a href="http://mirbase.org/cgi-bin/mirna_entry.pl?acc=',g, '">',g, "</a>", sep = ""))
+    link <- HTML(paste('<a href="https://mirbase.org/results/?query=',g, '">',g, "</a>", sep = ""))
     tab[i,1] <- link
     i <- i + 1
   }
@@ -204,7 +204,7 @@ paths2frames <- function(oneortwo,P,IT,IH,CT){
     }else{
       pathWHod<- paste(P,"diseased", sep= "")
       newpath<- paste(pathWHod,tpm,sep = "_")
-      tail <- switch(as.character(IH),"diseased"="_phenotype-disease-all","disease - CCS"= "_phenotype-disease-stable-CAD","disease - ACS"= "_phenotype-disease-MI"  )
+      tail <- switch(as.character(IH),"diseased"="_phenotype-disease-all","disease - CAD"= "_phenotype-disease-stable-CAD","disease - ACS"= "_phenotype-disease-MI"  )
       tailplus <- paste(newpath, tail, sep = "")
       finalpath <- paste(tailplus,end ,sep= "")
     }

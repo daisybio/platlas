@@ -433,8 +433,16 @@ output$DASPIE <- renderPlotly({
   allevents <- das_df[,c(1,2)]%>%
     dplyr::group_by(Type)%>%
     dplyr::count()
-
-  fig <- plot_ly(allevents, labels = ~Type, values = ~n, type = 'pie',textposition = 'inside',
+  allevents <- allevents %>%
+    mutate(Types = case_when(
+      Type == "ES" ~ "ES: Exon Skipping",
+      Type == "A5" ~ "A5: Alternative 5′ splice site",
+      Type == "A3" ~ "A3: Alternative 3′ splice site",
+      Type == "IR" ~ "IR: Intron retention"
+    ))
+  
+  
+  fig <- plot_ly(allevents, labels = ~Types, values = ~n, type = 'pie',textposition = 'inside',
                  textinfo = 'percent',
                  insidetextfont = list(color = '#FFFFFF'),
                  hoverinfo = 'percent + text',

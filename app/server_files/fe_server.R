@@ -126,7 +126,7 @@ GO <-  eventReactive(input$clickGO,{#c(input$clickGO,input$clickGO2)
   fc <- 0
   annot <- 0
   annotation_type <- ""
-  HoDGO <- "disease - CCS"
+  HoDGO <- "disease - CAD"
   TPMGO <-  "TPM > 0.2"
   #adjustment_method <- ""
   #if(clickedUDA1() < input$clickGO){
@@ -587,7 +587,7 @@ output$GO_padj_logFC <- renderPlotly({
 
 #observe({
 #  if(!is.null(input$HoDGO)){
-#    if(input$HoDGO == "disease - CCS"){
+#    if(input$HoDGO == "disease - CAD"){
 #      updateSelectInput(session, "TPMGO", choices = c("TPM > 0.2"))
 #    }else{
 #      updateSelectInput(session, "TPMGO", choices = c("TPM > 0.1","TPM > 0.3", "TPM > 1", "TPM > 2"))

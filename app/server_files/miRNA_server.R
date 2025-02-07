@@ -398,7 +398,9 @@ output$MIGOnet <- renderPlot({
 
 
 output$MIpG<- renderPlotly({
+  getMIPaths()
   tabi <- g2g()
+  if(!is.null(tabi)){
   tabi <- tabi[tabi$significantly_expressed == input$UDMI & tabi$p.adjust <= 0.05, ]
   tabi <- filterGO(tabi,input$gos_of_interest_MI)
   tabi$percentage <- tabi$'%' *100
@@ -412,6 +414,8 @@ output$MIpG<- renderPlotly({
   fig <- plot_ly(tabi, x = ~Category, y = ~percentage, type = 'bar', name = 'percentage of differentially expressed genes in category',text = ~Term,marker = list(color = '#ba3131'))
   fig <- fig %>% layout(title = "Percentage of differentially expressed target genes in GO categories")
   fig
+  }
+
    # barmode = 'group'
   #)
   # fig
@@ -420,7 +424,9 @@ output$MIpG<- renderPlotly({
 
 output$MIpFE <-renderPlotly({
   # n <- fthreshold()
+  getMIPaths()
   testtab <- g2g()#f_foldenrich(saved_GO(),n)
+  if(!is.null(testtab)){
   testtab <- testtab[testtab$significantly_expressed == input$UDMI & testtab$p.adjust <= 0.05, ]
   testtab <- filterGO(testtab,input$gos_of_interest_MI)
   testtab <- testtab[order(testtab$FDR, decreasing = FALSE),]
@@ -433,12 +439,16 @@ output$MIpFE <-renderPlotly({
   fig2 <- fig2 %>% layout(title = "enrichment FDR in categories", xaxis = list(title = "enrichment FDR"),
                           yaxis = form,
                           margin = list(b = 100))
+  fig2
+  }
   # fig2
   
 })
 
 output$MIGO_perc_term <- renderPlotly({
+  getMIPaths()
   gotab <- g2g()
+  if(!is.null(gotab)){
   gotab <- gotab[gotab$significantly_expressed == input$UDMI & gotab$p.adjust <= 0.05, ]
   gotab <- filterGO(gotab,input$gos_of_interest_MI)
   gotab$percentage <- gotab$'%' *100
@@ -453,10 +463,13 @@ output$MIGO_perc_term <- renderPlotly({
                           xaxis = form,
                           margin = list(b = 100))
   # fig2
-  
+  fig2
+}
 })
 output$MIGO_padj_logFC <- renderPlotly({
+  getMIPaths()
   gotab <- g2g()
+  if(!is.null(gotab)){
   gotab <- gotab[gotab$significantly_expressed == input$UDMI & gotab$p.adjust <= 0.05, ]
   gotab <- filterGO(gotab,input$gos_of_interest_MI)
   
@@ -473,14 +486,16 @@ output$MIGO_padj_logFC <- renderPlotly({
   fig2 <- fig2 %>% layout(title = "Scatterplot: logFC of target genes in a GO Term and its adjusted p-value", yaxis = list(title = "adjusted p-value"),
                           xaxis = form,
                           margin = list(b = 100))
-  # fig2
-  
+   fig2
+}
 })
 
 
 
 output$MIGOC <- renderPlotly({
+  getMIPaths()
   gotab <- g2g()
+  if(!is.null(gotab)){
   gotab <- gotab[gotab$significantly_expressed == input$UDMI & gotab$p.adjust <= 0.05, ]
   gotab <- filterGO(gotab,input$gos_of_interest_MI)
   circ_data <- make_circ_data(gotab,miRNA_saved_circ(),miRNA_saved_ontology())
@@ -490,6 +505,7 @@ output$MIGOC <- renderPlotly({
     add_markers(size = 5)
   p <- p %>% layout(title = "GO categories with the 10 highest DE target genes")
   p
+  }
 })
 
 
@@ -547,7 +563,9 @@ output$MInet <- renderForceNetwork({
 # })
 
 output$MIGOp <- renderPlotly({
+  getMIPaths()
   gotab <- g2g()
+  if(!is.null(gotab)){
   gotab <- gotab[gotab$significantly_expressed == input$UDMI & gotab$p.adjust <= 0.05, ]
   gotab <- filterGO(gotab,input$gos_of_interest_MI)
   #circ_data <- make_circ_data(gotab,saved_circ_mat(),saved_ontology())
@@ -561,8 +579,8 @@ output$MIGOp <- renderPlotly({
   fig2 <- fig2 %>% layout(title = "Top 10 categories with lowest adjusted p-values", yaxis = list(title = "adjusted p-value"),
                           xaxis = form,
                           margin = list(b = 100))
-  # fig2
-  
+   fig2
+  }
 })
 
 miRNA_fp <- paste0(getwd(),"/new/")#"/www/miRNA/new/"

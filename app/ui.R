@@ -218,8 +218,7 @@ ui<- dashboardPage(
     box(
       width = 12,
     title = span("Patient demographics",style = "color: black; font-size: 18px;font-weight: bold"),
-    span("The study included 19 patients diagnosed with coronary artery disease (CAD). The median age of the cohort was 65 years, with 73% being male. Additionally, 78% of the patients were on dual antiplatelet therapy, and 63% had a history of previous myocardial infarction.
-         More information can be found in the supplement." ,style = "color: black; font-size: 18px"),
+    span('The study included patients with coronary artery disease. Specific information on the study cohort can be found in the manuscript "Reticulated platelets in coronary artery disease: a multi-omics approach unveils pro-thrombotic signalling and novel therapeutic targets"; doi: XXXXXXX' ,style = "color: black; font-size: 18px"),
     
     #slickROutput("slickr", width = "100%", height = "100%")
     
@@ -245,8 +244,8 @@ ui<- dashboardPage(
             
             id = "VPfilter", #height = "200px", 
             # tabPanel(id= "t1","Guide", "The Differential Expression results, browsable on this page by using different filters, are obtained from the transcriptome analysis of reticulated and mature platelets from 4 healthy patients and 10 diseased patients, of which 6 were diagnosed with Chronic coronary syndrome (CCS) and 4 were diagnosed with Acute coronary syndrome (ACS).",br(), br() ,"By clicking on the first filter (Mature vs Reticulated) and filtering between the datasets of the patients, the different thresholds of read count normalizations (with TPM), p-value cutoffs and foldchange cutoffs, the differentially expressed genes of mature platelets versus reticulated platelets, which were computed by using DESeq2, visualized by downloadable plots and represented by downloadable data tables will be shown on the right side of the page.",br(),br() ,"Analogously by clicking on the second filter (CCS vs ACS), refinement of the search is possible by the same parameters as mentioned before and the differentially expressed genes of patients with Chronic coronary syndrome and the patients with Acute coronary syndrome, computed by using DESeq2, will be shown on the right side of the page, represented by downloadable data tables and plots as well."),
-            tabPanel(id="DIFEX_t1","Mature vs. Reticulated", 
-                     span("Mature Platelets vs. Reticulated Platelets",style = "color: black; font-size: 14px; font-weight: bold"),br(),
+            tabPanel(id="DIFEX_t1","Reticulated Platelets vs. Mature Platelets", 
+                     span("Reticulated Platelets vs. Mature Platelets",style = "color: black; font-size: 14px; font-weight: bold"),br(),
                      span("Read count normalization: TPM (Transcripts per million) threshhold > 0.2",style = "color: black; font-size: 14px"),
                     #splitLayout(
                      # pickerInput(inputId = "HoD" , label = "Choose from patient datasets" , choices = c("disease - CCS","healthy","diseased" , "disease - ACS"), multiple = FALSE,choicesOpt = list(
@@ -282,7 +281,7 @@ ui<- dashboardPage(
           box(
             title = span("Differential Expression Results - Guide", 
                          style = "color: white; font-size: 18px; font-weight: bold"), background = "black" , solidHeader = TRUE,
-            "The Differential Expression results, accessible on this page using various filters, are derived from transcriptome analyses of reticulated and mature platelets from 19 CAD patients.",br(), br() ,"By applying p-value and fold-change cutoffs, you can explore the differentially expressed genes between mature and reticulated platelets. These results, computed using DESeq2, are presented through a range of downloadable visualizations and data tables.",br(),br() ,"Additionally, the platform provides the ability to visualize volcano plots, a comprehensive list of differentially expressed genes, biotypes of detected genes, MA plots, and other detailed analyses to deepen your understanding of platelet transcriptomic differences." )
+            "The Differential Expression results, accessible on this page using various filters, are derived from transcriptome analyses of reticulated and mature platelets",br(), br() ,"By applying p-value and fold-change cutoffs, you can explore the differentially expressed genes between mature and reticulated platelets. These results, computed using DESeq2, are presented through a range of downloadable visualizations and data tables.",br(),br() ,"Additionally, the platform provides the ability to visualize volcano plots, a comprehensive list of differentially expressed genes, biotypes of detected genes, MA plots, and other detailed analyses to deepen your understanding of platelet transcriptomic differences." )
           
           
         ),
@@ -446,8 +445,8 @@ ui<- dashboardPage(
             # The id lets us use input$tabset1 on the server to find the current tab
             #height = "1500px",
             id = "VPfilter", #height = "200px", 
-            tabPanel(id="FEX_t1","Mature vs. Reticulated", 
-                     span("Mature Platelets vs. Reticulated Platelets",style = "color: black; font-size: 14px; font-weight: bold"),br(),
+            tabPanel(id="FEX_t1","Reticulated Platelets vs. Mature Platelets", 
+                     span("Reticulated Platelets vs. Mature Platelets",style = "color: black; font-size: 14px; font-weight: bold"),br(),
                      span("Read count normalization: TPM (Transcripts per million) threshhold > 0.2",style = "color: black; font-size: 14px"),
             
                      #pickerInput(inputId = "HoDGO" , label = "Choose from patient datasets" , choices = c("disease - CCS","healthy","diseased",  "disease - ACS"), multiple = FALSE,choicesOpt = list(
@@ -488,7 +487,7 @@ ui<- dashboardPage(
           box(
             title = span("Functional Enrichment Results - Guide", 
                          style = "color: white; font-size: 18px; font-weight: bold"), background = "black" , solidHeader = TRUE,
-            "This page presents the Functional Enrichment Results, which can be used to explore the functional enrichment differences between mature platelets and reticulated platelets. These analyses are based on transcriptome data from 19 CAD patients.",br(),br(),
+            "This page presents the Functional Enrichment Results, which can be used to explore the functional enrichment differences between mature platelets and reticulated platelets.",br(),br(),
             "The functional enrichment analysis was performed using the enrichGO() function from the clusterProfiler package. The results are fully customizable, allowing users to browse patient datasets, adjust criteria for differential gene expression (p-value and fold-change cutoffs), and select the desired ontology (Biological Process, Cellular Component, or Molecular Function). Gene annotation outputs are also configurable (ENSEMBL ID or HGNC).",br(),br(),
             "The results are represented through a variety of visualizations, including detailed plots and a data table of the identified Gene Ontology (GO) entries, providing a comprehensive view of platelet-related functional enrichments as well as Gene Set Enrichment Analysis (GSEA)."
           )
@@ -704,7 +703,7 @@ ui<- dashboardPage(
             ),
             tabPanel(
               id="tx",span("Differential Expression Results",style = "color: black; font-size: 14px; font-weight: bold"),
-              title = "miRNA differential Expression in Mature Platelets vs. Reticulated Platelets" ,background = "black" ,solidHeader = TRUE,
+              title = "miRNA differential Expression in Reticulated Platelets vs. Mature Platelets" ,background = "black" ,solidHeader = TRUE,
               "",
              # selectInput(inputId = "miF" , label = "Choose the dataset in which you want to start the analysis" , choices = c("Mature Platelets vs. Reticulated - all data", "in MI vs. CAD patients", "only CAD patients"), multiple = FALSE),
               #pickerInput(inputId = "miF" , label = "Choose the dataset in which you want to start the analysis" , choices = c("only CAD patients","Mature Platelets vs. Reticulated - all data","in MI vs. CAD patients"), multiple = FALSE,choicesOpt = list(
@@ -720,7 +719,7 @@ ui<- dashboardPage(
             
             tabPanel(
               id="ty",span("Target Enrichment",style = "color: black; font-size: 14px; font-weight: bold"),
-              title = "miRNA target enrichment in Mature Platelets vs. Reticulated Platelets" ,background = "black" ,solidHeader = TRUE,
+              title = "miRNA target enrichment in Reticulated Platelets vs. Mature Platelets" ,background = "black" ,solidHeader = TRUE,
               "",
               #pickerInput(inputId = "miF2" , label = "Choose the dataset in which you want to start the analysis" , choices = c("only CAD patients","Mature Platelets vs. Reticulated - all data","in MI vs. CAD patients"), multiple = FALSE,choicesOpt = list(
               #  disabled = c("only CAD patients","Mature Platelets vs. Reticulated - all data","in MI vs. CAD patients") %in% c("Mature Platelets vs. Reticulated - all data","in MI vs. CAD patients")
@@ -980,7 +979,7 @@ ui<- dashboardPage(
           #fluidRow(
           box(
             span("circRNA analysis - Guide", style = "color: white; font-size: 18px; font-weight: bold"), background = "black" , solidHeader = TRUE,br(),br(),
-            "This page shows the differential expression results of circular RNA. The results are based on transcriptome analysis of reticulated and mature platelets from 19 CAD patients.",br(),br(),
+            "This page shows the differential expression results of circular RNA. The results are based on transcriptome analysis of reticulated and mature platelets.",br(),br(),
             "The results of the circRNA differential expression analysis can be browsed by simply selecting the adjusted p-value threshold and the Log2 fold-change threshold. This analysis is represented by a volcano plot and the significantly differentially expressed circRNAs are listed in a data table. The results are presented in a downloadable data table and plots.",br(),br(),
             "The circRNA interaction analysis can also be browsed by selecting the adjusted p-value threshold and Log2 fold-change threshold of the interacting gene expression. A network of interactions between significantly upregulated genes (green), significantly downregulated genes (red) and circRNAs (dark blue) can be displayed. Other analyses include a correlation analysis of genes and circRNAs, biotypes of genes whose expression is significantly correlated with circRNA expression, and a bar graph showing the number of circRNAs per host gene."
             
@@ -1169,7 +1168,7 @@ ui<- dashboardPage(
           #),
           box(
             title = span("Differential Alternative Splicing - Guide",style = "color: white; font-size: 18px; font-weight: bold"), background = "black" , solidHeader = TRUE,
-            "The differential alternative splicing analysis results presented on this page have been obtained by using MAJIQ and Voila on the different datasets, the most important of which can be browsed here. The dataset used throughout Platlas is based on transcriptome analysis of reticulated and mature platelets from 19 CAD patients." ,br(),br(),
+            "The differential alternative splicing analysis results presented on this page have been obtained by using MAJIQ and Voila on the different datasets, the most important of which can be browsed here. The dataset used throughout Platlas is based on transcriptome analysis of reticulated and mature platelets" ,br(),br(),
             "This analysis shows which local splicing variations per gene are differentially spliced between mature and reticulated platelets in CAD patients. Delta E(PSI) is used to filter the degree of differentiation, with a default value of 0.2. This means that only local splicing variations per gene that are 20% more (less) spliced in the corresponding data sets are selected. The filter P(|deltaPSI|>= 0.20) acts as a p-value threshold, where the default value is 0.95, but the higher the number, the lower the actual p-value." ,br(),br(),
             "The results are presented here in different plots showing the differences in E(PSI) between RPs and MPs for each splicing event, a list of significantly alternatively spliced genes and bar plots showing the number of significant local splicing variations per gene. "
           )
