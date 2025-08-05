@@ -16,7 +16,6 @@ library(PCAtools)
 library("DT")
 library(janitor)
 library(shinyWidgets)
-library(slickR)
 library(stringr)
 library(tidyr)  ##neu installiert
 library(shinyjs)

@@ -1,4 +1,4 @@
-sample	condition	platelet	group	original_sample_name	donor	RPs_MPs	disease	patient	gender	treatment	age	sample_name
+sample	condition	platelet	group	original_sample_name	donor	RPs_MPs	disease	patient	gender	treatment	age	new_sample_name
 DBO-03	healthy	RP	healthy_P1	DBO.03	NA	RPs	healthy	NA	NA	NA	NA	21_RPs
 DBO-04	healthy	MP	healthy_P2	DBO.04	NA	MPs	healthy	NA	NA	NA	NA	21_MPs
 DBO-05	healthy	RP	healthy_P3	DBO.05	NA	RPs	healthy	NA	NA	NA	NA	22_RPs
@@ -15,14 +15,14 @@ DBO-43	CCS	MP	CCS_R18	DBO.43	RPs028	MPs	CCS	TO_6	m	ASS, Ticagrelor	79	17_MPs
 DBO-44	CCS	RP	CCS_R19	DBO.44	RPs028	RPs	CCS	TO_6	m	ASS, Ticagrelor	79	17_RPs
 DBO-47	CCS	MP	CCS_R20	DBO.47	RPs030	MPs	CCS	TO_8	f	ASS, oral anticoagulation	73	18_MPs
 DBO-48	CCS	RP	CCS_R21	DBO.48	RPs030	RPs	CCS	TO_8	f	ASS, oral anticoagulation	73	18_RPs
-DBO-51	ACS	MP	ACS_R1	DBO.51	NA	MPs	ACS	NA	NA	NA	NA	25_MPs
-DBO-52	ACS	RP	ACS_R2	DBO.52	NA	RPs	ACS	NA	NA	NA	NA	25_RPs
-DBO-55	ACS	MP	ACS_R3	DBO.55	NA	MPs	ACS	NA	NA	NA	NA	26_MPs
-DBO-56	ACS	RP	ACS_R4	DBO.56	NA	RPs	ACS	NA	NA	NA	NA	26_RPs
-DBO-61	ACS	MP	ACS_R5	DBO.61	NA	MPs	ACS	NA	NA	NA	NA	27_MPs
-DBO-62	ACS	RP	ACS_R6	DBO.62	NA	RPs	ACS	NA	NA	NA	NA	27_RPs
-DBO-73	ACS	RP	ACS_R7	DBO.73	NA	MPs	ACS	NA	NA	NA	NA	28_MPs
-DBO-74	ACS	MP	ACS_R8	DBO.74	NA	RPs	ACS	NA	NA	NA	NA	28_RPs
+DBO-51	ACS	MP	ACS_R1	DBO.51	RPs032	MPs	ACS	TO_10	f	ASS, Clopidogrel	NA	25_MPs
+DBO-52	ACS	RP	ACS_R2	DBO.52	RPs032	RPs	ACS	TO_10	f	ASS, Clopidogrel	NA	25_RPs
+DBO-55	ACS	MP	ACS_R3	DBO.55	RPs034	MPs	ACS	TO_12	m	ASS, Ticagrelor, Heparin	NA	26_MPs
+DBO-56	ACS	RP	ACS_R4	DBO.56	RPs034	RPs	ACS	TO_12	m	ASS, Ticagrelor, Heparin	NA	26_RPs
+DBO-61	ACS	MP	ACS_R5	DBO.61	RPs037	MPs	ACS	TO_15	m	oral anticoagulation, clopidogrel	NA	27_MPs
+DBO-62	ACS	RP	ACS_R6	DBO.62	RPs037	RPs	ACS	TO_15	m	oral anticoagulation, clopidogrel	NA	27_RPs
+DBO-73	ACS	RP	ACS_R7	DBO.73	RPs043	RPs	ACS	TO_21	m	ASS, prasugrel	NA	28_MPs
+DBO-74	ACS	MP	ACS_R8	DBO.74	RPs043	MPs	ACS	TO_21	m	ASS, prasugrel	NA	28_RPs
 DBO-77	CCS	RP	CCS_R34	DBO.77	RPs045	RPs	CCS	TO_23	m	ASS, Ticagrelor	77	19_RPs
 DBO-78	CCS	MP	CCS_R35	DBO.78	RPs045	MPs	CCS	TO_23	m	ASS, Ticagrelor	77	19_MPs
 DBO-81	CCS	RP	CCS_R36	DBO.81	RPs047	RPs	CCS	TO_25	f	ASS, Clopidogrel	65	20_RPs

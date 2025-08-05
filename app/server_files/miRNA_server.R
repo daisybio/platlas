@@ -105,7 +105,7 @@ getHM <- eventReactive(input$clickMIF,{
  
  
  observe({
-   if(input$miEXP == FALSE && input$miSign == FALSE){
+   if(!input$miEXP && !input$miSign){
      shinyjs::disable("clickMIF2")
      shinyjs::show("textclickMIF2")
    }else{
