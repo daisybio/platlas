@@ -3,7 +3,7 @@ version: '3.5'
 services:
   platlas:
     build: ./app
-    image: platlas:latest
+    image: platlas_new
     expose:
       - 3848
     networks:
