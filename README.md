@@ -34,6 +34,13 @@ Platlas is divided into 5 subpages covering diverse bioinformatics aspects of tr
 
 ![Platlas_graphical_summary2](https://github.com/user-attachments/assets/b97d3c89-1a46-4e3d-8aa7-9d30c6202c22)
 
+---
+
+## Docker Image
+
+Link: https://hub.docker.com/r/leonoraka/platlas/tags 
+
+
 
 
 
