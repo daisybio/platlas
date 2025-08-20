@@ -1,5 +1,5 @@
 # Base image https://hub.docker.com/u/rocker/
-FROM rocker/shiny:4.4.0
+FROM rocker/shiny:4.5.0
 #MAINTAINER Leonora Raka <leonoraraka1801@gmail.com>
 
 # system libraries of general use
@@ -43,7 +43,7 @@ RUN sed -i 's/site_dir \/Leonora\/shiny-server;/app_dir \/Leonora\/platlas;/g' /
 # go to project directory
 WORKDIR /Leonora/platlas/
 
-ENV RENV_VERSION 1.0.2
+ENV RENV_VERSION 1.1.5
 RUN R -e "install.packages('renv', repos = c(CRAN = 'https://cloud.r-project.org')); \
   renv::restore()"
  
