@@ -116,7 +116,7 @@ heat <-  eventReactive(c(input$click1,input$click2),{ ##debug
   rownames(merged_annotation) <- merged_annotation$original_sample_name
   to_translate <- colnames(neuer)
   new_names <- merged_annotation[to_translate,]
-  colnames(neuer) <- new_names$sample_name
+  colnames(neuer) <- new_names$new_sample_name
   #order counts
   suffixes <- sapply(strsplit(colnames(neuer), "_"), function(x) tail(x, 1))
   prefixes <- sapply(strsplit(colnames(neuer), "_"), function(x) head(x, 1))
@@ -193,7 +193,7 @@ output$DIFVIO <- renderPlotly({
       rownames(info) = chosen_gene
       #View(info)
       saved_vio_tab(info)
-      melted_point <- melt(points) #variable & value
+      melted_point <- reshape2::melt(points) #variable & value
       fig <- melted_point %>%
         plot_ly(
           x = ~variable,
@@ -296,7 +296,7 @@ output$heatmap <- renderPlot({
   heatmap_title <- paste0("Heatmap: ", difex_title(), " in ", nameHod(), " dataset")
   dbo_file <- data.table::fread("www/simulated_sample_names_all.tsv")
   dbo_file$platelet_type <- gsub("s","",dbo_file$RPs_MPs)
-  dbo <- data.frame("names" = dbo_file$sample_name, "Condition" = dbo_file$condition, "Platelet type" = dbo_file$platelet_type)
+  dbo <- data.frame("names" = dbo_file$new_sample_name, "Condition" = dbo_file$condition, "Platelet type" = dbo_file$platelet_type)
   rownames(dbo) = dbo$names
   dbo <- dbo[,-1]
   #colnames(dbo) = c("Condition", "Platelet type")

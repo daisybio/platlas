@@ -241,7 +241,7 @@ ui<- dashboardPage(
             title = "Filter the results",
             # The id lets us use input$tabset1 on the server to find the current tab
             
-            id = "VPfilter", #height = "200px", 
+            id = "VPfilter1", #height = "200px", 
             # tabPanel(id= "t1","Guide", "The Differential Expression results, browsable on this page by using different filters, are obtained from the transcriptome analysis of reticulated and mature platelets from 4 healthy patients and 10 diseased patients, of which 6 were diagnosed with Chronic coronary syndrome (CCS) and 4 were diagnosed with Acute coronary syndrome (ACS).",br(), br() ,"By clicking on the first filter (Mature vs Reticulated) and filtering between the datasets of the patients, the different thresholds of read count normalizations (with TPM), p-value cutoffs and foldchange cutoffs, the differentially expressed genes of mature platelets versus reticulated platelets, which were computed by using DESeq2, visualized by downloadable plots and represented by downloadable data tables will be shown on the right side of the page.",br(),br() ,"Analogously by clicking on the second filter (CCS vs ACS), refinement of the search is possible by the same parameters as mentioned before and the differentially expressed genes of patients with Chronic coronary syndrome and the patients with Acute coronary syndrome, computed by using DESeq2, will be shown on the right side of the page, represented by downloadable data tables and plots as well."),
             tabPanel(id="DIFEX_t1","Reticulated Platelets vs. Mature Platelets", 
                      span("Reticulated Platelets vs. Mature Platelets",style = "color: black; font-size: 14px; font-weight: bold"),br(),
@@ -443,7 +443,7 @@ ui<- dashboardPage(
             title = "Filter the results",
             # The id lets us use input$tabset1 on the server to find the current tab
             #height = "1500px",
-            id = "VPfilter", #height = "200px", 
+            id = "VPfilter2", #height = "200px", 
             tabPanel(id="FEX_t1","Reticulated Platelets vs. Mature Platelets", 
                      span("Reticulated Platelets vs. Mature Platelets",style = "color: black; font-size: 14px; font-weight: bold"),br(),
                      span("Read count normalization: TPM (Transcripts per million) threshhold > 0.2",style = "color: black; font-size: 14px"),
@@ -853,7 +853,7 @@ ui<- dashboardPage(
               tabPanel(
                 id="t11","miRNA Target Network Graph", 
                 conditionalPanel(
-                condition = "input.miEXP == TRUE || input.miSign == TRUE",
+                condition = "input.miEXP == true || input.miSign == true",
                 span("the results show miRNAs (darkblue nodes) and their mapping genes, while green nodes are upregulated genes and red nodes are downregulated genes.",
                      style = "color: black; font-size: 18px"),
                 br(),
@@ -861,7 +861,7 @@ ui<- dashboardPage(
                 
                 ),
                 conditionalPanel(
-                  condition = "input.miEXP == FALSE && input.miSign == FALSE",
+                  condition = "input.miEXP == false && input.miSign == false",
                   span("Unfortunately, by not choosing any of the checkboxes, the resulting network size is too big & therefore will not be displayed",
                        style = "color: black; font-size: 18px"),
                   br(),
@@ -941,7 +941,7 @@ ui<- dashboardPage(
             title = "Filter the results",
             # The id lets us use input$tabset1 on the server to find the current tab
             
-            id = "VPfilter", #height = "200px", 
+            id = "VPfilter3", #height = "200px", 
             # tabPanel(id = "t1", "circRNA Analysis - Guide",
             #          span("circRNA analysis - Guide", style = "color: black; font-size: 18px; font-weight: bold"),br(),br(),
             #          "This page shows the differential expression results of circular RNA. The results are based on transcriptome analysis of reticulated and mature platelets from 19 CAD patients.",br(),br(),

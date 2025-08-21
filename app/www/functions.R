@@ -285,8 +285,9 @@ pickGeneAnnot <- function(geneID,tab){ #right gene id annotation
 }
 metapath <- "www/simulated_sample_names_all.tsv"
 metatab <- as.data.frame(fread(metapath, header = TRUE, sep = "\t", na.strings = "NA", quote = "" ))
-row.names(metatab) = metatab$sample_name
+row.names(metatab) = metatab$new_sample_name
 metatab = metatab[,-1]
+
 #colnames(metatab) = c("medical_condition","platelet_condition")
 metatab$CCS<- NULL
 metatab$CCS[metatab$condition == "CCS"] <- 1
@@ -304,6 +305,7 @@ metatab$RP[metatab$platelet != "RP"] <- 0
 metatab$healthy[metatab$condition == "healthy"] <- 1
 metatab$healthy[metatab$condition != "healthy"] <- 0
 #metatab$platelet_condition [metatab$medical_condition == "healthy"] <- 0
+#View(metatab)
 
 getDASdata <- function(ds){
   p <- switch(ds,"Reticulated Platelets vs Mature  Platelets (healthy)"= "healthy-RP_healthy-MP.deltapsi.tsv","Mature Platelets vs Reticulated Platelets (stable CCS)"="DAS_neu.xlsx" ,"healthy vs stable CCS (Mature Platelets)"= "healthy-MP_stable-MP.deltapsi.tsv","healthy vs stable CCS (Reticulated Platelets)" = "healthy-RP_stable-RP.deltapsi.tsv")

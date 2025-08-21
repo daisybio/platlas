@@ -48,7 +48,16 @@ functional_enrichment <- function(significant_genes_up,significant_genes_down,un
 }
 
 gse_analysis <- function(genes, ontology, annotation_type){
-  res <- gseGO(gene=genes,OrgDb="org.Hs.eg.db", ont=ontology,minGSSize = 1,maxGSSize = 500,pvalueCutoff =0.05, keyType = annotation_type)#'ENSEMBL', pvalueCutoff = 0.05
+  genes_avg <- data.frame(
+    gene = names(genes),
+    value = as.numeric(genes)
+  ) %>%
+    group_by(gene) %>%
+    summarise(value = mean(value), .groups = "drop")
+  
+  genes_avg <- setNames(genes_avg$value, genes_avg$gene)
+  genes_avg <- sort(genes_avg, decreasing = TRUE)
+  res <- gseGO(gene=genes_avg,OrgDb="org.Hs.eg.db", ont=ontology,minGSSize = 1,maxGSSize = 500,pvalueCutoff =0.05, keyType = annotation_type)#'ENSEMBL', pvalueCutoff = 0.05
   #View(res)
   #print(res@result[["core_enrichment"]][1])
   #print(res@result[["ID"]][1])
@@ -166,6 +175,8 @@ GO <-  eventReactive(input$clickGO,{#c(input$clickGO,input$clickGO2)
   universe_genes <- input_list[["universe"]]
   functional_enrichment_result <- functional_enrichment(sig_genes_up,sig_genes_down, universe_genes, ontology, annotation_type)
   #TODO
+  #print("input_list[['gsea_input']]")
+  #print(input_list[["gsea_input"]])
   gse_analysis_result <- gse_analysis(input_list[["gsea_input"]],ontology, annotation_type)
   
   
@@ -293,7 +304,7 @@ output$GSEA_heat <- renderPlot({
     neuer[neuer < 0] <- 0
     to_translate <- colnames(neuer)
     new_names <- merged_annotation[to_translate,]
-    colnames(neuer) <- new_names$sample_name
+    colnames(neuer) <- new_names$new_sample_name
     neuer <- neuer[ , !(colnames(neuer) %in% c("6_MPs","6_RPs"))]
     #View(neuer)
     
@@ -331,7 +342,7 @@ output$GSEA_heat <- renderPlot({
     #View(filtered_heat)
     #print(type(filtered_heat))
     ###heatmap plot
-    dbo <- data.frame("names" = merged_annotation$sample_name, "Condition" = merged_annotation$condition, "Platelet type" = merged_annotation$platelet_type)
+    dbo <- data.frame("names" = merged_annotation$new_sample_name, "Condition" = merged_annotation$condition, "Platelet type" = merged_annotation$platelet_type)
     
     rownames(dbo) = dbo$names
     dbo <- dbo[,-1]

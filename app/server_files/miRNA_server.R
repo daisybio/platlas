@@ -26,7 +26,7 @@ getDTVP <- eventReactive(input$clickMIF,{
 })
 
 
-observe
+
 
 getVP <- eventReactive(input$clickMIF,{
   df <- data.frame()
@@ -63,12 +63,17 @@ getHM <- eventReactive(input$clickMIF,{
   #}else if(input$miF == "only CAD patients"){
     sig_CAD_rp_vs_mp <- read.csv2("www/ccs_rp_vs_mp_diff_mir_counts_noSample6_filtered_pCutoff0.05.CSV",header = TRUE, na.strings = "_") # ccs_rp_vs_mp_diff_mir_counts_noSample6_filtered_pCutoff0.05.CSV bzw das signifikante
     df <- sig_CAD_rp_vs_mp
+    #print("df:")
+    #View(df)
     #print("new path:")
     #print("www/ccs_rp_vs_mp_diff_mir_counts_noSample6_filtered_pCutoff0.05.CSV")
     counts_disease <- read.csv2("www/counts_normalized_disease.CSV",header = TRUE, na.strings = "_")
     cdf <- counts_disease
+    #print("cdf:")
+    #View(cdf)
   #}
   neu<- cdf[grep(paste(df[,1],collapse="|"),cdf[,1]),]
+
   names <-neu[,1]
   neu <-neu[,-1]
   rownames(neu) = make.names(names, unique=TRUE)
@@ -78,17 +83,23 @@ getHM <- eventReactive(input$clickMIF,{
   rownames(merged_annotation) <- merged_annotation$original_sample_name
   to_translate <- colnames(neu)
   
+
   print(to_translate)
   new_names <- merged_annotation[to_translate,]
   #print(to_translate)
   #print(new_names)
-  colnames(neu) <- new_names$sample_name
+  colnames(neu) <- new_names$new_sample_name
+  #print("neu:")
+  #View(neu)
  # if(input$miF == "only CAD patients"){
     #threshold <- sort(rowVars(counts), decreasing = T)[150]
     #counts = counts[which(rowVars(counts) >= threshold),]
    neu <- neu[ , !(colnames(neu) %in% c("6_MPs","6_RPs"))]
  # }
+   #View(neu)
+
   neu
+  
   # counts_disease <- data.matrix(counts_disease)
   #sample_annotation <- colnames(neu)
 })
@@ -229,6 +240,7 @@ saved_HMMI = reactiveVal()
 output$HMMI <- renderPlot({
   counts <- getHM()
   cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+  #View(counts)
   if(!is.null(counts)){
     #if(input$miF == "only CAD patients"){
       #threshold <- sort(rowVars(counts), decreasing = T)[150]
@@ -242,7 +254,8 @@ output$HMMI <- renderPlot({
       
    # }
   dbo_file <- data.table::fread("www/simulated_sample_names_all.tsv")
-  dbo <- data.frame("names" = dbo_file$sample_name, "Condition" = dbo_file$condition, "Platelet type" = dbo_file$platelet )
+  #View(dbo_file)
+  dbo <- data.frame("names" = dbo_file$new_sample_name, "Condition" = dbo_file$condition, "Platelet type" = dbo_file$platelet )
   rownames(dbo) = dbo$names
   dbo <- dbo[,-1]
   pl_names = c(cbbPalette[1],cbbPalette[4])#c(RPs = cbbPalette[1], MPs = cbbPalette[4])
@@ -259,6 +272,8 @@ output$HMMI <- renderPlot({
   HM_title= paste0("Heatmap: ", MI_first_dataset())#",, p-value cutoff: ",MI_first_pc(),", log2FoldChange: ",MI_first_fc()
   #VP_subtitel = paste0()
   ann_col = list(`Platelet type` = pl_names,Disease = d_names)
+  #View(dbo)
+  print(counts)
   p <- pheatmap(counts,
                 color = colorRampPalette(c("blue", "red"))(50),
                 annotation_colors = ann_col,
@@ -297,9 +312,11 @@ output$MAMI <- renderPlot({
 saved_PCAMI = reactiveVal()
 output$PCAMI <- renderPlot({
   tab <- getHM()
+  #View(tab)
   if(!is.null(tab)){
     dis_metatab <- metatab
     dis_metatab <-dis_metatab[row.names(dis_metatab) %in% colnames(tab),]
+
     p <- pca(tab, metadata = dis_metatab, removeVar = 0.1)
     p_title = paste0("Biplot: ", MI_first_dataset())
     
