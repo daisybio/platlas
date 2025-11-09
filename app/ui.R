@@ -216,7 +216,7 @@ ui<- dashboardPage(
              
              # Title
              div(style = "font-size:18px; font-weight:600; color:black;",
-                 "Reticulated platelets in coronary artery disease: a multi-omics approach unveils pro-thrombotic signalling and novel therapeutic targets."
+                 "Reticulated platelets in coronary artery disease: a multidimensional approach unveils prothrombotic signalling and novel therapeutic targets"
              ),
              
              # Journal meta + DOI + Published date (NO 'Free' badge)
