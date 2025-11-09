@@ -30,7 +30,10 @@ library(periscope)
 library(orca)
 library(readxl)
 library(shinyjs)
-
+library(bslib)
+#library(httr)
+#library(jsonlite)
+#library(htmltools)
 
 #all input data
 #Difex -> HoD
@@ -46,6 +49,10 @@ color: #333 !important;
 cursor: not-allowed !important;
 border-color: #aaa !important;
 }"
+# ---- study link + local PDF (served from www/) ----
+study_doi <- "10.1093/eurheartj/ehaf694"                 # <-- set your DOI
+study_doi_url <- paste0("https://doi.org/", study_doi)
+study_pdf_rel <- "EHJ_paper.pdf"          # file at: www/papers/platlas_study.pdf
 
 ui<- dashboardPage(
   
@@ -168,8 +175,10 @@ ui<- dashboardPage(
               title = span("Welcome to Platlas!", 
                            style = "color: black; font-size: 24px; font-weight: bold"),
               
-              span("Platlas is a comprehensive platelet atlas designed to provide access to platelet transcriptome data presented in our study. This platform focuses on visualizing and presenting data that differentiates between reticulated platelets (RPs) and mature platelets (MPs). It offers valuable insights into the transcriptomic differences observed in patients with coronary artery disease (CAD).",style = "color: black; font-size: 18px")
-              
+              span("Platlas is a comprehensive platelet atlas designed to provide access to platelet transcriptome data presented in our study. This platform focuses on visualizing and presenting data that differentiates between reticulated platelets (RPs) and mature platelets (MPs). It offers valuable insights into the transcriptomic differences observed in patients with coronary artery disease (CAD).",style = "color: black; font-size: 18px"),
+              tags$a(href = study_doi_url, target = "_blank", rel = "noopener",
+                     style = "display:inline-block;padding:.3rem .6rem;border:1px solid #ddd;border-radius:999px;color:#333;text-decoration:none;",
+                     tagList(icon("link"), span(" DOI "), tags$code(study_doi))),
               #span("This platelet atlas presents the platelet transcriptome data in the subpages shown on the left.",style = "color: black; font-size: 18px"), br(), br(), br(),
               #span("It especially focusses on visualizing and presenting platelet data which differentiate between reticulated platelets (RPs) and mature platelets (MPs).",style = "color: black; font-size: 18px"),br(), br(), br(),
               #span("It also considers the transcriptomic differences between patients with coronary artery disease (CAD) and patients with myocardial infarction",style = "color: black; font-size: 18px"),br(), br(), br(),
@@ -201,30 +210,57 @@ ui<- dashboardPage(
         ,
         br(),
          fluidRow(
-          box(
-            width = 12,
-            title = span("Platlas computes a variety of visualizations",style = "color: black; font-size: 18px;font-weight: bold"),
-             span("With Platlas, you can explore a variety of interactive visualizations and analyses. The platform enables you to browse results effortlessly through intuitive plots and detailed data tables. By combining platelet-specific transcriptome data with an easy-to-navigate interface, Platlas empowers researchers to uncover actionable insights related to platelet biology and CAD." ,style = "color: black; font-size: 18px"),
+           box(
+             width = 12,
+             title = span("Cite Our Study:", style = "color: black; font-size: 18px; font-weight: bold"),
              
-             #slickROutput("slickr", width = "100%", height = "100%")
+             # Title
+             div(style = "font-size:18px; font-weight:600; color:black;",
+                 "Reticulated platelets in coronary artery disease: a multi-omics approach unveils pro-thrombotic signalling and novel therapeutic targets."
+             ),
              
+             # Journal meta + DOI + Published date (NO 'Free' badge)
+             div(style = "margin-top:8px; color:#444;",
+                 span("European Heart Journal, ehaf694 · "),
+                 tags$a(href = study_doi_url, target = "_blank", rel = "noopener", study_doi_url),
+                 span(" · Published: 31 August 2025")
+             ),
+             
+             # Authors
+             div(style = "margin-top:8px; color:#444;",
+                 "Kilian Kirmes, Jiaying Han, Melissa Klug, Conor J Bloxham, Olena Babyak, Judith Bernett, ",
+                 "Lis Arend, Quirin Manz, Leonora Raka, Leon Schwartz, Markus Hoffmann, Marc Rosenbaum, ",
+                 "Jürgen Ruland, Octavia-Andreea Ciora, Zakaria Louadi, Olga Tsoy, Khalique Newaz, ",
+                 "Jessica Modica, Carola Conca Dioguardi, Clelia Peano, Michaela Müller, Donato Santovito, ",
+                 "Giacomo Viggiani, Stephanie Kühne, Moritz von Scheidt, Leo Nicolai, Tianjiao Wu, ",
+                 "Jan Baumbach, Mauro Chiarito, Karl-Ludwig Laugwitz, Gianluigi Condorelli, ",
+                 "Philip W J Raake, Markus List, Isabell Bernlochner, Dario Bongiovanni"
+             ),
+             
+             tags$hr(),
+             
+             # How to cite (exact text you provided)
+             
+             # Actions: Quick preview (local PDF), Download PDF, Open DOI
+             div(class = "btn-group",
+                 actionButton("home_preview_pdf",
+                              label = tagList(icon("file-pdf-o"), " Quick preview"),
+                              class = "btn btn-danger"),
+                 tags$a(href = study_pdf_rel,
+                        class = "btn btn-default",
+                        download = "Platlas_study.pdf",
+                        "Download PDF"),
+                 tags$a(href = study_doi_url,
+                        target = "_blank", rel = "noopener",
+                        class = "btn btn-primary",
+                        tagList(icon("external-link"), " Open DOI"))
+             ),
+             tags$br(),
            )
            
            
          ),
   br(),
-  fluidRow(
-    box(
-      width = 12,
-    title = span("Patient demographics",style = "color: black; font-size: 18px;font-weight: bold"),
-    span('The study included patients with coronary artery disease. Specific information on the study cohort can be found in the manuscript "Reticulated platelets in coronary artery disease: a multi-omics approach unveils pro-thrombotic signalling and novel therapeutic targets"; doi: XXXXXXX' ,style = "color: black; font-size: 18px"),
-    
-    #slickROutput("slickr", width = "100%", height = "100%")
-    
-  )
-  
-  
-)
         
       ),
 
