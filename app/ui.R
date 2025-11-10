@@ -52,7 +52,7 @@ border-color: #aaa !important;
 # ---- study link + local PDF (served from www/) ----
 study_doi <- "10.1093/eurheartj/ehaf694"                 # <-- set your DOI
 study_doi_url <- paste0("https://doi.org/", study_doi)
-study_pdf_rel <- "EHJ_paper.pdf"          # file at: www/papers/platlas_study.pdf
+#study_pdf_rel <- "EHJ_paper.pdf"          # file at: www/papers/platlas_study.pdf
 
 ui<- dashboardPage(
   
@@ -243,13 +243,13 @@ ui<- dashboardPage(
              
              # Actions: Quick preview (local PDF), Download PDF, Open DOI
              div(class = "btn-group",
-                 actionButton("home_preview_pdf",
-                              label = tagList(icon("file-pdf-o"), " Quick preview"),
-                              class = "btn btn-danger"),
-                 tags$a(href = study_pdf_rel,
-                        class = "btn btn-default",
-                        download = "Platlas_study.pdf",
-                        "Download PDF"),
+                 #actionButton("home_preview_pdf",
+                #              label = tagList(icon("file-pdf-o"), " Quick preview"),
+                 #             class = "btn btn-danger"),
+                 #tags$a(href = study_pdf_rel,
+                #        class = "btn btn-default",
+                #        download = "Platlas_study.pdf",
+                #        "Download PDF"),
                  tags$a(href = study_doi_url,
                         target = "_blank", rel = "noopener",
                         class = "btn btn-primary",
